@@ -3,3 +3,6 @@
 Compilation assumes gfortran 8.2.0 (called via gfortran-8 on this machine)
 (Need parameterised derived types functionality)
 
+Actually, no we don't (easier just to use allocatable components)
+
+For subroutines use FOO(output,input) convention
