@@ -5,9 +5,19 @@ module initialisation
 
 contains
 
-  subroutine initGrid()
+  subroutine initGrid(settings,kgridFine,kgridCoarse)
+    type(settingparam),intent(in)::settings
+    type(finegrid),allocatable,intent(inout)::kgridFine(:,:,:)
+    type(coarsegrid),allocatable,intent(inout)::kgridCoarse(:,:,:)
+
+    !routine variables
+    integer::temp(3)
 
     !allocate fine grid and coarse grid sizes
+    temp=settings%nfpoint
+    allocate(kgridFine(temp(1),temp(2),temp(3)))
+    temp=settings%ncell
+    allocate(kgridCoarse(temp(1),temp(2),temp(3)))
 
     !allocate k grid values
 
