@@ -21,7 +21,7 @@ program TMDCAnderson
   
 
   ! initialise grids, GFO and HYB0
-  call 
+  call initGrid(settings,kgridFine,kgridCoarse)
 
   ! start loop
 

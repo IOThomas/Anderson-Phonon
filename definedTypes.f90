@@ -17,6 +17,7 @@ module definedTypes
   type coarsegrid
      real(real12)::kx,ky,kz,norm !defined as centre of cell
      complex(real12)::omega2
+     integer::label
   end type coarsegrid
 
   type settingparam
