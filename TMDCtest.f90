@@ -4,7 +4,6 @@ program TMDCAnderson
   use definedTypes
   use readsettings
   use initialisation
-  use dynamicalLoop
 
   implicit none
   
@@ -22,13 +21,6 @@ program TMDCAnderson
 
   ! initialise grids, GFO and HYB0
   call initGrid(settings,kgridFine,kgridCoarse)
-  
-  ! start loop
-
-  ! call loop routine
-
-  ! call test routine; if passed end loop
-
-  ! outputs
-
+  stop
+ 
 end program TMDCAnderson

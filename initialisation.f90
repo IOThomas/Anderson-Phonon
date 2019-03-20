@@ -18,7 +18,7 @@ contains
 
 
     !allocate fine grid
-    itemp=settings%nfpoint
+    itemp=settings%nfpoints
     length=2.0*pi/real(itemp-1,real12)
     allocate(kgridFine(itemp(1),itemp(2),itemp(3)))
     do ix=1,itemp(1)

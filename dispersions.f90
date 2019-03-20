@@ -16,7 +16,19 @@ contains
   end function fineDispersion
 
 
-  function coarseDispersion
+  function coarseDispersion(fineomega2,icellnumber,igridno)
+    complex(real12)
+    !dummyvariables
+    real,intent(in)::fineomega2(:,:,:) ! assume we pass a masked temporary array here
+    integer,intent(in)::icellnumber,igridno !*total* number of cells grid points
+
+    !routine variables
+    real(real12)::ratio
+
+    ratio=real(icellnumber,real12)/real(igridno,real12)
+
+    coarseDispersion=ratio*sum(fineomega2)
+    
   end function coarseDispersion
 
 end module dispersions

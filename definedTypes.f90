@@ -23,7 +23,7 @@ module definedTypes
   type settingparam
      integer::ncell(3)! number of cells in each direction
      integer::nomega ! number of omega values
-     integer::nfpoint(3) !number of fine gridpoints in each direction
+     integer::nfpoints(3) !number of fine gridpoints in each direction
   end type settingparam
 
   

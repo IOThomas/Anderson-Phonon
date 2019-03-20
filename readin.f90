@@ -1,7 +1,7 @@
 module readsettings
 
   use constants
-  use derivedTypes
+  use definedTypes
 
   implicit none
 
