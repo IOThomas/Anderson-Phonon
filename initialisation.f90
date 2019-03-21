@@ -109,7 +109,40 @@ contains
 
     !calculate frequency squared for both grids
 
-     deallocate(tempArray)
+    !output grids
+    open(unit=10,file='finekgrid.out',status='new')
+    write(10) '# fine kpoint grid'
+    write(10) 'ix, iy, iz, kx, ky, kz, |k|, omega**2, <map to this coarse grid point>'
+    itemp=settings%nfpoints
+    do ix=1,itemp(1)
+       do iy=1,itemp(2)
+          do iz=1,itemp(3)
+             write(10,*) ix, iy, iz, kgridFine(ix,iy,iz)%kx, &
+                  kgridFine(ix,iy,iz)%ky, kgridFine(ix,iy,iz)%kz,&
+                  kgridFine(ix,iy,iz)%norm,&
+                  kgridFine(ix,iy,iz)%omega2,kgridFine(ix,iy,iz)%coarsemap
+          enddo
+       enddo
+    enddo
+    close(10)
+    
+    open(unit=10,file='coarsekgrid.out',status='new')
+    write(10) '# coarse kpoint grid'
+    write(10) 'ix, iy, iz, kx, ky, kz, |k|, omega**2, cell label'
+    itemp=settings%ncell
+    do ix=1,itemp(1)
+       do iy=1,itemp(2)
+          do iz=1,itemp(3)
+             write(10,*) ix, iy, iz, kgridCoarse(ix,iy,iz)%kx, &
+                  kgridCoarse(ix,iy,iz)%ky, kgridCoarse(ix,iy,iz)%kz,&
+                  kgridCoarse(ix,iy,iz)%norm,&
+                  kgridCoarse(ix,iy,iz)%omega2,kgridCoarse(ix,iy,iz)%label
+          enddo
+       enddo
+    enddo
+    close(10)
+
+    deallocate(tempArray)
   end subroutine initGrid
 
   subroutine initGF()

@@ -17,7 +17,7 @@ contains
 
 
   function coarseDispersion(fineomega2,icellnumber,igridno)
-    complex(real12)
+    complex(real12)::coarseDispersion
     !dummyvariables
     real,intent(in)::fineomega2(:,:,:) ! assume we pass a masked temporary array here
     integer,intent(in)::icellnumber,igridno !*total* number of cells grid points
