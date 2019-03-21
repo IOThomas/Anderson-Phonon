@@ -5,7 +5,7 @@ obj =   constants.f90 \
 	initialisation.f90
 
 
-compiler = gfortran
+compiler = gfortran-8
 
 xtest:
 
