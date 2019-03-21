@@ -9,7 +9,7 @@ compiler = gfortran-8
 
 xtest:
 
-	$(compiler) -O3  $(obj) TMDCtest.f90 -o ../C-Rhediadau-Anderson/xtest
+	$(compiler) -O3  $(obj) TMDCtest.f90 -o ../../C-Rhediadau-Anderson/xtest
 
 clean:
 	rm *mod

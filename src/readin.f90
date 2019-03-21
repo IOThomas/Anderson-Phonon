@@ -21,11 +21,11 @@ contains
     atomBasis%ry=0.0d0
     atomBasis%rz=0.0d0
 
-    settings%ncell=5 !rhoi 5? cell ym mhob cyfeiriad -- gwiriwch bod hyn
+    settings%ncell=2 !rhoi 4 cell ym mhob cyfeiriad -- gwiriwch bod hyn
                      !yn gyson a'r gymesuredd
 
     settings%nomega=200
-    settings%nfpoints=20 !rhoi 20 pwynt ym mhob cyfeiriad...
+    settings%nfpoints=8 !rhoi 10 pwynt ym mhob cyfeiriad...
 
   end subroutine readin
 end module readsettings
