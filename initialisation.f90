@@ -14,7 +14,7 @@ contains
     !routine variables
     integer::itemp(3),ix,iy,iz,iNcell,iNpoint
     real(real12)::kx,ky,kz,length(3),lowLim(3),upperLim(3)
-    real(real12),allocatable::tempArray(:,:,:)
+    complex(real12),allocatable::tempArray(:,:,:)
 
 
     !allocate fine grid
