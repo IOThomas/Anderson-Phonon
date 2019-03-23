@@ -33,13 +33,13 @@ contains
     length=2.0_real12*pi/real(itemp,real12)
     allocate(kgridFine(itemp(1),itemp(2),itemp(3)))
     allocate(tempArray(itemp(1),itemp(2),itemp(3)))
-    do ix=1,itemp(1)
-       kx=(real(ix,real12)-0.5_real12*real(1+(itemp(1)/2),real12))*length(1)
+    do iz=1,itemp(3)
+       kz=(real(iz,real12)-0.5_real12*real(1+(itemp(3)/2),real12))*length(3)
        do iy=1,itemp(2)
           ky=(real(iy,real12)-0.5_real12*real(1+(itemp(2)/2),real12))*length(2)
-          do iz=1,itemp(3)
-             kz=(real(iz,real12)-0.5_real12*real(1+(itemp(3)/2),real12))&
-                  *length(3)
+          do ix=1,itemp(1)
+             kx=(real(ix,real12)-0.5_real12*real(1+(itemp(1)/2),real12))&
+                  *length(1)
              kgridFine(ix,iy,iz)%kx=kx
              kgridFine(ix,iy,iz)%ky=ky
              kgridFine(ix,iy,iz)%kz=kz
@@ -53,13 +53,13 @@ contains
     itemp=settings%ncell
     allocate(kgridCoarse(itemp(1),itemp(2),itemp(3)))
     length=2.0_real12*pi/real(itemp,real12)
-    do ix=1,itemp(1)
-       kx=(real(ix,real12)-0.5_real12*real(1+(itemp(1)/2),real12))*length(1)
+    do iz=1,itemp(3)
+       kz=(real(iz,real12)-0.5_real12*real(1+(itemp(3)/2),real12))*length(3)
        do iy=1,itemp(2)
           ky=(real(iy,real12)-0.5_real12*real(1+(itemp(2)/2),real12))*length(2)
-          do iz=1,itemp(3)
-             kz=(real(iz,real12)-0.5_real12*real(1+(itemp(3)/2),real12))&
-                  *length(3)
+          do ix=1,itemp(1)
+             kx=(real(ix,real12)-0.5_real12*real(1+(itemp(1)/2),real12))&
+                  *length(1)
              kgridCoarse(ix,iy,iz)%kx=kx
              kgridCoarse(ix,iy,iz)%ky=ky
              kgridCoarse(ix,iy,iz)%kz=kz
