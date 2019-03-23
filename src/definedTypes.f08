@@ -1,7 +1,9 @@
 module definedTypes
   ! contains the defined types for the code
-  use constants
+  use constants, only: real12
   implicit none
+  private
+  public basis, finegrid, coarsegrid, settingparam
 
   type basis
      integer::natom

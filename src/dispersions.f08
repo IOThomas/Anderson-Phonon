@@ -1,8 +1,10 @@
 module dispersions
   ! contains definitions of the phonon dispersions
   ! currently only simple acoustic
-  use constants
+  use constants, only: real12
   implicit none
+  private
+  public finedispersion, coarseDispersion
 
 contains
 

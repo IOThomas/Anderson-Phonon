@@ -2,10 +2,12 @@ module initialisation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! contains initialisation subroutines for the calculation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-  use constants
-  use dispersions
-  use definedTypes
+  use constants, only: real12, pi
+  use dispersions, only: finedispersion, coarseDispersion
+  use definedTypes, only: settingparam,finegrid,coarsegrid
   implicit none
+  private
+  public initGrid
 
 contains
 
@@ -28,7 +30,7 @@ contains
 
     !allocate fine grid
     itemp=settings%nfpoints
-    length=2.0*pi/real(itemp,real12)
+    length=2.0_real12*pi/real(itemp,real12)
     allocate(kgridFine(itemp(1),itemp(2),itemp(3)))
     allocate(tempArray(itemp(1),itemp(2),itemp(3)))
     do ix=1,itemp(1)
@@ -50,7 +52,7 @@ contains
     !allocate coarsegrid
     itemp=settings%ncell
     allocate(kgridCoarse(itemp(1),itemp(2),itemp(3)))
-    length=2.0*pi/real(itemp,real12)
+    length=2.0_real12*pi/real(itemp,real12)
     do ix=1,itemp(1)
        kx=(real(ix,real12)-0.5_real12*real(1+(itemp(1)/2),real12))*length(1)
        do iy=1,itemp(2)

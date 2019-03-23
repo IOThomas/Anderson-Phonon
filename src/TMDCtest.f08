@@ -1,9 +1,8 @@
 program TMDCAnderson
-
-  use constants
-  use definedTypes
-  use readsettings
-  use initialisation
+  use constants, only: real12
+  use definedTypes, only: basis,settingparam,finegrid,coarsegrid
+  use readsettings, only: readin
+  use initialisation, only: initGrid
 
   implicit none
   
