@@ -25,7 +25,7 @@ contains
                      !yn gyson a'r gymesuredd
 
     settings%nomega=200
-    settings%nfpoints=8 !rhoi 10 pwynt ym mhob cyfeiriad...
+    settings%nfpoints=4 !rhoi 10 pwynt ym mhob cyfeiriad...
 
   end subroutine readin
 end module readsettings

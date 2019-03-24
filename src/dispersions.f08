@@ -8,21 +8,27 @@ module dispersions
 
 contains
 
-  function fineDispersion(kx,ky,kz)
-    real(real12)::fineDispersion
+  elemental pure function fineDispersion(kx,ky,kz)
+    complex(real12)::fineDispersion
+    ! defines the standard momentum for each kpoint
     !dummy variables
     real(real12),intent(in)::kx,ky,kz
 
-    fineDispersion=cos(kx/2.0d0)*cos(kx/2.0d0)+cos(ky/2.0d0)*cos(ky/2.0d0)&
-         +cos(kz/2.0d0)*cos(kz/2.0d0)
+    fineDispersion=cmplx(sin(kx/2.0_real12)*sin(kx/2.0_real12)&
+         +sin(ky/2.0_real12)*sin(ky/2.0_real12)&
+         +sin(kz/2.0_real12)*sin(kz/2.0_real12),0.0_real12) 
   end function fineDispersion
 
 
   function coarseDispersion(fineomega2,icellnumber,igridno)
     complex(real12)::coarseDispersion
+    ! sums and normalises fine grid momenta from an input array
+    ! fineomega2 is *masked* to set non relevent contributions to zero
+    ! icell number, igrid number are the *total* numbers of cells in each grid
+    
     !dummyvariables
-    real,intent(in)::fineomega2(:,:,:) ! assume we pass a masked temporary array here
-    integer,intent(in)::icellnumber,igridno !*total* number of cells grid points
+    complex(real12),intent(in)::fineomega2(:,:,:)
+    integer,intent(in)::icellnumber,igridno 
 
     !routine variables
     real(real12)::ratio

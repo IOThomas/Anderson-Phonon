@@ -71,6 +71,8 @@ contains
     enddo
 
     !allocate the coarse map points and the associated coarse momentum
+    iNcell=settings%ncell(1)*settings%ncell(2)*settings%ncell(2)
+    iNpoint=settings%nfpoints(1)*settings%nfpoints(2)*settings%nfpoints(2)
     do ix=1,itemp(1)
        do iy=1,itemp(2)
           do iz=1,itemp(3)
@@ -94,15 +96,11 @@ contains
                 kgridFine%coarsemap=kgridCoarse(ix,iy,iz)%label
                 tempArray=kgridFine%omega2
              end where
-             kgridCoarse%omega2=sum(tempArray)
+             kgridCoarse(ix,iy,iz)%omega2=&
+                  coarseDispersion(tempArray,iNcell,iNpoint)           
           enddo
        enddo
     enddo
-    iNcell=settings%ncell(1)*settings%ncell(2)*settings%ncell(2)
-    iNpoint=settings%nfpoints(1)*settings%nfpoints(2)*settings%nfpoints(2)
-    kgridCoarse%omega2=real(iNcell,real12)&
-         *kgridCoarse%omega2/real(iNpoint,real12)
-    !calculate frequency squared for both grids
 
     !output grids
     open(unit=10,file='finekgrid.out',status='new')
