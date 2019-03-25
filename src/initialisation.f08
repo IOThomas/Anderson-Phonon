@@ -7,7 +7,7 @@ module initialisation
   use definedTypes, only: settingparam,finegrid,coarsegrid
   implicit none
   private
-  public initGrid
+  public initGrid,initD0
 
 contains
 
@@ -146,13 +146,45 @@ contains
   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine initGF()
+  subroutine initD0(settings,kgridFine,DnDisO)
+    type(settingparam),intent(inout)::settings
+    type(finegrid),allocatable,intent(inout)::kgridFine(:,:,:)
+    complex(real12),intent(inout)::DnDisO(:,:,:,:)
 
+    ! routine variables
+    integer::i,j,k,nmax
+    complex(real12)::omega_diff,tempArray
+
+    !generate omega2 differences
+    allocate(settings%omega2diff(nfpoints(1),nfpoints(2),nfpoints(3),&
+         settings%nomega))
+    omega_diff=(settings%omegaMax-settings%omegaMin)/&
+         (real(settings%nomega-1,real12))
+
+    do i=1,settings%nomega
+       settings%omega2diff(1:nfpoints(1),1:nfpoints(2),1:nfpoints(3),i)=&
+            ((i-1)*omega_diff)**2&
+            -(kgridFine(1:nfpoints(1),1:nfpoints(2),1:nfpoints(3))**2
+    enddo
+    allocate(pointsmap,mold=kgridFine)
+    pointsmap=kgridFine%coarseMap
+    
     !generate DO for fine grid points
-
+    allocate(tempArray,mold=kgridFine)
+    allocate(DnDisO(settings%ncell(1),settings%ncell(2),settings%ncell(3),&
+         settings%nomega)
+    
     !map to coarse grid
-
-  end subroutine initGF
+    tempArray=0.0_real12
+    nmax=settings%ncell(1)*settings%ncell(2)*settings%ncell(3)
+    nfmax=settings%nfpoints(1)*settings%nfpoints(2)*settings%nfpoints(3)
+    do i=nmax
+       where(kpgridFine%coarseMap=i)
+          ! will need to rework for matrix case?
+          tempArray=1.0_real12/settings%omega2diff
+       end where
+       DnDisO=
+  end subroutine initD0
 
   subroutine initHybrid()
 

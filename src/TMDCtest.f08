@@ -10,7 +10,8 @@ program TMDCAnderson
   type(settingparam)::settings
   type(finegrid),allocatable::kgridFine(:,:,:)
   type(coarsegrid),allocatable::kgridCoarse(:,:,:)
-  
+
+  complex(real12),allocatable::DnDisO(:,:,:,:)
   complex(real12),allocatable::hybOld(:,:,:,:),hybNew(:,:,:,:)
   complex(real12),allocatable::dcGF(:,:,:,:),typGF(:,:,:,:)
   
@@ -20,6 +21,7 @@ program TMDCAnderson
 
   ! initialise grids, GFO and HYB0
   call initGrid(settings,kgridFine,kgridCoarse)
+  call initDO(settings,kgridFine,DnDisO)
   stop
  
 end program TMDCAnderson
