@@ -149,11 +149,15 @@ contains
   subroutine initD0(settings,kgridFine,DnDisO)
     type(settingparam),intent(inout)::settings
     type(finegrid),allocatable,intent(inout)::kgridFine(:,:,:)
-    complex(real12),intent(inout)::DnDisO(:,:,:,:)
+    complex(real12),allocatable,intent(out)::DnDisO(:,:,:,:)
 
     ! routine variables
-    integer::i,j,k,nmax
-    complex(real12)::omega_diff,tempArray
+    integer::i,ix,iy,iz,nmax, nfmax,nfpoints(3), ncell(3)
+    complex(real12),allocatable::omega_diff(:,:,:,:)
+    complex(real12),allocatable::tempArray(:,:,:,:),tempArray1(:,:)
+
+    nfpoints=settings%nfpoints
+    ncell=settings%ncell
 
     !generate omega2 differences
     allocate(settings%omega2diff(nfpoints(1),nfpoints(2),nfpoints(3),&
@@ -164,26 +168,36 @@ contains
     do i=1,settings%nomega
        settings%omega2diff(1:nfpoints(1),1:nfpoints(2),1:nfpoints(3),i)=&
             ((i-1)*omega_diff)**2&
-            -(kgridFine(1:nfpoints(1),1:nfpoints(2),1:nfpoints(3))**2
+            -kgridFine(1:nfpoints(1),1:nfpoints(2),1:nfpoints(3))%omega2)**2
     enddo
-    allocate(pointsmap,mold=kgridFine)
-    pointsmap=kgridFine%coarseMap
+    allocate(settings%pointsmap(nfpoints(1),nfpoints(2),nfpoints(3),&
+         settings%nomega))
+    forall (i=1:settings%nomega)
+       settings%pointsmap(1:nfpoints(1),1:nfpoints(2),1:nfpoints(3),i)=&
+            kgridFine%coarseMap
+    endforall
     
     !generate DO for fine grid points
-    allocate(tempArray,mold=kgridFine)
-    allocate(DnDisO(settings%ncell(1),settings%ncell(2),settings%ncell(3),&
-         settings%nomega)
+    allocate(tempArray(nfpoints(1),nfpoints(2),nfpoints(3),&
+         settings%nomega))
+    allocate(DnDisO(ncell(1),ncell(2),ncell(3),settings%nomega))
     
     !map to coarse grid
     tempArray=0.0_real12
-    nmax=settings%ncell(1)*settings%ncell(2)*settings%ncell(3)
-    nfmax=settings%nfpoints(1)*settings%nfpoints(2)*settings%nfpoints(3)
-    do i=nmax
-       where(kpgridFine%coarseMap=i)
+    nmax=ncell(1)*ncell(2)*ncell(3)
+    nfmax=nfpoints(1)*nfpoints(2)*nfpoints(3)
+    allocate(tempArray1(nmax,settings%nomega))
+    tempArray1=reshape(DnDisO, (/ nmax,settings%nomega /))
+    do i=1,nmax
+       where(settings%pointsmap==i)
           ! will need to rework for matrix case?
           tempArray=1.0_real12/settings%omega2diff
        end where
-       DnDisO=
+       tempArray1(i,1:settings%nomega)=coarseDispersion(tempArray,nmax,nfmax)
+    enddo
+    DnDisO=reshape(tempArray1,[ncell(1),ncell(2),ncell(3),settings%nomega])
+
+    deallocate(tempArray,tempArray1)
   end subroutine initD0
 
   subroutine initHybrid()
