@@ -1,7 +1,7 @@
 module initialisation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! contains initialisation subroutines for the calculation
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   use constants, only: real12, pi
   use dispersions, only: finedispersion, coarseDispersion
   use definedTypes, only: settingparam,finegrid,coarsegrid
@@ -17,7 +17,7 @@ contains
 ! Initialises coarse and fine momentum grids for the calculation
 ! Note that the formula for assigning the kpoint values is a little non-obvious
 ! and only works for *even* values of Ncell and Nfpoints  
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(settingparam),intent(in)::settings
     type(finegrid),allocatable,intent(inout)::kgridFine(:,:,:)
     type(coarsegrid),allocatable,intent(inout)::kgridCoarse(:,:,:)
@@ -152,9 +152,10 @@ contains
     complex(real12),allocatable,intent(out)::DnDisO(:,:,:,:)
 
     ! routine variables
-    integer::i,ix,iy,iz,nmax, nfmax,nfpoints(3), ncell(3)
-    complex(real12),allocatable::omega_diff(:,:,:,:)
+    integer::i,j,k,l,nmax, nfmax,nfpoints(3), ncell(3)
+    complex(real12)::omega_diff
     complex(real12),allocatable::tempArray(:,:,:,:),tempArray1(:,:)
+    complex(real12),allocatable::tempArray2(:,:)
 
     nfpoints=settings%nfpoints
     ncell=settings%ncell
@@ -165,11 +166,10 @@ contains
     omega_diff=(settings%omegaMax-settings%omegaMin)/&
          (real(settings%nomega-1,real12))
 
-    do i=1,settings%nomega
-       settings%omega2diff(1:nfpoints(1),1:nfpoints(2),1:nfpoints(3),i)=&
-            ((i-1)*omega_diff)**2&
-            -kgridFine(1:nfpoints(1),1:nfpoints(2),1:nfpoints(3))%omega2)**2
-    enddo
+    forall(i=1:nfpoints(1),j=1:nfpoints(2),k=1:nfpoints(3),l=1:settings%nomega)
+       settings%omega2diff(i,j,k,l)=(real((l-1),real12)*omega_diff)**2 &
+            -(kgridFine(i,j,k)%omega2)**2
+    endforall
     allocate(settings%pointsmap(nfpoints(1),nfpoints(2),nfpoints(3),&
          settings%nomega))
     forall (i=1:settings%nomega)
@@ -186,18 +186,24 @@ contains
     tempArray=0.0_real12
     nmax=ncell(1)*ncell(2)*ncell(3)
     nfmax=nfpoints(1)*nfpoints(2)*nfpoints(3)
+    !redefine what follows as a function maybe? (will need to do again...)
     allocate(tempArray1(nmax,settings%nomega))
-    tempArray1=reshape(DnDisO, (/ nmax,settings%nomega /))
+    allocate(tempArray2(nfmax,settings%nomega))
+    tempArray1=reshape(DnDisO, [nmax,settings%nomega])
     do i=1,nmax
        where(settings%pointsmap==i)
           ! will need to rework for matrix case?
           tempArray=1.0_real12/settings%omega2diff
        end where
-       tempArray1(i,1:settings%nomega)=coarseDispersion(tempArray,nmax,nfmax)
+       tempArray2=reshape(tempArray2,[nmax,settings%nomega])
+       forall(j=1:settings%nomega)
+          tempArray1(i,j)=real(nmax,real12)*sum(tempArray2(1:nmax,j))&
+               /real(nfmax,real12)
+       end forall
     enddo
     DnDisO=reshape(tempArray1,[ncell(1),ncell(2),ncell(3),settings%nomega])
 
-    deallocate(tempArray,tempArray1)
+    deallocate(tempArray,tempArray1,tempArray2)
   end subroutine initD0
 
   subroutine initHybrid()
