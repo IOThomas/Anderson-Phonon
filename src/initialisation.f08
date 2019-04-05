@@ -7,7 +7,7 @@ module initialisation
   use definedTypes, only: settingparam,finegrid,coarsegrid
   implicit none
   private
-  public initGrid,initD0
+  public initGrid,initD0,initHybrid
 
 contains
 
@@ -148,8 +148,8 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine initD0(settings,kgridFine,DnDisO)
     type(settingparam),intent(inout)::settings
-    type(finegrid),allocatable,intent(inout)::kgridFine(:,:,:)
-    complex(real12),allocatable,intent(out)::DnDisO(:,:,:,:)
+    type(finegrid),intent(in)::kgridFine(:,:,:)
+    complex(real12),allocatable,intent(inout)::DnDisO(:,:,:,:)
 
     ! routine variables
     integer::i,j,k,l,nmax, nfmax,nfpoints(3), ncell(3)
@@ -163,9 +163,12 @@ contains
     !generate omega2 differences
     allocate(settings%omega2diff(nfpoints(1),nfpoints(2),nfpoints(3),&
          settings%nomega))
+    allocate(settings%omega2(settings%nomega))
     omega_diff=(settings%omegaMax-settings%omegaMin)/&
          (real(settings%nomega-1,real12))
-
+    forall(i=1:settings%nomega)
+       settings%omega2(i)=(real((i-1),real12)*omega_diff)**2
+    end forall
     forall(i=1:nfpoints(1),j=1:nfpoints(2),k=1:nfpoints(3),l=1:settings%nomega)
        settings%omega2diff(i,j,k,l)=(real((l-1),real12)*omega_diff)**2 &
             -(kgridFine(i,j,k)%omega2)**2
@@ -206,9 +209,26 @@ contains
     deallocate(tempArray,tempArray1,tempArray2)
   end subroutine initD0
 
-  subroutine initHybrid()
+  subroutine initHybrid(w2raw,coarsew2,D0,startHybrid)
+    complex(real12),intent(in)::w2raw(:),coarsew2(:,:,:,:)
+    complex(real12),intent(in)::D0(:,:,:,:)
+    complex(real12),allocatable,intent(out)::startHybrid(:,:,:,:)
 
-    ! generate initial hybridisation
+    !routine variables
+    integer:: nx,ny,nz,nw2
+    integer:: i,j,k,l
+
+    nx=size(D0,1)
+    ny=size(D0,2)
+    nz=size(D0,3)
+    nw2=size(D0,4)
+    
+    allocate(startHybrid(nx,ny,nz,nw2))
+    !may have to rewrite for matrix form...
+    forall (i=1:nx,j=1:ny,k=1:nz,l=1:nw2)
+       startHybrid(i,j,k,l)=w2raw(l)-coarsew2(i,j,k,l)-1.0_real12/D0(i,j,k,l)
+    end forall
+   
 
   end subroutine initHybrid
 

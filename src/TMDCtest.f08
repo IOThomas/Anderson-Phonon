@@ -22,6 +22,7 @@ program TMDCAnderson
   ! initialise grids, GFO and HYB0
   call initGrid(settings,kgridFine,kgridCoarse)
   call initDO(settings,kgridFine,DnDisO)
+  call initHybrid(settings%omega2,kgridCoarse%omega2,DnDisO,hybOld)
   stop
  
 end program TMDCAnderson
