@@ -2,7 +2,7 @@ program TMDCAnderson
   use constants, only: real12
   use definedTypes, only: basis,settingparam,finegrid,coarsegrid
   use readsettings, only: readin
-  use initialisation, only: initGrid
+  use initialisation, only: initGrid,initDO,initHybrid
 
   implicit none
   
@@ -23,6 +23,6 @@ program TMDCAnderson
   call initGrid(settings,kgridFine,kgridCoarse)
   call initDO(settings,kgridFine,DnDisO)
   call initHybrid(settings%omega2,kgridCoarse%omega2,DnDisO,hybOld)
-  stop
+  
  
 end program TMDCAnderson

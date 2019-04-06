@@ -7,7 +7,7 @@ module initialisation
   use definedTypes, only: settingparam,finegrid,coarsegrid
   implicit none
   private
-  public initGrid,initD0,initHybrid
+  public initGrid,initDO,initHybrid
 
 contains
 
@@ -146,10 +146,10 @@ contains
   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine initD0(settings,kgridFine,DnDisO)
+  subroutine initDO(settings,kgridFine,DnDisO)
     type(settingparam),intent(inout)::settings
     type(finegrid),intent(in)::kgridFine(:,:,:)
-    complex(real12),allocatable,intent(inout)::DnDisO(:,:,:,:)
+    complex(real12),allocatable,intent(out)::DnDisO(:,:,:,:)
 
     ! routine variables
     integer::i,j,k,l,nmax, nfmax,nfpoints(3), ncell(3)
@@ -207,10 +207,10 @@ contains
     DnDisO=reshape(tempArray1,[ncell(1),ncell(2),ncell(3),settings%nomega])
 
     deallocate(tempArray,tempArray1,tempArray2)
-  end subroutine initD0
+  end subroutine initDO
 
   subroutine initHybrid(w2raw,coarsew2,D0,startHybrid)
-    complex(real12),intent(in)::w2raw(:),coarsew2(:,:,:,:)
+    complex(real12),intent(in)::w2raw(:),coarsew2(:,:,:)
     complex(real12),intent(in)::D0(:,:,:,:)
     complex(real12),allocatable,intent(out)::startHybrid(:,:,:,:)
 
@@ -226,7 +226,7 @@ contains
     allocate(startHybrid(nx,ny,nz,nw2))
     !may have to rewrite for matrix form...
     forall (i=1:nx,j=1:ny,k=1:nz,l=1:nw2)
-       startHybrid(i,j,k,l)=w2raw(l)-coarsew2(i,j,k,l)-1.0_real12/D0(i,j,k,l)
+       startHybrid(i,j,k,l)=w2raw(l)-coarsew2(i,j,k)-1.0_real12/D0(i,j,k,l)
     end forall
    
 
