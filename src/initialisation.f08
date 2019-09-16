@@ -21,14 +21,16 @@ contains
     type(settingparam),intent(in)::settings
     type(finegrid),allocatable,intent(inout)::kgridFine(:,:,:)
     type(coarsegrid),allocatable,intent(inout)::kgridCoarse(:,:,:)
-
-    !routine variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! routine variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     integer::itemp(3),ix,iy,iz,iNcell,iNpoint
     real(real12)::kx,ky,kz,length(3),lowLim(3),upperLim(3)
     complex(real12),allocatable::tempArray(:,:,:)
 
-
-    !allocate fine grid
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! allocate fine grid
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     itemp=settings%nfpoints
     length=2.0_real12*pi/real(itemp,real12)
     allocate(kgridFine(itemp(1),itemp(2),itemp(3)))
@@ -48,8 +50,9 @@ contains
           enddo
        enddo
     enddo
-    
-    !allocate coarsegrid
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+! allocate coarsegrid
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     itemp=settings%ncell
     allocate(kgridCoarse(itemp(1),itemp(2),itemp(3)))
     length=2.0_real12*pi/real(itemp,real12)
@@ -69,8 +72,9 @@ contains
           enddo
        enddo
     enddo
-
-    !allocate the coarse map points and the associated coarse momentum
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! allocate the coarse map points and the associated coarse momentum
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     iNcell=settings%ncell(1)*settings%ncell(2)*settings%ncell(2)
     iNpoint=settings%nfpoints(1)*settings%nfpoints(2)*settings%nfpoints(2)
     do ix=1,itemp(1)
@@ -101,8 +105,9 @@ contains
           enddo
        enddo
     enddo
-
-    !output grids
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! output grids
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     open(unit=10,file='finekgrid.out',status='new')
     write(10,*) '# fine kpoint grid'
     write(10,*) 'ix, iy, iz, kx, ky, kz, |k|, Re(omega**2),  Im(omega**2), <map to this coarse grid point>'
@@ -136,6 +141,7 @@ contains
     close(10)
 
     deallocate(tempArray)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
 !!!!!!!!!!!!!!!!!
 ! FORMAT BLOCKS !
 !!!!!!!!!!!!!!!!!

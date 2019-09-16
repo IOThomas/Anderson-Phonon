@@ -1,10 +1,8 @@
 program TMDCAnderson
-
-  use constants
-  use definedTypes
-  use readsettings
-  use initialisation
-  use dynamicalLoop
+  use constants, only: real12,uline,dline
+  use definedTypes, only: basis,settingparam,finegrid,coarsegrid
+  use readsettings, only: readin
+  use initialisation, only: initGrid,initDO,initHybrid
 
   implicit none
   
@@ -12,19 +10,24 @@ program TMDCAnderson
   type(settingparam)::settings
   type(finegrid),allocatable::kgridFine(:,:,:)
   type(coarsegrid),allocatable::kgridCoarse(:,:,:)
-  
+
+  complex(real12),allocatable::DnDisO(:,:,:,:)
   complex(real12),allocatable::hybOld(:,:,:,:),hybNew(:,:,:,:)
   complex(real12),allocatable::dcGF(:,:,:,:),typGF(:,:,:,:)
-  
-  ! read in settings and initialise variables
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! read in settings and initialise variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   call readin(atombasis,settings)
-  
-
-  ! initialise grids, GFO and HYB0
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! initialise grids, GFO and HYB0
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   call initGrid(settings,kgridFine,kgridCoarse)
-  
-  ! start loop
-
+  call initDO(settings,kgridFine,DnDisO)
+  call initHybrid(settings%omega2,kgridCoarse%omega2,DnDisO,hybOld)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! start loop
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! call loop routine
 
   ! call test routine; if passed end loop
