@@ -1,14 +1,16 @@
 test_suite initialisation
 
 !global variables here
-integer,parameter::fine_points=
-integer,parameter::ncoarse_cells=
-type(settingparam)::settings
-type(finegrid)::kgridFine(:,:)
-type(coarsegrid)::kgridCoarse(:,:)
+!use derivedtypes
+integer,  parameter :: fine_points=5
+integer,  parameter :: ncoarse_cells=5
+type(settingparam)  :: settings
+type(finegrid),allocatable     :: kgridFine(:,:,:)
+type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
 
 
 setup
+  use definedtypes               
   !code that should be run before each test
   settings%nfpoints=fine_points
   settings%ncell=ncoarse_cells
@@ -17,6 +19,13 @@ end setup
 
 teardown
   !code runs after each test
+  integer::stat
+
+  deallocate(kgridFine,kgridCoarse)
+  open(unit=1234, iostat=stat, file="finekgrid.out", status='unknown')
+  close(1234, status='delete')
+  open(unit=1234, iostat=stat, file="coarsekgrid.out", status='unknown')
+  close(1234, status='delete')
 end teardown
 
 test fine_points_stored_correctly

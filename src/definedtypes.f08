@@ -1,4 +1,4 @@
-module definedTypes
+module definedtypes
   ! contains the defined types for the code
   use constants, only: real12
   implicit none
