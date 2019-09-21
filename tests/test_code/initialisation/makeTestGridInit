@@ -1,0 +1,29 @@
+
+# makefile to compile TestRunner.f90
+#
+# funit generated this file on 2019-09-17 23:43:00 +0100.
+# IOT modified file on 2019-09-21 20:44  +0100.
+
+OBJ=initGrid_fun.o initialisation.o definedtypes.o constants.o dispersions.o TestGridinit.o
+LDFLAGS= -lstdc++
+
+SRCDIR=../../../src
+
+all:TestGridInit.x
+
+TestGridInit.x: $(OBJ)
+	gfortran-9   -o TestGridInit.x $(OBJ) $(LDFLAGS)
+
+TestGridinit.o: TestGridinit.f08 initGrid_fun.o 
+	(cd .; gfortran-9  -I. -c TestGridinit.f08)
+initGrid_fun.o: initGrid_fun.f08 initialisation.o definedtypes.o 
+	(cd .; gfortran-9  -I. -c initGrid_fun.f08)
+initialisation.o: $(SRCDIR)/initialisation.f08 constants.o dispersions.o definedtypes.o 
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/initialisation.f08)
+constants.o: $(SRCDIR)/constants.f08  
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/constants.f08)
+dispersions.o: $(SRCDIR)/dispersions.f08 constants.o 
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/dispersions.f08)
+definedtypes.o: $(SRCDIR)/definedtypes.f08 constants.o 
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/definedtypes.f08)
+  
