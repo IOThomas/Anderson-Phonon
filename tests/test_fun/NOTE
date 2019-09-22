@@ -1,0 +1,7 @@
+For convenience when testing there may be several different test suites 
+corresponding to the same module.  To use funit, these would have to be renamed 
+to $MODULE.fun when generating the code (which will also require copies/symbolic 
+links to the module code and dependencies with a *.f90 file type)
+
+SUITE			MODULE			TEST
+initGrid.fun            initialisation		momentum grid setup

@@ -1,0 +1,3 @@
+Code is generated from the files in test_fun using funit plus a few necessary 
+manual modifications such that it works. The resulting test suites are stored in 
+test_code in directories corresponding to the relevent module.
