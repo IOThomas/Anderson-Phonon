@@ -5,3 +5,4 @@ links to the module code and dependencies with a *.f90 file type)
 
 SUITE			MODULE			TEST
 initGrid.fun            initialisation		momentum grid setup
+dispersions.fun		dispersions		fine and coarse grid dispersions

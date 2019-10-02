@@ -1,0 +1,25 @@
+
+# makefile to compile TestRunner.f90
+#
+# funit generated this file on 2019-10-02 18:56:53 +0100.
+# IOT modified file on 2009-10-02 18:
+
+OBJ=dispersions_fun.o constants.o dispersions.o TestDisp.o
+LDFLAGS= -lstdc++
+
+SRCDIR=../../../src
+
+all:TestDisp.x
+
+TestDisp.x: $(OBJ)
+	gfortran-9   -o TestDisp.x $(OBJ) $(LDFLAGS)
+
+TestDisp.o: TestDisp.f08 dispersions_fun.o 
+	(cd .; gfortran-9  -I. -c TestDisp.f08)
+dispersions_fun.o: dispersions_fun.f08 constants.o dispersions.o 
+	(cd .; gfortran-9  -I. -c dispersions_fun.f08)
+constants.o: ${SRCDIR}/constants.f08  
+	(cd .; gfortran-9  -I. -c ${SRCDIR}/constants.f08)
+dispersions.o: ${SRCDIR}/dispersions.f08 constants.o 
+	(cd .; gfortran-9  -I. -c ${SRCDIR}/dispersions.f08)
+  
