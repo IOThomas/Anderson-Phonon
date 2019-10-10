@@ -62,14 +62,12 @@ contains
     allocate(kgridFine(itemp(1), itemp(2), itemp(3)))
     allocate(tempArray(itemp(1), itemp(2), itemp(3)))
     do iz = 1, itemp(3)
-       kz = (real(iz, real12)&
-            - half * real( 1 + (itemp(3) / 2), real12)) * length(3)
+       kz=squaregridmom(iz,itemp(3),length(3))
        do iy = 1, itemp(2)
-          ky = (real( iy, real12)&
-               - half * real( 1 + (itemp(2) / 2), real12)) * length(2)
+          ky=squaregridmom(iy,itemp(2),length(2))
           do ix =1, itemp(1)
-             kx = (real(ix, real12)&
-                  - half * real( 1 + (itemp(1) / 2), real12)) * length(1)
+             kx=squaregridmom(ix,itemp(1),length(1))
+             
              kgridFine(ix, iy, iz)%kx = kx
              kgridFine(ix, iy, iz)%ky = ky
              kgridFine(ix, iy, iz)%kz = kz
@@ -85,14 +83,12 @@ contains
     allocate(kgridCoarse(itemp(1), itemp(2), itemp(3)))
     length = two * pi / real(itemp, real12)
     do iz = 1, itemp(3)
-       kz = (real(iz, real12)&
-            - half * real(1 + (itemp(3) / 2), real12)) * length(3)
+       kz=squaregridmom(iz,itemp(3),length(3))
        do iy = 1, itemp(2)
-          ky = (real(iy, real12)&
-               - half * real(1 + (itemp(2) / 2), real12)) * length(2)
+          ky=squaregridmom(iy,itemp(2),length(2))
           do ix = 1, itemp(1)
-             kx = (real(ix,real12)&
-                  - half *real (1 + (itemp(1) / 2), real12)) * length(1)
+             kx=squaregridmom(ix,itemp(1),length(1))
+             
              kgridCoarse(ix, iy, iz)%kx = kx
              kgridCoarse(ix, iy, iz)%ky = ky
              kgridCoarse(ix, iy, iz)%kz = kz
@@ -177,6 +173,24 @@ contains
 !!!!!!!!!!!!!!!!!
 800 format(3i5, 4es25.15, 2es25.15, i5)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  contains
+    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+    pure function squaregridmom(ipoint,itotal,tlength)
+      real(real12) :: squaregridmom
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Calculates the momentum at a given point in a square grid
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      integer, intent(in) :: ipoint
+      integer, intent(in) :: itotal
+      real(real12), intent(in) :: tlength
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      squaregridmom = (real(ipoint, real12)&
+           - half * real( 1 + (itotal/ 2), real12)) * tlength
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    end function squaregridmom
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
   end subroutine initGrid
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
