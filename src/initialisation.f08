@@ -10,7 +10,7 @@ module initialisation
   public initGrid, initDO, initHybrid
 
 contains
-
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine initGrid(settings, kgridFine, kgridCoarse, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -171,9 +171,8 @@ contains
 !!!!!!!!!!!!!!!!!
 800 format(3i5, 4es25.15, 2es25.15, i5)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  contains
-    
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+  contains    
+!------------------------------------------------------------------------------ 
     pure function squaregridmom(ipoint,itotal,tlength)
       real(real12) :: squaregridmom
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -187,19 +186,19 @@ contains
            - half * real( 1 + (itotal/ 2), real12)) * tlength
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     end function squaregridmom
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-
+!------------------------------------------------------------------------------ 
   end subroutine initGrid
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  subroutine initDO(settings, kgridFine, DnDisO, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine initDO(settings,kgridFine,DnDisO)
-    type(settingparam),intent(inout)::settings
-    type(finegrid),intent(in)::kgridFine(:,:,:)
-    complex(real12),allocatable,intent(out)::DnDisO(:,:,:,:)
-
-    ! routine variables
+    type(settingparam),intent(inout)        :: settings
+    type(finegrid),intent(in)               :: kgridFine(:,:,:)
+    complex(real12),allocatable,intent(out) :: DnDisO(:,:,:,:)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! routine variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     integer::i,j,k,l,nmax, nfmax,nfpoints(3), ncell(3)
     complex(real12)::omega_diff
     complex(real12),allocatable::tempArray(:,:,:,:),tempArray1(:,:)
