@@ -12,18 +12,26 @@ module initialisation
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine initGrid(settings, kgridFine, kgridCoarse)
+  subroutine initGrid(settings, kgridFine, kgridCoarse, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Initialises coarse and fine momentum grids for the calculation
 ! Note that the formula for assigning the kpoint values is a little non-obvious
-! and only works for *even* values of Ncell and Nfpoints  
+! and only works for *even* values of Ncell and Nfpoints
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Error codes: ierr=0: Routine executed fine
+!              ierr=1: Ncell or Nfpoints are negative or zero
+!              ierr=2: Ncell or Nfpoints are odd
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(settingparam), intent(in)               :: settings
     type(finegrid), allocatable, intent(inout)   :: kgridFine(:,:,:)
     type(coarsegrid), allocatable, intent(inout) :: kgridCoarse(:,:,:)
+    integer                                      :: ierr
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    integer                      :: itest1(3)
+    integer                      :: itest2(3)
+    integer                      :: icond(3)  
     integer                      :: itemp(3)
     integer                      :: ix, iy, iz
     integer                      :: iNcell, iNpoint
@@ -31,7 +39,21 @@ contains
     real(real12)                 :: length(3)
     real(real12)                 :: lowLim(3), upperLim(3)
     complex(real12), allocatable :: tempArray(:,:,:)
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! check number of grid points, return uninitialised if unusable
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+    itest1=settings%nfpoints
+    itest2=settings%ncell
+    icond=1
+    if (any(itest1.lt.icond).or.any(itest2.lt.icond)) then
+       ierr=1
+       return
+    elseif (any(mod(itest1,2).eq.icond).or.any(mod(itest2,2).eq.icond)) then
+       ierr=2
+       return
+    else
+       ierr=0
+    endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! allocate fine grid
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -149,7 +171,7 @@ contains
     close(10)
 
     deallocate(tempArray)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 !!!!!!!!!!!!!!!!!
 ! FORMAT BLOCKS !
 !!!!!!!!!!!!!!!!!
