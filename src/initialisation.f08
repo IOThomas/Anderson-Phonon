@@ -37,7 +37,7 @@ contains
     integer                      :: iNcell, iNpoint
     real(real12)                 :: kx, ky, kz
     real(real12)                 :: length(3)
-    real(real12)                 :: lowLim(3), upperLim(3)
+    real(real12)                 :: lowLim(3), upperLim(3), ktemp(3)
     complex(real12), allocatable :: tempArray(:,:,:)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! check number of grid points, return uninitialised if unusable
@@ -106,14 +106,12 @@ contains
     do ix = 1, itemp(1)
        do iy = 1, itemp(2)
           do iz = 1, itemp(3)
-             lowLim(1) = kgridCoarse(ix, iy, iz)%kx - half * length(1)
-             upperLim(1) = kgridCoarse(ix, iy, iz)%kx + half * length(1)
-
-             lowLim(2) = kgridCoarse(ix, iy, iz)%ky - half * length(2)
-             upperLim(2) = kgridCoarse(ix, iy, iz)%ky + half *length(2)
-          
-             lowLim(3) = kgridCoarse(ix, iy, iz)%kz - half * length(3)
-             upperLim(3) = kgridCoarse(ix, iy, iz)%kz + half * length(3)
+             ktemp(1) = kgridCoarse(ix, iy, iz)%kx
+             ktemp(2) = kgridCoarse(ix, iy, iz)%ky
+             ktemp(3) = kgridCoarse(ix, iy, iz)%kz
+             
+             lowLim= ktemp - half * length
+             upperLim = ktemp + half * length
 
              tempArray = 0.0d0
              where ((kgridFine%kx >= lowLim(1)).and.&
