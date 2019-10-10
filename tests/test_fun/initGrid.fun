@@ -2,7 +2,8 @@ test_suite initialisation
 
 !global variables here (don't change fine_points or ncoarse_cells)
 integer,  parameter :: fine_points=6   
-integer,  parameter :: ncoarse_cells=2 
+integer,  parameter :: ncoarse_cells=2
+integer             :: ierr
 type(settingparam)  :: settings
 type(finegrid),allocatable     :: kgridFine(:,:,:)
 type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
@@ -18,27 +19,55 @@ teardown
   !code runs after each test
   integer::stat
 
-  deallocate(kgridFine,kgridCoarse)
+  if (allocated(kgridFine)) deallocate(kgridFine)
+  if (allocated(kgridCoarse)) deallocate(kgridCoarse)
 end teardown
 
+test negative_finegrid_ierr
+  settings%nfpoints(3)=-1
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
+  assert_equal(ierr,1)
+end test
+
+test odd_finegrid_ierr
+  settings%nfpoints(3)=5
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
+  assert_equal(ierr,2)
+end test
+
+test negative_coarsegrid_ierr
+  settings%ncell(3)=-1
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
+  assert_equal(ierr,1)
+end test
+
+
+test odd_coarsegrid_ierr
+  settings%ncell(3)=5
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
+  assert_equal(ierr,2)
+end test
+
 test fine_points_stored_correctly
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
   assert_equal(settings%nfpoints(1),fine_points)
   assert_equal(settings%nfpoints(2),fine_points)
   assert_equal(settings%nfpoints(3),fine_points)
+  
 end test
 
 test coarse_cell_no_stored_correctly
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
   assert_equal(settings%ncell(1),ncoarse_cells)
   assert_equal(settings%ncell(2),ncoarse_cells)
   assert_equal(settings%ncell(3),ncoarse_cells)
+  
 end test
 
 test fine_grid_array_size
   integer:: ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   ix=size(kgridFine,1)
   iy=size(kgridFine,2)
@@ -47,13 +76,13 @@ test fine_grid_array_size
   assert_equal(ix,fine_points)
   assert_equal(iy,fine_points)
   assert_equal(iz,fine_points)
-
+  
 end test
 
 test coarse_grid_array_size
   integer:: ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   ix=size(kgridCoarse,1)
   iy=size(kgridCoarse,2)
@@ -62,7 +91,7 @@ test coarse_grid_array_size
   assert_equal(ix,ncoarse_cells)
   assert_equal(iy,ncoarse_cells)
   assert_equal(iz,ncoarse_cells)
-
+  
 end test
 
 test fine_grid_values_corners
@@ -71,7 +100,7 @@ test fine_grid_values_corners
   real(real12),parameter::tolerance=epsilon(pi)
   real(real12)::testx,testy,testz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   testx=kgridFine(1,1,1)%kx
   testy=kgridFine(1,1,1)%ky
@@ -140,7 +169,7 @@ test coarse_grid_values_corners
   real(real12),parameter::tolerance=epsilon(pi)
   real(real12)::testx,testy,testz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   testx=kgridCoarse(1,1,1)%kx
   testy=kgridCoarse(1,1,1)%ky
@@ -197,7 +226,7 @@ test coarse_grid_values_corners
   assert_equal_within(testx,last,tolerance)
   assert_equal_within(testy,last,tolerance)
   assert_equal_within(testz,last,tolerance)
-
+  
 end test
 
 test assigncell_maps
@@ -207,7 +236,7 @@ test assigncell_maps
    integer:: icell,testno
    logical:: npwrong
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
    !test the number of points mapped to each cell is correct
    allocate(cellcount(fine_points,fine_points,fine_points))
@@ -224,12 +253,13 @@ test assigncell_maps
    enddo
    assert_false(npwrong)
    deallocate(cellcount)
+   
 end test
 
 test assigncell_specific_fine_points
    integer::testcell
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
    
    !test specific cells
    testcell=kgridfine(5,5,4)%coarsemap
@@ -242,14 +272,14 @@ test assigncell_specific_fine_points
    assert_equal(testcell,7)
    testcell=kgridfine(6,6,6)%coarsemap
    assert_equal(testcell,8)
-
+   
 end test
     
 test assign_coarse_labels
    integer::ix,iy,iz,itest
    logical::problem
 
-   call initgrid(settings,kgridFine,kgridCoarse)
+   call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
    problem=.false.
    do ix=1,ncoarse_cells
@@ -266,15 +296,15 @@ test assign_coarse_labels
       enddo
    enddo
    assert_false(problem)
-
-
+   
+   
 end test
 
 test fine_points_reals_are_numbers
   logical::problem
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,fine_points
@@ -354,7 +384,7 @@ test fine_points_reals_are_numbers
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
 
 test fine_grid_kx_within_range
@@ -364,7 +394,7 @@ test fine_grid_kx_within_range
   real(real12)::test
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,fine_points
@@ -393,7 +423,7 @@ test fine_grid_kx_within_range
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
   
 test fine_grid_ky_within_range
@@ -403,7 +433,7 @@ test fine_grid_ky_within_range
   real(real12)::test
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,fine_points
@@ -432,7 +462,7 @@ test fine_grid_ky_within_range
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
 
 test fine_grid_kz_within_range
@@ -442,7 +472,7 @@ test fine_grid_kz_within_range
   real(real12)::test
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,fine_points
@@ -471,7 +501,7 @@ test fine_grid_kz_within_range
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
 
 test fine_grid_knorm_within_range
@@ -481,7 +511,7 @@ test fine_grid_knorm_within_range
   real(real12)::test
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,fine_points
@@ -510,7 +540,7 @@ test fine_grid_knorm_within_range
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
 
 !!!!!!!!!!!!!!!!!!!
@@ -518,7 +548,7 @@ test Coarse_points_reals_are_numbers
   logical::problem
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,ncoarse_cells
@@ -598,7 +628,7 @@ test Coarse_points_reals_are_numbers
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
 
 test Coarse_grid_kx_within_range
@@ -608,7 +638,7 @@ test Coarse_grid_kx_within_range
   real(real12)::test
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,ncoarse_cells
@@ -637,7 +667,7 @@ test Coarse_grid_kx_within_range
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
   
 test Coarse_grid_ky_within_range
@@ -647,7 +677,7 @@ test Coarse_grid_ky_within_range
   real(real12)::test
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,ncoarse_cells
@@ -676,7 +706,7 @@ test Coarse_grid_ky_within_range
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
 
 test Coarse_grid_kz_within_range
@@ -686,7 +716,7 @@ test Coarse_grid_kz_within_range
   real(real12)::test
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,ncoarse_cells
@@ -715,7 +745,7 @@ test Coarse_grid_kz_within_range
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
 
 test Coarse_grid_knorm_within_range
@@ -725,7 +755,7 @@ test Coarse_grid_knorm_within_range
   real(real12)::test
   integer::ix,iy,iz
 
-  call initgrid(settings,kgridFine,kgridCoarse)
+  call initgrid(settings,kgridFine,kgridCoarse,ierr)
 
   problem=.false.
   do ix=1,ncoarse_cells
@@ -754,7 +784,7 @@ test Coarse_grid_knorm_within_range
      enddo
   enddo
   assert_false(problem)
-
+  
 end test
 
 end test_suite
