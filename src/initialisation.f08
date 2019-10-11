@@ -191,86 +191,74 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine initDO(settings, kgridFine, DnDisO, ierr)
+  subroutine initDO(settings, kgridFine, stored, Dzero, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    type(settingparam),intent(inout)        :: settings
-    type(finegrid),intent(in)               :: kgridFine(:,:,:)
-    complex(real12),allocatable,intent(out) :: DnDisO(:,:,:,:)
+    type(settingparam), intent(inout)          :: settings
+    type(finegrid), intent(in)                 :: kgridFine(:,:,:)
+    type(storedparam), intent(inout)           :: stored
+    type(greensfunc),allocatable,intent(inout) :: Dzero(:,:,:,:)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    integer::i,j,k,l,nmax, nfmax,nfpoints(3), ncell(3)
-    complex(real12)::omega_diff
-    complex(real12),allocatable::tempArray(:,:,:,:),tempArray1(:,:)
-    complex(real12),allocatable::tempArray2(:,:)
-
-    nfpoints=settings%nfpoints
-    ncell=settings%ncell
-
-    !generate omega2 differences
-    allocate(settings%omega2diff(nfpoints(1),nfpoints(2),nfpoints(3),&
-         settings%nomega))
-    allocate(settings%omega2(settings%nomega))
-    omega_diff=(settings%omegaMax-settings%omegaMin)/&
-         (real(settings%nomega-1,real12))
-    forall(i=1:settings%nomega)
-       settings%omega2(i)=(real((i-1),real12)*omega_diff)**2
+    integer         :: i, j, k, l
+    integer         :: nfpoints(3)
+    integer         :: nomega,
+    integer         :: icond(3)
+    complex(real12) :: omega_diff
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! get number of fine grid and omega points
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    nfpoints = settings%nfpoints
+    nomega = settings%nomega
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! check input for errors
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    icond = 1
+    if (any(nfpoints.lt.icond(3)).or.(nomega.lt.1)) then
+       ierr=1
+       return
+    elseif (omegaMax.lt.zero) then
+       ierr=2
+       return
+    else
+       ierr=0
+    end if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! allocate and calculate values of Dzero
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    omega_diff = (settings%omegaMax - settings%omegaMin) / real(nomega, real12)
+    stored%omega_diff=omega_diff
+    
+    allocate(Dzero(nfpoints(1), nfpoints(2), nfpoints(3), nomega))
+    
+    forall (i = 1:nfpoints(1), j = 1:nfpoints(2), k = 1:nfpoints(3), &
+         l = 1:nomega)
+       Dzero(i, j, k, l)%GF = (real(l**2,real12)*omega_diff*omega_diff, zero)&
+            - kfinegrid(i, j, k)%omega2
+       Dzero(i, j, k, l)%map = kfinegrid(i, j, k)%coarseMap
     end forall
-    forall(i=1:nfpoints(1),j=1:nfpoints(2),k=1:nfpoints(3),l=1:settings%nomega)
-       settings%omega2diff(i,j,k,l)=(real((l-1),real12)*omega_diff)**2 &
-            -(kgridFine(i,j,k)%omega2)**2
-    endforall
-    allocate(settings%pointsmap(nfpoints(1),nfpoints(2),nfpoints(3),&
-         settings%nomega))
-    forall (i=1:settings%nomega)
-       settings%pointsmap(1:nfpoints(1),1:nfpoints(2),1:nfpoints(3),i)=&
-            kgridFine%coarseMap
-    endforall
-    
-    !generate DO for fine grid points
-    allocate(tempArray(nfpoints(1),nfpoints(2),nfpoints(3),&
-         settings%nomega))
-    allocate(DnDisO(ncell(1),ncell(2),ncell(3),settings%nomega))
-    
-    !map to coarse grid
-    tempArray=0.0_real12
-    nmax=ncell(1)*ncell(2)*ncell(3)
-    nfmax=nfpoints(1)*nfpoints(2)*nfpoints(3)
-    !redefine what follows as a function maybe? (will need to do again...)
-    allocate(tempArray1(nmax,settings%nomega))
-    allocate(tempArray2(nfmax,settings%nomega))
-    tempArray1=reshape(DnDisO, [nmax,settings%nomega])
-    do i=1,nmax
-       where(settings%pointsmap==i)
-          ! will need to rework for matrix case?
-          tempArray=1.0_real12/settings%omega2diff
-       end where
-       tempArray2=reshape(tempArray2,[nmax,settings%nomega])
-       forall(j=1:settings%nomega)
-          tempArray1(i,j)=real(nmax,real12)*sum(tempArray2(1:nmax,j))&
-               /real(nfmax,real12)
-       end forall
-    enddo
-    DnDisO=reshape(tempArray1,[ncell(1),ncell(2),ncell(3),settings%nomega])
-
-    deallocate(tempArray,tempArray1,tempArray2)
+    Dzero%GF = one / Dzero%GF ! assumes diagonal matrix!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   end subroutine initDO
-
-  subroutine initHybrid(w2raw,coarsew2,D0,startHybrid)
-    complex(real12),intent(in)::w2raw(:),coarsew2(:,:,:)
-    complex(real12),intent(in)::D0(:,:,:,:)
-    complex(real12),allocatable,intent(out)::startHybrid(:,:,:,:)
-
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  subroutine initHybrid(stored, kgridCoarse, Dzero, Gzero )
+    type(storedparam), intent(in)   :: stored
+    type(coarsegrid), intent(in)    :: kgridCoarse
+    type(greensfunc), intent(in)    :: Dzero
+    type(greensfunc), intent(inout) :: Gzero
+    integer, intent(out)            :: ierr
     !routine variables
     integer:: nx,ny,nz,nw2
     integer:: i,j,k,l
+    real(real12) :: omega_diff
 
-    nx=size(D0,1)
-    ny=size(D0,2)
-    nz=size(D0,3)
-    nw2=size(D0,4)
+    nx=size(kgridCoarse,1)
+    ny=size(kgridCoarse,2)
+    nz=size(kgridCoarse,3)
+    nw2=size(Dzero,4)
     
-    allocate(startHybrid(nx,ny,nz,nw2))
+    allocate(Gzero(nx,ny,nz,nw2))
     !may have to rewrite for matrix form...
     forall (i=1:nx,j=1:ny,k=1:nz,l=1:nw2)
        startHybrid(i,j,k,l)=w2raw(l)-coarsew2(i,j,k)-1.0_real12/D0(i,j,k,l)
@@ -278,6 +266,5 @@ contains
    
 
   end subroutine initHybrid
-
     
 end module initialisation
