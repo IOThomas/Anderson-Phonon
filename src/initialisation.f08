@@ -21,6 +21,7 @@ contains
 ! Error codes: ierr=0: Routine executed fine
 !              ierr=1: Ncell or Nfpoints are negative or zero
 !              ierr=2: Ncell or Nfpoints are odd
+!              ierr=3: kgridFine or kgridCoarse already allocated    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(settingparam), intent(in)               :: settings
     type(finegrid), allocatable, intent(inout)   :: kgridFine(:,:,:)
@@ -50,6 +51,9 @@ contains
        return
     elseif (any(mod(itest1,2).eq.icond).or.any(mod(itest2,2).eq.icond)) then
        ierr=2
+       return
+    elseif (allocated(kgridFine).or.allocated(kgridCoarse)) then
+       ierr=3
        return
     else
        ierr=0
