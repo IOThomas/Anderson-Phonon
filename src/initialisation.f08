@@ -224,6 +224,12 @@ contains
     elseif (omegaMax.lt.zero) then
        ierr=2
        return
+    elseif (.not.allocated(kgridFine)) then
+       ierr=3
+       return
+    elseif (allocated(Dzero)) then
+       ierr=4
+       return
     else
        ierr=0
     end if
