@@ -1,9 +1,9 @@
 module definedtypes
   ! contains the defined types for the code
-  use constants, only: real12
+  use constants, only: real12, zero, cmplx_zero
   implicit none
   private
-  public basis, finegrid, coarsegrid, settingparam
+  public basis, finegrid, coarsegrid, settingparam, storedparam, greensfunc
 
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -31,11 +31,11 @@ module definedtypes
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   type settingparam
-     integer                    :: ncell(3)! number of cells per dirn
-     integer                    :: nomega ! number of omega values
-     integer                    :: nfpoints(3) !number of fine points per dirn
-     complex(real12)            :: omegaMax
-     complex(real12), parameter :: omegaMin=(zero, zero)
+     integer         :: ncell(3)! number of cells per dirn
+     integer         :: nomega ! number of omega values
+     integer         :: nfpoints(3) !number of fine points per dirn
+     complex(real12) :: omegaMax
+     complex(real12) :: omegaMin=cmplx_zero
   end type settingparam
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

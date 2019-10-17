@@ -2,12 +2,13 @@ module initialisation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! contains initialisation subroutines for the calculation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  use constants, only: real12, pi, half, two
+  use constants, only: real12, pi, half, two, zero, one, cmplx_zero
   use dispersions, only: finedispersion, coarseDispersion
-  use definedtypes, only: settingparam, finegrid, coarsegrid
+  use definedtypes, only: settingparam, finegrid, coarsegrid, storedparam,&
+       greensfunc
   implicit none
   private
-  public initGrid, initDO, initHybrid
+  public initGrid, initDzero, initHybrid
 
 contains
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -195,18 +196,27 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine initDO(settings, kgridFine, stored, Dzero, ierr)
+  subroutine initDzero(settings, kgridFine, stored, Dzero, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    type(settingparam), intent(inout)          :: settings
-    type(finegrid), intent(in)                 :: kgridFine(:,:,:)
-    type(storedparam), intent(inout)           :: stored
-    type(greensfunc),allocatable,intent(inout) :: Dzero(:,:,:,:)
+! Initialises fine grid non-interacting green's functions
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Error codes: ierr = 0 -- no problems
+!              ierr = 1 -- settings%nfpoints or settings%nomega less than one  
+!              ierr = 2 -- settings%omegamax less than settings%omegamin
+!              ierr = 3 -- kgridFine not allocated
+!              ierr = 4 -- Dzero already allocated  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    type(settingparam), intent(inout)           :: settings
+    type(finegrid), allocatable, intent(in)     :: kgridFine(:,:,:)
+    type(storedparam), intent(inout)            :: stored
+    type(greensfunc),allocatable, intent(inout) :: Dzero(:,:,:,:)
+    integer                                     :: ierr
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     integer         :: i, j, k, l
     integer         :: nfpoints(3)
-    integer         :: nomega,
+    integer         :: nomega
     integer         :: icond(3)
     complex(real12) :: omega_diff
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -221,7 +231,7 @@ contains
     if (any(nfpoints.lt.icond(3)).or.(nomega.lt.1)) then
        ierr=1
        return
-    elseif (omegaMax.lt.zero) then
+    elseif (real(settings%omegaMax).le.real(settings%omegaMin)) then
        ierr=2
        return
     elseif (.not.allocated(kgridFine)) then
@@ -243,38 +253,104 @@ contains
     
     forall (i = 1:nfpoints(1), j = 1:nfpoints(2), k = 1:nfpoints(3), &
          l = 1:nomega)
-       Dzero(i, j, k, l)%GF = (real(l**2,real12)*omega_diff*omega_diff, zero)&
-            - kfinegrid(i, j, k)%omega2
-       Dzero(i, j, k, l)%map = kfinegrid(i, j, k)%coarseMap
+       Dzero(i, j, k, l)%GF = one/(real(l**2,real12)*omega_diff*omega_diff&
+            - kgridFine(i, j, k)%omega2) ! assumes diagonal matrix
+       Dzero(i, j, k, l)%map = kgridFine(i, j, k)%coarseMap
     end forall
-    Dzero%GF = one / Dzero%GF ! assumes diagonal matrix!
+    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  end subroutine initDO
+  end subroutine initDzero
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine initHybrid(stored, kgridCoarse, Dzero, Gzero )
-    type(storedparam), intent(in)   :: stored
-    type(coarsegrid), intent(in)    :: kgridCoarse
-    type(greensfunc), intent(in)    :: Dzero
-    type(greensfunc), intent(inout) :: Gzero
-    integer, intent(out)            :: ierr
-    !routine variables
-    integer:: nx,ny,nz,nw2
-    integer:: i,j,k,l
-    real(real12) :: omega_diff
-
-    nx=size(kgridCoarse,1)
-    ny=size(kgridCoarse,2)
-    nz=size(kgridCoarse,3)
-    nw2=size(Dzero,4)
+  subroutine initHybrid(stored, kgridCoarse, Dzero, Gzero, ierr)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Initialises the coarse grid hybridisation function
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Error codes: ierr = 0 -- no problems
+!              ierr = 1 -- stored%omega_diff less than or equal to zero    
+!              ierr = 2 -- either or both of kgridCoarse and Dzero unallocated
+!              ierr = 3 -- Gzero already allocated    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    type(storedparam), intent(in)                :: stored
+    type(coarsegrid), allocatable, intent(in)    :: kgridCoarse(:, :, :)
+    type(greensfunc), allocatable, intent(in)    :: Dzero(:, :, :, :)
+    type(greensfunc), allocatable, intent(inout) :: Gzero(:, :, :, :)
+    integer, intent(out)                         :: ierr
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! routine variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    integer                      :: nx, ny, nz, nw2
+    integer                      :: nxfin, nyfin, nzfin
+    integer                      :: i, j, k, l
+    integer                      :: ifi, jf, kf, lf
+    integer                      :: imap
+    complex(real12)              :: omega_diff
+    complex(real12), allocatable :: work(:, :, :, :), work1(:, :, :, :)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    omega_diff = stored%omega_diff
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! input error tests
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+    if (real(omega_diff).le.zero) then
+       ierr = 1
+       return
+    elseif ((.not.allocated(kgridCoarse)).and.(.not.allocated(Dzero))) then
+       ierr = 2
+       return
+    elseif (allocated(Gzero)) then
+       ierr = 3
+       return
+    else
+       ierr = 0
+    end if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! array allocation and coarse point label assignment
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+    nx = size(kgridCoarse, 1)
+    ny = size(kgridCoarse, 2)
+    nz = size(kgridCoarse, 3)
     
-    allocate(Gzero(nx,ny,nz,nw2))
+    nxfin = size(Dzero, 1)
+    nyfin = size(Dzero, 2)
+    nzfin = size(Dzero, 3)
+    nw2 = size(Dzero, 4)
+    
+    allocate(Gzero(nx, ny, nz, nw2))
+    allocate(work(nx, ny, nz, nw2))
+    allocate(work1(nxfin, nyfin, nzfin, nw2))
+    
+    forall (i = 1:nw2)
+       Gzero(1:nx, 1:ny, 1:nz, i)%map=kgridCoarse(1:nx, 1:ny, 1:nz)%label
+    end forall
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! calculate Gzero
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+    do l = 1, nw2
+       do k = 1, nz
+          do j = 1, ny
+             do i = 1, nx
+                forall(ifi=1:nxfin, jf=1:nyfin, kf=1:nzfin, lf=1:nw2)
+                   work1(ifi, jf, kf, lf) = Dzero(ifi, jf, kf, lf)%GF
+                end forall
+                where (Dzero%map /= kgridCoarse(i, j, k)%label)
+                   work1 = cmplx_zero
+                endwhere
+                work(i,j,k,l) = sum(work1(1:nxfin, 1:nyfin, 1:nzfin, l))
+             enddo
+          enddo
+       enddo
+    enddo
+    work = one/work
+    
     !may have to rewrite for matrix form...
-    forall (i=1:nx,j=1:ny,k=1:nz,l=1:nw2)
-       startHybrid(i,j,k,l)=w2raw(l)-coarsew2(i,j,k)-1.0_real12/D0(i,j,k,l)
+    forall (i=1:nx, j=1:ny, k=1:nz, l=1:nw2)
+       Gzero(i,j,k,l)%GF = real(l**2,real12)*omega_diff**2&
+            - kgridCoarse(i, j, k)%omega2 - work(i,j,k,l)
     end forall
    
-
+    deallocate(work, work1)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   end subroutine initHybrid
-    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module initialisation

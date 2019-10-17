@@ -1,21 +1,23 @@
 program TMDCAnderson
   use constants, only: real12,uline,dline
-  use definedTypes, only: basis,settingparam,finegrid,coarsegrid
+  use definedTypes, only: basis,settingparam,finegrid,coarsegrid,storedparam,&
+        greensfunc
   use readsettings, only: readin
-  use initialisation, only: initGrid,initDO,initHybrid
+  use initialisation, only: initGrid,initDzero,initHybrid
 
   implicit none
   
   type(basis)::atomBasis
   type(settingparam)::settings
+  type(storedparam)::stored
   type(finegrid),allocatable::kgridFine(:,:,:)
   type(coarsegrid),allocatable::kgridCoarse(:,:,:)
 
 
   integer                     :: ierr
-  complex(real12),allocatable :: DnDisO(:,:,:,:)
-  complex(real12),allocatable :: hybOld(:,:,:,:),hybNew(:,:,:,:)
-  complex(real12),allocatable :: dcGF(:,:,:,:),typGF(:,:,:,:)
+  type(greensfunc),allocatable :: Dzero(:,:,:,:)
+  type(greensfunc),allocatable :: GAMMAold(:,:,:,:),GAMMAnew(:,:,:,:)
+ 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! read in settings and initialise variables
@@ -25,13 +27,25 @@ program TMDCAnderson
 ! initialise grids
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   call initGrid(settings,kgridFine,kgridCoarse,ierr)
+  write(*, *) "Grid initialised"
   if (ierr.eq.1) stop "Number of fine or coarse points is less than 1. Halting."
   if (ierr.eq.2) stop "Number of fine or coarse points is even. Halting."
+  if (ierr.eq.3) stop "Input arrays already allocated. Halting."
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! initialise Dzero and Hybridisation arrays
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  call initDO(settings,kgridFine,DnDisO)
-  call initHybrid(settings%omega2,kgridCoarse%omega2,DnDisO,hybOld)
+  call initDzero(settings,kgridFine,stored, Dzero, ierr)
+  write(*, *) "Fine grid non-interacting GF initialised"
+  if (ierr.eq.1) stop "Number of fine k or omega points less than 1. Halting."
+  if (ierr.eq.2) stop "Negative omega range. Halting."
+  if (ierr.eq.3) stop "Input array not allocated. Halting."
+  if (ierr.eq.4) stop "Output array already allocated. Halting."
+  
+  call initHybrid(stored,kgridCoarse,Dzero,GAMMAold,ierr)
+  write(*, *) "Coarse grid hybridisation function initialised"
+  if (ierr.eq.1) stop "Omega point spacing zero or less. Halting."
+  if (ierr.eq.2) stop "Input array(s) not allocated. Halting."
+  if (ierr.eq.3) stop "Output array already allocated. Halting."
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! start loop
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
