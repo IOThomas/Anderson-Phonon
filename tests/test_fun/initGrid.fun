@@ -35,6 +35,18 @@ test odd_finegrid_ierr
   assert_equal(ierr,2)
 end test
 
+test not_allocatated_fine_grid_ierr
+     allocate(kgridFine(fine_points,fine_points,fine_points))
+     call initgrid(settings,kgridFine,kgridCoarse,ierr)
+     assert_equal(ierr,3)
+end test
+
+test not_allocatated_coarse_grid_ierr
+     allocate(kgridCoarse(ncoarse_cells,ncoarse_cells,ncoarse_cells))
+     call initgrid(settings,kgridFine,kgridCoarse,ierr)
+     assert_equal(ierr,3)
+end test
+
 test negative_coarsegrid_ierr
   settings%ncell(3)=-1
   call initgrid(settings,kgridFine,kgridCoarse,ierr)

@@ -19,7 +19,8 @@ conventions used in this repository.
 Test suites and module correspondences
 ----------------------------------------
 
-|SUITE			|MODULE			|TEST|
-|----------------       |--------------         |------|
-|`initGrid.fun`         |`initialisation`	|momentum grid setup|
-|`dispersions.fun`	|`dispersions`		|fine and coarse grid dispersions|
+|SUITE			        |MODULE			    |TEST                            |
+|----------------       |--------------     |------                          |
+|`initGrid.fun`         |`initialisation`	|momentum grid setup (run first) |
+|`initD0.fun`           |`initialisation`   |D0 green's fn setup (run second)|
+|`dispersions.fun`	    |`dispersions`		|fine and coarse grid dispersions|

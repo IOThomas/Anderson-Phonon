@@ -84,6 +84,54 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
  end subroutine odd_finegrid_ierr
 
 
+ subroutine not_allocatated_fine_grid_ierr
+
+     allocate(kgridFine(fine_points,fine_points,fine_points))
+     call initgrid(settings,kgridFine,kgridCoarse,ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==3)) then
+      print *, " *Assert_Equal failed* in test not_allocatated_fine_grid_ierr &
+              &[initialisation.fun:41]"
+      print *, "  ", "ierr (",ierr,") is not", 3
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+  numTests = numTests + 1
+
+ end subroutine not_allocatated_fine_grid_ierr
+
+
+ subroutine not_allocatated_coarse_grid_ierr
+
+     allocate(kgridCoarse(ncoarse_cells,ncoarse_cells,ncoarse_cells))
+     call initgrid(settings,kgridFine,kgridCoarse,ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==3)) then
+      print *, " *Assert_Equal failed* in test not_allocatated_coarse_grid_ierr &
+              &[initialisation.fun:47]"
+      print *, "  ", "ierr (",ierr,") is not", 3
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+  numTests = numTests + 1
+
+ end subroutine not_allocatated_coarse_grid_ierr
+
+
  subroutine negative_coarsegrid_ierr
 
   settings%ncell(3)=-1
@@ -93,7 +141,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(ierr==1)) then
       print *, " *Assert_Equal failed* in test negative_coarsegrid_ierr &
-              &[initialisation.fun:41]"
+              &[initialisation.fun:53]"
       print *, "  ", "ierr (",ierr,") is not", 1
       print *, ""
       noAssertFailed = .false.
@@ -118,7 +166,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(ierr==2)) then
       print *, " *Assert_Equal failed* in test odd_coarsegrid_ierr &
-              &[initialisation.fun:48]"
+              &[initialisation.fun:60]"
       print *, "  ", "ierr (",ierr,") is not", 2
       print *, ""
       noAssertFailed = .false.
@@ -141,7 +189,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(settings%nfpoints(1)==fine_points)) then
       print *, " *Assert_Equal failed* in test fine_points_stored_correctly &
-              &[initialisation.fun:53]"
+              &[initialisation.fun:65]"
       print *, "  ", "settings%nfpoints(1) (",settings%nfpoints(1),") is not", fine_points
       print *, ""
       noAssertFailed = .false.
@@ -155,7 +203,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(settings%nfpoints(2)==fine_points)) then
       print *, " *Assert_Equal failed* in test fine_points_stored_correctly &
-              &[initialisation.fun:54]"
+              &[initialisation.fun:66]"
       print *, "  ", "settings%nfpoints(2) (",settings%nfpoints(2),") is not", fine_points
       print *, ""
       noAssertFailed = .false.
@@ -169,7 +217,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(settings%nfpoints(3)==fine_points)) then
       print *, " *Assert_Equal failed* in test fine_points_stored_correctly &
-              &[initialisation.fun:55]"
+              &[initialisation.fun:67]"
       print *, "  ", "settings%nfpoints(3) (",settings%nfpoints(3),") is not", fine_points
       print *, ""
       noAssertFailed = .false.
@@ -193,7 +241,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(settings%ncell(1)==ncoarse_cells)) then
       print *, " *Assert_Equal failed* in test coarse_cell_no_stored_correctly &
-              &[initialisation.fun:61]"
+              &[initialisation.fun:73]"
       print *, "  ", "settings%ncell(1) (",settings%ncell(1),") is not", ncoarse_cells
       print *, ""
       noAssertFailed = .false.
@@ -207,7 +255,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(settings%ncell(2)==ncoarse_cells)) then
       print *, " *Assert_Equal failed* in test coarse_cell_no_stored_correctly &
-              &[initialisation.fun:62]"
+              &[initialisation.fun:74]"
       print *, "  ", "settings%ncell(2) (",settings%ncell(2),") is not", ncoarse_cells
       print *, ""
       noAssertFailed = .false.
@@ -221,7 +269,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(settings%ncell(3)==ncoarse_cells)) then
       print *, " *Assert_Equal failed* in test coarse_cell_no_stored_correctly &
-              &[initialisation.fun:63]"
+              &[initialisation.fun:75]"
       print *, "  ", "settings%ncell(3) (",settings%ncell(3),") is not", ncoarse_cells
       print *, ""
       noAssertFailed = .false.
@@ -252,7 +300,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(ix==fine_points)) then
       print *, " *Assert_Equal failed* in test fine_grid_array_size &
-              &[initialisation.fun:76]"
+              &[initialisation.fun:88]"
       print *, "  ", "ix (",ix,") is not", fine_points
       print *, ""
       noAssertFailed = .false.
@@ -266,7 +314,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(iy==fine_points)) then
       print *, " *Assert_Equal failed* in test fine_grid_array_size &
-              &[initialisation.fun:77]"
+              &[initialisation.fun:89]"
       print *, "  ", "iy (",iy,") is not", fine_points
       print *, ""
       noAssertFailed = .false.
@@ -280,7 +328,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(iz==fine_points)) then
       print *, " *Assert_Equal failed* in test fine_grid_array_size &
-              &[initialisation.fun:78]"
+              &[initialisation.fun:90]"
       print *, "  ", "iz (",iz,") is not", fine_points
       print *, ""
       noAssertFailed = .false.
@@ -311,7 +359,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(ix==ncoarse_cells)) then
       print *, " *Assert_Equal failed* in test coarse_grid_array_size &
-              &[initialisation.fun:91]"
+              &[initialisation.fun:103]"
       print *, "  ", "ix (",ix,") is not", ncoarse_cells
       print *, ""
       noAssertFailed = .false.
@@ -325,7 +373,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(iy==ncoarse_cells)) then
       print *, " *Assert_Equal failed* in test coarse_grid_array_size &
-              &[initialisation.fun:92]"
+              &[initialisation.fun:104]"
       print *, "  ", "iy (",iy,") is not", ncoarse_cells
       print *, ""
       noAssertFailed = .false.
@@ -339,7 +387,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(iz==ncoarse_cells)) then
       print *, " *Assert_Equal failed* in test coarse_grid_array_size &
-              &[initialisation.fun:93]"
+              &[initialisation.fun:105]"
       print *, "  ", "iz (",iz,") is not", ncoarse_cells
       print *, ""
       noAssertFailed = .false.
@@ -380,7 +428,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:108]"
+              &[initialisation.fun:120]"
       print *, "  ", "testx (",testx,") is not", &
  first,"within",tolerance
       print *, ""
@@ -403,7 +451,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:109]"
+              &[initialisation.fun:121]"
       print *, "  ", "testy (",testy,") is not", &
  first,"within",tolerance
       print *, ""
@@ -426,7 +474,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:110]"
+              &[initialisation.fun:122]"
       print *, "  ", "testz (",testz,") is not", &
  first,"within",tolerance
       print *, ""
@@ -453,7 +501,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:115]"
+              &[initialisation.fun:127]"
       print *, "  ", "testx (",testx,") is not", &
  last,"within",tolerance
       print *, ""
@@ -476,7 +524,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:116]"
+              &[initialisation.fun:128]"
       print *, "  ", "testy (",testy,") is not", &
  first,"within",tolerance
       print *, ""
@@ -499,7 +547,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:117]"
+              &[initialisation.fun:129]"
       print *, "  ", "testz (",testz,") is not", &
  first,"within",tolerance
       print *, ""
@@ -526,7 +574,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:122]"
+              &[initialisation.fun:134]"
       print *, "  ", "testx (",testx,") is not", &
  first,"within",tolerance
       print *, ""
@@ -549,7 +597,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:123]"
+              &[initialisation.fun:135]"
       print *, "  ", "testy (",testy,") is not", &
  last,"within",tolerance
       print *, ""
@@ -572,7 +620,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:124]"
+              &[initialisation.fun:136]"
       print *, "  ", "testz (",testz,") is not", &
  first,"within",tolerance
       print *, ""
@@ -599,7 +647,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:129]"
+              &[initialisation.fun:141]"
       print *, "  ", "testx (",testx,") is not", &
  first,"within",tolerance
       print *, ""
@@ -622,7 +670,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:130]"
+              &[initialisation.fun:142]"
       print *, "  ", "testy (",testy,") is not", &
  first,"within",tolerance
       print *, ""
@@ -645,7 +693,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:131]"
+              &[initialisation.fun:143]"
       print *, "  ", "testz (",testz,") is not", &
  last,"within",tolerance
       print *, ""
@@ -672,7 +720,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:136]"
+              &[initialisation.fun:148]"
       print *, "  ", "testx (",testx,") is not", &
  last,"within",tolerance
       print *, ""
@@ -695,7 +743,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:137]"
+              &[initialisation.fun:149]"
       print *, "  ", "testy (",testy,") is not", &
  last,"within",tolerance
       print *, ""
@@ -718,7 +766,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:138]"
+              &[initialisation.fun:150]"
       print *, "  ", "testz (",testz,") is not", &
  first,"within",tolerance
       print *, ""
@@ -745,7 +793,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:143]"
+              &[initialisation.fun:155]"
       print *, "  ", "testx (",testx,") is not", &
  last,"within",tolerance
       print *, ""
@@ -768,7 +816,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:144]"
+              &[initialisation.fun:156]"
       print *, "  ", "testy (",testy,") is not", &
  first,"within",tolerance
       print *, ""
@@ -791,7 +839,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:145]"
+              &[initialisation.fun:157]"
       print *, "  ", "testz (",testz,") is not", &
  last,"within",tolerance
       print *, ""
@@ -818,7 +866,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:150]"
+              &[initialisation.fun:162]"
       print *, "  ", "testx (",testx,") is not", &
  first,"within",tolerance
       print *, ""
@@ -841,7 +889,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:151]"
+              &[initialisation.fun:163]"
       print *, "  ", "testy (",testy,") is not", &
  last,"within",tolerance
       print *, ""
@@ -864,7 +912,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:152]"
+              &[initialisation.fun:164]"
       print *, "  ", "testz (",testz,") is not", &
  last,"within",tolerance
       print *, ""
@@ -891,7 +939,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:157]"
+              &[initialisation.fun:169]"
       print *, "  ", "testx (",testx,") is not", &
  last,"within",tolerance
       print *, ""
@@ -914,7 +962,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:158]"
+              &[initialisation.fun:170]"
       print *, "  ", "testy (",testy,") is not", &
  last,"within",tolerance
       print *, ""
@@ -937,7 +985,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test fine_grid_values_corners &
-              &[initialisation.fun:159]"
+              &[initialisation.fun:171]"
       print *, "  ", "testz (",testz,") is not", &
  last,"within",tolerance
       print *, ""
@@ -982,7 +1030,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:177]"
+              &[initialisation.fun:189]"
       print *, "  ", "testx (",testx,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1005,7 +1053,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:178]"
+              &[initialisation.fun:190]"
       print *, "  ", "testy (",testy,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1028,7 +1076,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:179]"
+              &[initialisation.fun:191]"
       print *, "  ", "testz (",testz,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1055,7 +1103,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:184]"
+              &[initialisation.fun:196]"
       print *, "  ", "testx (",testx,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1078,7 +1126,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:185]"
+              &[initialisation.fun:197]"
       print *, "  ", "testy (",testy,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1101,7 +1149,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:186]"
+              &[initialisation.fun:198]"
       print *, "  ", "testz (",testz,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1128,7 +1176,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:191]"
+              &[initialisation.fun:203]"
       print *, "  ", "testx (",testx,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1151,7 +1199,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:192]"
+              &[initialisation.fun:204]"
       print *, "  ", "testy (",testy,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1174,7 +1222,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:193]"
+              &[initialisation.fun:205]"
       print *, "  ", "testz (",testz,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1201,7 +1249,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:198]"
+              &[initialisation.fun:210]"
       print *, "  ", "testx (",testx,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1224,7 +1272,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:199]"
+              &[initialisation.fun:211]"
       print *, "  ", "testy (",testy,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1247,7 +1295,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:200]"
+              &[initialisation.fun:212]"
       print *, "  ", "testz (",testz,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1274,7 +1322,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:205]"
+              &[initialisation.fun:217]"
       print *, "  ", "testx (",testx,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1297,7 +1345,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:206]"
+              &[initialisation.fun:218]"
       print *, "  ", "testy (",testy,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1320,7 +1368,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:207]"
+              &[initialisation.fun:219]"
       print *, "  ", "testz (",testz,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1347,7 +1395,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:212]"
+              &[initialisation.fun:224]"
       print *, "  ", "testx (",testx,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1370,7 +1418,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:213]"
+              &[initialisation.fun:225]"
       print *, "  ", "testy (",testy,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1393,7 +1441,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:214]"
+              &[initialisation.fun:226]"
       print *, "  ", "testz (",testz,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1420,7 +1468,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:219]"
+              &[initialisation.fun:231]"
       print *, "  ", "testx (",testx,") is not", &
  first,"within",tolerance
       print *, ""
@@ -1443,7 +1491,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:220]"
+              &[initialisation.fun:232]"
       print *, "  ", "testy (",testy,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1466,7 +1514,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:221]"
+              &[initialisation.fun:233]"
       print *, "  ", "testz (",testz,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1493,7 +1541,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testx) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:226]"
+              &[initialisation.fun:238]"
       print *, "  ", "testx (",testx,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1516,7 +1564,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testy) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:227]"
+              &[initialisation.fun:239]"
       print *, "  ", "testy (",testy,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1539,7 +1587,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
      .le. &
      (testz) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_grid_values_corners &
-              &[initialisation.fun:228]"
+              &[initialisation.fun:240]"
       print *, "  ", "testz (",testz,") is not", &
  last,"within",tolerance
       print *, ""
@@ -1584,7 +1632,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (npwrong) then
       print *, " *Assert_False failed* in test assigncell_maps &
-              &[initialisation.fun:254]"
+              &[initialisation.fun:266]"
       print *, "  ", "npwrong is not false"
       print *, ""
       noAssertFailed = .false.
@@ -1614,7 +1662,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(testcell==8)) then
       print *, " *Assert_Equal failed* in test assigncell_specific_fine_points &
-              &[initialisation.fun:266]"
+              &[initialisation.fun:278]"
       print *, "  ", "testcell (",testcell,") is not", 8
       print *, ""
       noAssertFailed = .false.
@@ -1629,7 +1677,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(testcell==1)) then
       print *, " *Assert_Equal failed* in test assigncell_specific_fine_points &
-              &[initialisation.fun:268]"
+              &[initialisation.fun:280]"
       print *, "  ", "testcell (",testcell,") is not", 1
       print *, ""
       noAssertFailed = .false.
@@ -1644,7 +1692,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(testcell==5)) then
       print *, " *Assert_Equal failed* in test assigncell_specific_fine_points &
-              &[initialisation.fun:270]"
+              &[initialisation.fun:282]"
       print *, "  ", "testcell (",testcell,") is not", 5
       print *, ""
       noAssertFailed = .false.
@@ -1659,7 +1707,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(testcell==7)) then
       print *, " *Assert_Equal failed* in test assigncell_specific_fine_points &
-              &[initialisation.fun:272]"
+              &[initialisation.fun:284]"
       print *, "  ", "testcell (",testcell,") is not", 7
       print *, ""
       noAssertFailed = .false.
@@ -1674,7 +1722,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (.not.(testcell==8)) then
       print *, " *Assert_Equal failed* in test assigncell_specific_fine_points &
-              &[initialisation.fun:274]"
+              &[initialisation.fun:286]"
       print *, "  ", "testcell (",testcell,") is not", 8
       print *, ""
       noAssertFailed = .false.
@@ -1716,7 +1764,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test assign_coarse_labels &
-              &[initialisation.fun:298]"
+              &[initialisation.fun:310]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -1756,7 +1804,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_points_reals_are_numbers &
-              &[initialisation.fun:320]"
+              &[initialisation.fun:332]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -1782,7 +1830,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_points_reals_are_numbers &
-              &[initialisation.fun:333]"
+              &[initialisation.fun:345]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -1808,7 +1856,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_points_reals_are_numbers &
-              &[initialisation.fun:346]"
+              &[initialisation.fun:358]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -1834,7 +1882,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_points_reals_are_numbers &
-              &[initialisation.fun:359]"
+              &[initialisation.fun:371]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -1860,7 +1908,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_points_reals_are_numbers &
-              &[initialisation.fun:372]"
+              &[initialisation.fun:384]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -1887,7 +1935,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_points_reals_are_numbers &
-              &[initialisation.fun:386]"
+              &[initialisation.fun:398]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -1930,7 +1978,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_grid_kx_within_range &
-              &[initialisation.fun:411]"
+              &[initialisation.fun:423]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -1957,7 +2005,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_grid_kx_within_range &
-              &[initialisation.fun:425]"
+              &[initialisation.fun:437]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2000,7 +2048,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_grid_ky_within_range &
-              &[initialisation.fun:450]"
+              &[initialisation.fun:462]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2027,7 +2075,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_grid_ky_within_range &
-              &[initialisation.fun:464]"
+              &[initialisation.fun:476]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2070,7 +2118,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_grid_kz_within_range &
-              &[initialisation.fun:489]"
+              &[initialisation.fun:501]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2097,7 +2145,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_grid_kz_within_range &
-              &[initialisation.fun:503]"
+              &[initialisation.fun:515]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2140,7 +2188,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_grid_knorm_within_range &
-              &[initialisation.fun:528]"
+              &[initialisation.fun:540]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2167,7 +2215,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test fine_grid_knorm_within_range &
-              &[initialisation.fun:542]"
+              &[initialisation.fun:554]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2207,7 +2255,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_points_reals_are_numbers &
-              &[initialisation.fun:564]"
+              &[initialisation.fun:576]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2233,7 +2281,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_points_reals_are_numbers &
-              &[initialisation.fun:577]"
+              &[initialisation.fun:589]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2259,7 +2307,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_points_reals_are_numbers &
-              &[initialisation.fun:590]"
+              &[initialisation.fun:602]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2285,7 +2333,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_points_reals_are_numbers &
-              &[initialisation.fun:603]"
+              &[initialisation.fun:615]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2311,7 +2359,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_points_reals_are_numbers &
-              &[initialisation.fun:616]"
+              &[initialisation.fun:628]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2338,7 +2386,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_points_reals_are_numbers &
-              &[initialisation.fun:630]"
+              &[initialisation.fun:642]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2381,7 +2429,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_grid_kx_within_range &
-              &[initialisation.fun:655]"
+              &[initialisation.fun:667]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2408,7 +2456,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_grid_kx_within_range &
-              &[initialisation.fun:669]"
+              &[initialisation.fun:681]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2451,7 +2499,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_grid_ky_within_range &
-              &[initialisation.fun:694]"
+              &[initialisation.fun:706]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2478,7 +2526,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_grid_ky_within_range &
-              &[initialisation.fun:708]"
+              &[initialisation.fun:720]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2521,7 +2569,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_grid_kz_within_range &
-              &[initialisation.fun:733]"
+              &[initialisation.fun:745]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2548,7 +2596,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_grid_kz_within_range &
-              &[initialisation.fun:747]"
+              &[initialisation.fun:759]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2591,7 +2639,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_grid_knorm_within_range &
-              &[initialisation.fun:772]"
+              &[initialisation.fun:784]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2618,7 +2666,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   if (noAssertFailed) then
     if (problem) then
       print *, " *Assert_False failed* in test Coarse_grid_knorm_within_range &
-              &[initialisation.fun:786]"
+              &[initialisation.fun:798]"
       print *, "  ", "problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -2666,6 +2714,14 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
 
   call funit_setup
   call odd_finegrid_ierr
+  call funit_teardown
+
+  call funit_setup
+  call not_allocatated_fine_grid_ierr
+  call funit_teardown
+
+  call funit_setup
+  call not_allocatated_coarse_grid_ierr
   call funit_teardown
 
   call funit_setup
