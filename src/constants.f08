@@ -1,6 +1,6 @@
 module constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  use,intrinsic :: iso_fortran_env
+  use, intrinsic :: iso_fortran_env
   implicit none
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! numerical constants
@@ -13,6 +13,7 @@ module constants
   real(real12), parameter, public :: three = 3.0_real12
   real(real12), parameter, public :: pi = two*acos(zero)
   real(real12), parameter, public :: cmplx_zero = (zero, zero)
+  real(real12), parameter, public :: tolerance = epsilon(zero)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! character/other constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
