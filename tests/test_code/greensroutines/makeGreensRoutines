@@ -1,0 +1,26 @@
+
+# makefile to compile TestRunner.f90
+#
+# funit generated this file on 2019-11-07 18:25:47 +0000.
+
+OBJ=greensroutines_fun.o constants.o definedtypes.o greensroutines.o TestGreensRoutines.o
+LDFLAGS= -lstdc++
+
+SRC=../../../src
+
+all:TestGreensRoutines
+
+TestGreensRoutines: $(OBJ)
+	gfortran-9   -o TestGreensRoutines.x $(OBJ) $(LDFLAGS)
+
+TestGreensRoutines.o: TestGreensRoutines.f08 greensroutines_fun.o 
+	(cd .; gfortran-9  -I. -c TestGreensRoutines.f08)
+greensroutines_fun.o: greensroutines_fun.f08 constants.o definedtypes.o greensroutines.o 
+	(cd .; gfortran-9  -I. -c greensroutines_fun.f08)
+constants.o: $(SRC)/constants.f08  
+	(cd .; gfortran-9  -I. -c $(SRC)/constants.f08)
+definedtypes.o: $(SRC)/definedtypes.f08 constants.o 
+	(cd .; gfortran-9  -I. -c $(SRC)/definedtypes.f08)
+greensroutines.o: $(SRC)/greensroutines.f08 constants.o definedtypes.o 
+	(cd .; gfortran-9  -I. -c $(SRC)/greensroutines.f08)
+  

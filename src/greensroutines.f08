@@ -1,16 +1,15 @@
 module greensroutines
 
-  use constants, only: real12, one, cmplx_zero
-  use definedtypes, only: greensfunc
-  private
+  use constants, only: real12, one, cmplx_zero, tolerance
+  use definedtypes, only: greensfunc, kappagrid
   implicit none
   private
   public allocateGF,  calculateGF
 
 contains
 
-  elemental subroutine allocateGF(GFvariable, xsize, ysize, zsize, nomega, ierr)
-    type(greensfunc), allocatable, intent(inout) :: GFvariable
+  subroutine allocateGF(GFvariable, xsize, ysize, zsize, nomega, ierr)
+    type(greensfunc), allocatable, intent(inout) :: GFvariable(:, :, :)
     integer, intent(in)                          :: xsize
     integer, intent(in)                          :: ysize
     integer, intent(in)                          :: zsize
@@ -40,7 +39,7 @@ contains
 
   end subroutine allocateGF
 
-  elemental subroutine allocateGF(GFval, deltaw, dispersion, hybridisation,&
+  subroutine calculateGF(GFval, deltaw, dispersion, hybridisation,&
        ierr)
     type(greensfunc), intent(inout)              :: GFval(:, :, :)
     complex(real12), intent(in)                  :: deltaw
@@ -48,7 +47,7 @@ contains
     type(greensfunc), intent(in), optional       :: hybridisation(:, :, :)
     integer, intent(out)                         :: ierr
 
-    integer :: i, j, k
+    integer :: i, j, k, l
     integer :: xsize, ysize, zsize, nomega
     complex(real12) :: work
 
@@ -64,25 +63,27 @@ contains
           do k = 1, zsize
              do l = 1, nomega
                 test_optional_variable:if (present(hybridisation)) then
-                   work = -hybridisation(i, j, k)%GF
+                   work = -hybridisation(i, j, k)%GF(l)
                 else
                    work = cmplx_zero
                 endif test_optional_variable
              
-                work = work + real(l**2, real12) * omega_diff * omega_diff&
+                work = work + real(l**2, real12) * deltaw * deltaw&
                      - dispersion(i, j, k)%omega2
                 
                 check_div_by_zero:if ((abs(real(work)).lt.tolerance)&
-                     .or.(abs(aimag(work).lt.tolerance))) then
+                     .and.(abs(aimag(work)).lt.tolerance)) then
                    ierr = 1
                    return
                 end if check_div_by_zero
                 
-                GFval(i, j, k)%GF(l) = work
+                GFval(i, j, k)%GF(l) = one/work
              enddo
           enddo
        end do
     end do
 
-    deallocate(work)
-  end subroutine allocateGF
+    
+  end subroutine calculateGF
+
+end module greensroutines

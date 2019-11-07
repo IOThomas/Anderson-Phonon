@@ -209,7 +209,7 @@ contains
     type(settingparam), intent(inout)           :: settings
     type(finegrid), allocatable, intent(in)     :: kgridFine(:,:,:)
     type(storedparam), intent(inout)            :: stored
-    type(greensfunc),allocatable, intent(inout) :: Dzero(:,:,:,:)
+    type(greensfunc),allocatable, intent(inout) :: Dzero(:,:,:)
     integer                                     :: ierr
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
@@ -249,11 +249,18 @@ contains
     omega_diff = (settings%omegaMax - settings%omegaMin) / real(nomega, real12)
     stored%omega_diff=omega_diff
     
-    allocate(Dzero(nfpoints(1), nfpoints(2), nfpoints(3), nomega))
+    allocate(Dzero(nfpoints(1), nfpoints(2), nfpoints(3)))
+    do i = 1, nfpoints(1)
+       do j = 1, nfpoints(2)
+          do k = 1,nfpoints(3))
+             allocate(Dzero(i, j, k)%GF(nomega))
+          end do
+       end do
+    end do
     
     forall (i = 1:nfpoints(1), j = 1:nfpoints(2), k = 1:nfpoints(3), &
          l = 1:nomega)
-       Dzero(i, j, k, l)%GF = one/(real(l**2,real12)*omega_diff*omega_diff&
+       Dzero(i, j, k)%GF(l) = one/(real(l**2,real12)*omega_diff*omega_diff&
             - kgridFine(i, j, k)%omega2) ! assumes diagonal matrix
        Dzero(i, j, k, l)%map = kgridFine(i, j, k)%coarseMap
     end forall
