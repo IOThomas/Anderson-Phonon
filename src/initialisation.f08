@@ -4,8 +4,8 @@ module initialisation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   use constants, only: real12, pi, half, two, zero, one, cmplx_zero
   use dispersions, only: finedispersion, coarseDispersion
-  use definedtypes, only: settingparam, finegrid, coarsegrid, storedparam,&
-       greensfunc
+  use definedtypes, only: settingparam, kappagrid, storedparam
+  use greensroutines, only: allocateGF,  calculateGF, greensfunc
   implicit none
   private
   public initGrid, initDzero, initHybrid
@@ -25,8 +25,8 @@ contains
 !              ierr=3: kgridFine or kgridCoarse already allocated    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(settingparam), intent(in)               :: settings
-    type(finegrid), allocatable, intent(inout)   :: kgridFine(:,:,:)
-    type(coarsegrid), allocatable, intent(inout) :: kgridCoarse(:,:,:)
+    type(kappagrid), allocatable, intent(inout)  :: kgridFine(:,:,:)
+    type(kappagrid), allocatable, intent(inout)  :: kgridCoarse(:,:,:)
     integer                                      :: ierr
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
@@ -98,7 +98,7 @@ contains
              kgridCoarse(ix, iy, iz)%ky = ky
              kgridCoarse(ix, iy, iz)%kz = kz
              kgridCoarse(ix, iy, iz)%norm = sqrt(kx * kx + ky * ky + kz * kz)
-             kgridCoarse(ix, iy, iz)%label = ix + (iy -1 ) * itemp(1)&
+             kgridCoarse(ix, iy, iz)%map = ix + (iy -1 ) * itemp(1)&
                   + (iz - 1) * itemp(1) * itemp(2)
           enddo
        enddo
@@ -126,7 +126,7 @@ contains
                   (kgridFine%kz >= lowLim(3)).and.&
                   (kgridFine%kz < upperLim(3)))
 
-                kgridFine%coarsemap = kgridCoarse(ix, iy, iz)%label
+                kgridFine%map = kgridCoarse(ix, iy, iz)%map
                 tempArray = kgridFine%omega2
              end where
              kgridCoarse(ix, iy, iz)%omega2 = &
@@ -147,7 +147,7 @@ contains
              write(10, fmt=800) ix, iy, iz, kgridFine(ix, iy, iz)%kx, &
                   kgridFine(ix, iy, iz)%ky, kgridFine(ix, iy, iz)%kz,&
                   kgridFine(ix, iy, iz)%norm,&
-                  kgridFine(ix, iy, iz)%omega2, kgridFine(ix, iy, iz)%coarsemap
+                  kgridFine(ix, iy, iz)%omega2, kgridFine(ix, iy, iz)%map
           enddo
        enddo
     enddo
@@ -163,7 +163,7 @@ contains
              write(10, fmt=800) ix, iy, iz, kgridCoarse(ix, iy, iz)%kx, &
                   kgridCoarse(ix, iy, iz)%ky, kgridCoarse(ix, iy, iz)%kz,&
                   kgridCoarse(ix, iy, iz)%norm,&
-                  kgridCoarse(ix, iy, iz)%omega2,kgridCoarse(ix, iy, iz)%label
+                  kgridCoarse(ix, iy, iz)%omega2,kgridCoarse(ix, iy, iz)%map
           enddo
        enddo
     enddo
@@ -207,7 +207,7 @@ contains
 !              ierr = 4 -- Dzero already allocated  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(settingparam), intent(inout)           :: settings
-    type(finegrid), allocatable, intent(in)     :: kgridFine(:,:,:)
+    type(kappagrid), allocatable, intent(in)    :: kgridFine(:,:,:)
     type(storedparam), intent(inout)            :: stored
     type(greensfunc),allocatable, intent(inout) :: Dzero(:,:,:)
     integer                                     :: ierr
@@ -262,7 +262,7 @@ contains
          l = 1:nomega)
        Dzero(i, j, k)%GF(l) = one/(real(l**2,real12)*omega_diff*omega_diff&
             - kgridFine(i, j, k)%omega2) ! assumes diagonal matrix
-       Dzero(i, j, k, l)%map = kgridFine(i, j, k)%coarseMap
+       Dzero(i, j, k, l)%map = kgridFine(i, j, k)%map
     end forall
     
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -280,7 +280,7 @@ contains
 !              ierr = 3 -- Gzero already allocated    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(storedparam), intent(in)                :: stored
-    type(coarsegrid), allocatable, intent(in)    :: kgridCoarse(:, :, :)
+    type(kappagrid), allocatable, intent(in)     :: kgridCoarse(:, :, :)
     type(greensfunc), allocatable, intent(in)    :: Dzero(:, :, :, :)
     type(greensfunc), allocatable, intent(inout) :: Gzero(:, :, :, :)
     integer, intent(out)                         :: ierr
@@ -328,7 +328,7 @@ contains
     allocate(work1(nxfin, nyfin, nzfin, nw2))
     
     forall (i = 1:nw2)
-       Gzero(1:nx, 1:ny, 1:nz, i)%map=kgridCoarse(1:nx, 1:ny, 1:nz)%label
+       Gzero(1:nx, 1:ny, 1:nz, i)%map=kgridCoarse(1:nx, 1:ny, 1:nz)%map
     end forall
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! calculate Gzero
@@ -340,7 +340,7 @@ contains
                 forall(ifi=1:nxfin, jf=1:nyfin, kf=1:nzfin, lf=1:nw2)
                    work1(ifi, jf, kf, lf) = Dzero(ifi, jf, kf, lf)%GF
                 end forall
-                where (Dzero%map /= kgridCoarse(i, j, k)%label)
+                where (Dzero%map /= kgridCoarse(i, j, k)%map)
                    work1 = cmplx_zero
                 endwhere
                 work(i,j,k,l) = sum(work1(1:nxfin, 1:nyfin, 1:nzfin, l))
