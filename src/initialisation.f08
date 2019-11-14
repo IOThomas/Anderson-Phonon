@@ -204,7 +204,8 @@ contains
 !              ierr = 1 -- settings%nfpoints or settings%nomega less than one  
 !              ierr = 2 -- settings%omegamax less than settings%omegamin
 !              ierr = 3 -- kgridFine not allocated
-!              ierr = 4 -- Dzero already allocated  
+!              ierr = 4 -- Dzero already allocated
+!              ierr = 5 -- Division by zero when calculating Dzero%GF    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(settingparam), intent(inout)           :: settings
     type(kappagrid), allocatable, intent(in)    :: kgridFine(:,:,:)
@@ -218,6 +219,7 @@ contains
     integer         :: nfpoints(3)
     integer         :: nomega
     integer         :: icond(3)
+    integer         :: ier1
     complex(real12) :: omega_diff
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! get number of fine grid and omega points
@@ -249,21 +251,30 @@ contains
     omega_diff = (settings%omegaMax - settings%omegaMin) / real(nomega, real12)
     stored%omega_diff=omega_diff
     
-    allocate(Dzero(nfpoints(1), nfpoints(2), nfpoints(3)))
-    do i = 1, nfpoints(1)
-       do j = 1, nfpoints(2)
-          do k = 1,nfpoints(3))
-             allocate(Dzero(i, j, k)%GF(nomega))
-          end do
-       end do
-    end do
+    call allocateGF(Dzero, nfpoints(1), nfpoints(2), nfpoints(3), nomega, ier1)
+    allocation_error: select case(ier1)
+    case(1)
+       write(*, *) "Error in allocateGF in initDzero: array dimension < 1."
+       ierr = 1
+       return
+    case(2)
+       write(*, *) "Error in allocateDF in initDzero: Dzero already allocated."
+       ierr = 2
+       return
+    case default
+       continue
+    end select allocation_error
     
-    forall (i = 1:nfpoints(1), j = 1:nfpoints(2), k = 1:nfpoints(3), &
-         l = 1:nomega)
-       Dzero(i, j, k)%GF(l) = one/(real(l**2,real12)*omega_diff*omega_diff&
-            - kgridFine(i, j, k)%omega2) ! assumes diagonal matrix
-       Dzero(i, j, k, l)%map = kgridFine(i, j, k)%map
-    end forall
+    call calculateGF(GFval = Dzero, deltaw = omega_diff, &
+         dispersion = kgridFine, ierr = ier1)
+    divbyzero_error: select case(ier1)
+    case(1)
+       write(*,*) "Error in calculateGF in initDzero: division by zero."
+       ierr = 5
+       return
+    case default
+       continue
+    end select divbyzero_error
     
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   end subroutine initDzero
@@ -281,19 +292,20 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(storedparam), intent(in)                :: stored
     type(kappagrid), allocatable, intent(in)     :: kgridCoarse(:, :, :)
-    type(greensfunc), allocatable, intent(in)    :: Dzero(:, :, :, :)
-    type(greensfunc), allocatable, intent(inout) :: Gzero(:, :, :, :)
+    type(greensfunc), allocatable, intent(in)    :: Dzero(:, :, :)
+    type(greensfunc), allocatable, intent(inout) :: Gzero(:, :, :)
     integer, intent(out)                         :: ierr
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    integer                      :: nx, ny, nz, nw2
-    integer                      :: nxfin, nyfin, nzfin
-    integer                      :: i, j, k, l
-    integer                      :: ifi, jf, kf, lf
-    integer                      :: imap
-    complex(real12)              :: omega_diff
-    complex(real12), allocatable :: work(:, :, :, :), work1(:, :, :, :)
+    integer                       :: nx, ny, nz, nw2
+    integer                       :: nxfin, nyfin, nzfin
+    integer                       :: i, j, k, l
+    integer                       :: ifi, jf, kf, lf
+    integer                       :: imap
+    integer                       :: ier1
+    complex(real12)               :: omega_diff
+    type(greensfunc), allocatable :: work(:, :, :, :), work1(:, :, :, :)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     omega_diff = stored%omega_diff
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -321,29 +333,32 @@ contains
     nxfin = size(Dzero, 1)
     nyfin = size(Dzero, 2)
     nzfin = size(Dzero, 3)
-    nw2 = size(Dzero, 4)
+    nw2 = size(Dzero(1, 1, 1)%GF, 1)
     
-    allocate(Gzero(nx, ny, nz, nw2))
-    allocate(work(nx, ny, nz, nw2))
-    allocate(work1(nxfin, nyfin, nzfin, nw2))
+    call allocateGF(Gzero, nx, ny, nz, nw2, ier1)
+    call allocateGF(work, nx, ny, nz, ier1)
+    call allocateGF(work1, nxfin, nyfin, nzfin, nw2, ier1)
+    ! error handling code here
     
-    forall (i = 1:nw2)
+    assign_coarselabel: forall (i = 1:nw2)
        Gzero(1:nx, 1:ny, 1:nz, i)%map=kgridCoarse(1:nx, 1:ny, 1:nz)%map
-    end forall
+    end forall assign_coarselabel
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! calculate Gzero
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+! the calculation of work needs to be promoted to a greensroutine subroutine,
+! as we'll use it a lot (also makes handling div by zero issues easier)
     do l = 1, nw2
        do k = 1, nz
           do j = 1, ny
              do i = 1, nx
                 forall(ifi=1:nxfin, jf=1:nyfin, kf=1:nzfin, lf=1:nw2)
-                   work1(ifi, jf, kf, lf) = Dzero(ifi, jf, kf, lf)%GF
+                   work1(ifi, jf, kf)%GF(lf) = Dzero(ifi, jf, kf)%GF(lf)
                 end forall
                 where (Dzero%map /= kgridCoarse(i, j, k)%map)
-                   work1 = cmplx_zero
+                   work1%GF = cmplx_zero
                 endwhere
-                work(i,j,k,l) = sum(work1(1:nxfin, 1:nyfin, 1:nzfin, l))
+                work(i,j,k)%GF(l) = sum(work1(1:nxfin, 1:nyfin, 1:nzfin)%GF(l))
              enddo
           enddo
        enddo
