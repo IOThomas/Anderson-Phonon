@@ -114,6 +114,102 @@ contains
        end do
     end do loop_over_all_points
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      end subroutine calculateGF
+  end subroutine calculateGF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  subroutine reduceGF(coarseGF, fineGF, coarsegrid, ierr)
+    type(greensfunc), intent(inout) :: coarseGF(:, :, :)
+    type(greensfunc), intent(in)    :: fineGF(:, :, :)
+    type(kappagrid), intent(in)     :: coarsegrid(:, :, :)
+    integer, intent(out) :: ierr
+
+    integer :: ncx, ncy, ncz
+    integer :: nfx, nfy, nfz
+    integer :: i, j, k, l, site_count
+    integer :: nomega, ier1
+    complex(real12) :: work
+    type(greensfunc), allocatable :: workGFF(:, :, :)
+
+    ncx = size(coarseGF, 1)
+    ncy = size(coarseGF, 2)
+    ncz = size(coarseGF, 3)
+
+    nfx = size(fineGF, 1)
+    nfy = size(fineGF, 2)
+    nfz = size(fineGF, 3)
+
+    nomega = size(fineGF(1,1,1)%GF, 1)
+
+    call allocateGF(workGFF, nfx, nfy, nfz, nomega, ier1)
+    ! error handling code here
+    call copymap(workGFF, fineGF)
+    call copyGF(workGFF, fineGF)
+    
+    do i = 1, ncx
+       do j = 1, ncy
+          do k = 1, ncz
+             site_count = i + (j - 1)*ncx + (k - 1)*ncx*ncy
+             coarseGF(i, j, k) = sumfineGF(workGFF, site_count)
+          enddo
+       enddo
+    enddo
+
+  contains
+
+    function sumfineGF(work, isite)
+      type(greensfunc) :: sumfineGF
+      type(greensfunc) :: work (:, :, :)
+      integer, intent(in):: isite
+      
+      integer :: fx, fy, fz, fl, imap
+
+      sumfineGF%map= isite
+
+      do fl = 1, nomega
+         sumfineGF%GF(fl) = cmplx_zero
+         do fx = 1, nfx
+            do fy = 1, nfy
+               do fz = 1, nfz
+                  if (sumfineGF%map == work(fx, fy, fz)%map) then
+                     sumfineGF%GF(fl) = sumfineGF%GF(fl) &
+                          + work(fx, fy, fz)%GF(fl)
+                  endif
+               enddo
+            enddo
+         enddo
+      end do
+    end function sumfineGF
+      
+
+  end subroutine reduceGF
+
+  elemental subroutine invertGF(GF, ierr)
+    type(greensfunc), intent(inout) :: GF
+    integer, intent(out)                :: ierr
+
+    check_div_by_zero:if ((any(abs(GF%GF).lt.tolerance))&
+         .and.(any(abs(aimag(GF%GF)).lt.tolerance))) then
+       ierr = 1
+       return
+    end if check_div_by_zero
+
+    GF%GF = one/GF%GF
+  end subroutine invertGF
+
+  
+  elemental subroutine copymap(copy, original)
+    type(greensfunc), intent(inout) :: copy
+    type(greensfunc), intent(in)  :: original
+
+    copy%map = original%map
+  end subroutine copymap
+
+  elemental subroutine copyGF(copy, original)
+    type(greensfunc), intent(inout) :: copy
+    type(greensfunc), intent(in)  :: original
+
+    copy%GF = original%GF
+  end subroutine copyGF
+    
 end module greensroutines
