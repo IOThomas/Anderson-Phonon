@@ -4,7 +4,9 @@ module greensroutines
   use definedtypes, only: kappagrid
   implicit none
   private
-  public allocateGF,  calculateGF, greensfunc
+  public allocateGF,  calculateGF, greensfunc, copymap, copyGF, invertGF,&
+       reduceGF
+       
 
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -188,7 +190,7 @@ contains
     type(greensfunc), intent(inout) :: GF
     integer, intent(out)                :: ierr
 
-    check_div_by_zero:if ((any(abs(GF%GF).lt.tolerance))&
+    check_div_by_zero:if ((any(abs(real(GF%GF)).lt.tolerance))&
          .and.(any(abs(aimag(GF%GF)).lt.tolerance))) then
        ierr = 1
        return

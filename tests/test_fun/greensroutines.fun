@@ -238,4 +238,146 @@ test calculateGF_divbyzero
 
 end test
 
+test GF_copying 
+     type(greensfunc), allocatable :: original(:, :, :)
+     type(greensfunc), allocatable :: copy(:, :, :)
+     integer, parameter            :: arraysize = 2
+     integer, parameter            :: testmap = 2
+     real(real12), parameter       :: testGF = two
+     integer                       :: i, j, k, l, ierr
+     logical                       :: copymap_prob = .false.
+     logical                       :: copyGF_prob = .false.
+
+     call allocateGF(original, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+     assert_equal(ierr, 0)
+
+     call allocateGF(copy, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+     assert_equal(ierr, 0)
+
+     
+     do i = 1, arraysize
+     	do j = 1, arraysize
+	   do k = 1, arraysize
+	      original(i, j, k)%map = testmap
+	      do l = 1, arraysize
+		 original(i, j, k)%GF(l) = cmplx(testGF, testGF)
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     call copymap(copy, original)
+     call copyGF(copy, original)
+
+     
+     do i = 1, arraysize
+        if (copyGF_prob.and.copymap_prob) exit
+     	do j = 1, arraysize
+	   if (copyGF_prob.and.copymap_prob) exit
+	   do k = 1, arraysize
+	      if (copyGF_prob.and.copymap_prob) exit
+	      if (original(i, j, k)%map /= testmap) copymap_prob = .true.
+	      do l = 1, arraysize
+	         if (copyGF_prob.and.copymap_prob) exit
+		 if (real(original(i, j, k)%GF(l)) /= testGF) &
+		     copyGF_prob = .true.
+		 if (aimag(original(i, j, k)%GF(l)) /= testGF) &
+		     copyGF_prob = .true.
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     assert_false(copyGF_prob)
+     assert_false(copymap_prob)
+     deallocate(original, copy)
+end test
+
+test GF_invert
+     type(greensfunc), allocatable :: test(:, :, :)
+     integer, parameter            :: arraysize = 2
+     integer, parameter            :: testmap = 2
+     real(real12), parameter       :: testGF = two
+     real(real12), parameter       :: GFans = 0.5_real12
+     integer                       :: i, j, k, l, ierr
+     integer, allocatable          :: ierr1(:, :, :)
+     logical                       :: invertGF_prob = .false.
+
+     call allocateGF(test, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+     assert_equal(ierr, 0)
+
+     allocate(ierr1(arraysize, arraysize, arraysize))
+     
+     do i = 1, arraysize
+     	do j = 1, arraysize
+	   do k = 1, arraysize
+	      test(i, j, k)%map = testmap
+	      do l = 1, arraysize
+		 test(i, j, k)%GF(l) = cmplx(testGF, zero)
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     call invertGF(test, ierr1)
+     assert_true(all(ierr1 ==  0))
+     
+     do i = 1, arraysize
+        if (invertGF_prob) exit
+     	do j = 1, arraysize
+	   if (invertGF_prob) exit
+	   do k = 1, arraysize
+	      if (invertGF_prob) exit
+              do l = 1, arraysize
+	      	 if (invertGF_prob) exit
+		 if (real(test(i, j, k)%GF(l)) /= GFans) &
+		     invertGF_prob = .true.
+		 if (aimag(test(i, j, k)%GF(l)) /= zero) &
+		     invertGF_prob = .true.
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     assert_false(invertGF_prob)
+     
+     deallocate(test,ierr1)
+end test
+
+test GFinvert_ierr_divby0
+     type(greensfunc), allocatable :: test(:, :, :)
+     integer, parameter            :: arraysize = 2
+     integer, parameter            :: testmap = 2
+     real(real12), parameter       :: testGF = two
+     integer                       :: i, j, k, l, ierr
+     integer, allocatable          :: ierr_invertGF(:, :, :)
+
+     call allocateGF(test, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+     assert_equal(ierr, 0)
+
+     allocate(ierr_invertGF(arraysize, arraysize, arraysize))
+     
+     do i = 1, arraysize
+     	do j = 1, arraysize
+	   do k = 1, arraysize
+	      test(i, j, k)%map = testmap
+	      do l = 1, arraysize
+		 test(i, j, k)%GF(l) = cmplx(testGF, zero)
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     test(2, 1, 1)%GF(2) = zero
+
+     call invertGF(test, ierr_invertGF)
+     assert_true(any(ierr_invertGF == 1))
+
+     deallocate(test)
+end test
+
 end test_suite
