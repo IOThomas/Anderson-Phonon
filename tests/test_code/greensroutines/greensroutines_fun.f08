@@ -756,6 +756,125 @@ module greensroutines_fun
  end subroutine GFinvert_ierr_divby0
 
 
+ subroutine GF_reduction
+
+     type(greensfunc), allocatable :: coarse(:, :, :)
+     type(greensfunc), allocatable :: fine(:, :, :)
+     integer, parameter            :: coarse_size = 2
+     integer, parameter            :: fine_size = 4
+     integer, parameter            :: nomega = 2
+     real(real12), parameter       :: test_input = one
+     real(real12), parameter       :: test_output = 8.0_real12
+     integer                       :: i, j, k, l, ierr
+     integer                       :: ic, jc, kc
+     logical                       :: reduce_problem = .false.
+
+     call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
+         ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr== 0)) then
+      print *, " *Assert_Equal failed* in test GF_reduction &
+              &[greensroutines.fun:397]"
+      print *, "  ", "ierr (",ierr,") is not",  0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr== 0)) then
+      print *, " *Assert_Equal failed* in test GF_reduction &
+              &[greensroutines.fun:400]"
+      print *, "  ", "ierr (",ierr,") is not",  0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     do i = 1, fine_size
+     	do j = 1, fine_size
+	   do k = 1, fine_size
+	      ic = nint(real(i)/two)
+	      jc = nint(real(j)/two)
+	      kc = nint(real(k)/two)
+	      fine(i , j , k)%map = ic + (jc - 1)*coarse_size &
+	          + (kc - 1)*coarse_size*coarse_size
+	      do l = 1, nomega
+	      	 fine(i, j, k)%GF(l) = cmplx(one, one)
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     call reduceGF(coarse, fine, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr== 0)) then
+      print *, " *Assert_Equal failed* in test GF_reduction &
+              &[greensroutines.fun:418]"
+      print *, "  ", "ierr (",ierr,") is not",  0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     do i = 1, coarse_size
+     	if (reduce_problem) exit
+     	do j = 1, coarse_size
+	   if (reduce_problem) exit
+	   do k = 1, coarse_size
+	      if (reduce_problem) exit
+	      do l = 1, nomega
+	      	 if (reduce_problem) exit
+		 if (real(coarse(i, j, k)%GF(l)).ne.test_output) then
+		    reduce_problem = .true. 
+		    exit
+		 endif
+		 if (aimag(coarse(i, j, k)%GF(l)).ne.test_output) then
+		    reduce_problem = .true.
+		    exit
+		 endif
+	      enddo
+	   enddo
+        enddo
+     enddo
+
+  ! Assert_False assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (reduce_problem) then
+      print *, " *Assert_False failed* in test GF_reduction &
+              &[greensroutines.fun:441]"
+      print *, "  ", "reduce_problem is not false"
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+
+  numTests = numTests + 1
+
+ end subroutine GF_reduction
+
+
  subroutine funit_setup
 
   noAssertFailed = .true.
@@ -810,6 +929,10 @@ module greensroutines_fun
 
   call funit_setup
   call GFinvert_ierr_divby0
+  call funit_teardown
+
+  call funit_setup
+  call GF_reduction
   call funit_teardown
 
   nTests          = numTests

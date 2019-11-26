@@ -132,6 +132,7 @@ contains
     complex(real12) :: work
     type(greensfunc), allocatable :: workGFF(:, :, :)
 
+
     ierr = 0
     
     ncx = size(coarseGF, 1)
@@ -162,13 +163,16 @@ contains
 
     function sumfineGF(work, isite)
       type(greensfunc) :: sumfineGF
-      type(greensfunc) :: work (:, :, :)
+      type(greensfunc), intent(in) :: work (:, :, :)
       integer, intent(in):: isite
       
       integer :: fx, fy, fz, fl, imap
 
+
       sumfineGF%map= isite
 
+      allocate(sumfineGF%GF(nomega))
+      
       do fl = 1, nomega
          sumfineGF%GF(fl) = cmplx_zero
          do fx = 1, nfx
@@ -182,9 +186,10 @@ contains
             enddo
          enddo
       end do
+
     end function sumfineGF
       
-
+    
   end subroutine reduceGF
 
   elemental subroutine invertGF(GF, ierr)

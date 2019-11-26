@@ -380,4 +380,66 @@ test GFinvert_ierr_divby0
      deallocate(test)
 end test
 
+test GF_reduction
+     type(greensfunc), allocatable :: coarse(:, :, :)
+     type(greensfunc), allocatable :: fine(:, :, :)
+     integer, parameter            :: coarse_size = 2
+     integer, parameter            :: fine_size = 4
+     integer, parameter            :: nomega = 2
+     real(real12), parameter       :: test_input = one
+     real(real12), parameter       :: test_output = 8.0_real12
+     integer                       :: i, j, k, l, ierr
+     integer                       :: ic, jc, kc
+     logical                       :: reduce_problem = .false.
+
+     call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
+         ierr)
+     assert_equal(ierr, 0)
+
+     call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
+     assert_equal(ierr, 0)
+
+     do i = 1, fine_size
+     	do j = 1, fine_size
+	   do k = 1, fine_size
+	      ic = nint(real(i)/two)
+	      jc = nint(real(j)/two)
+	      kc = nint(real(k)/two)
+	      fine(i , j , k)%map = ic + (jc - 1)*coarse_size &
+	          + (kc - 1)*coarse_size*coarse_size
+	      do l = 1, nomega
+	      	 fine(i, j, k)%GF(l) = cmplx(one, one)
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     call reduceGF(coarse, fine, ierr)
+     assert_equal(ierr, 0)
+
+     do i = 1, coarse_size
+     	if (reduce_problem) exit
+     	do j = 1, coarse_size
+	   if (reduce_problem) exit
+	   do k = 1, coarse_size
+	      if (reduce_problem) exit
+	      do l = 1, nomega
+	      	 if (reduce_problem) exit
+		 if (real(coarse(i, j, k)%GF(l)).ne.test_output) then
+		    reduce_problem = .true. 
+		    exit
+		 endif
+		 if (aimag(coarse(i, j, k)%GF(l)).ne.test_output) then
+		    reduce_problem = .true.
+		    exit
+		 endif
+	      enddo
+	   enddo
+        enddo
+     enddo
+
+     assert_false(reduce_problem)
+
+end test
+
 end test_suite
