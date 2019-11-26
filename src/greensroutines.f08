@@ -132,6 +132,8 @@ contains
     complex(real12) :: work
     type(greensfunc), allocatable :: workGFF(:, :, :)
 
+    ierr = 0
+    
     ncx = size(coarseGF, 1)
     ncy = size(coarseGF, 2)
     ncz = size(coarseGF, 3)
