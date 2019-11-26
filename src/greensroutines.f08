@@ -120,10 +120,9 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine reduceGF(coarseGF, fineGF, coarsegrid, ierr)
+  subroutine reduceGF(coarseGF, fineGF, ierr)
     type(greensfunc), intent(inout) :: coarseGF(:, :, :)
     type(greensfunc), intent(in)    :: fineGF(:, :, :)
-    type(kappagrid), intent(in)     :: coarsegrid(:, :, :)
     integer, intent(out) :: ierr
 
     integer :: ncx, ncy, ncz
