@@ -1,13 +1,14 @@
 module greensroutines
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Contains type definitions and functions associated with manipulating
+! the greensfunc type
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   use constants, only: real12, one, cmplx_zero, tolerance
   use definedtypes, only: kappagrid
   implicit none
   private
   public allocateGF,  calculateGF, greensfunc, copymap, copyGF, invertGF,&
-       reduceGF
-       
-
+       reduceGF       
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   type, public :: greensfunc
@@ -121,18 +122,30 @@ contains
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine reduceGF(coarseGF, fineGF, ierr)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Maps fineGF grid values to coarse grid values (i.e. sum over k~)
+! Assigns coarseGF labels to coarseGF%map     
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Error codes: ierr = 0 -- Routine completed successfully
+!              ierr = 1 -- GF component of type(greensfunc) vars not allocated
+!              ierr = 2 -- GF component of input differs from that of output
+!              ierr = 3 -- coarseGF has fewer k components than fineGF    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     type(greensfunc), intent(inout) :: coarseGF(:, :, :)
     type(greensfunc), intent(in)    :: fineGF(:, :, :)
-    integer, intent(out) :: ierr
-
-    integer :: ncx, ncy, ncz
-    integer :: nfx, nfy, nfz
-    integer :: i, j, k, l, site_count
-    integer :: nomega, nomega1, ier1, map_test
-    complex(real12) :: work
-    logical :: map_ok
+    integer, intent(out)            :: ierr
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! routine variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    integer                       :: ncx, ncy, ncz
+    integer                       :: nfx, nfy, nfz
+    integer                       :: i, j, k, l, site_count
+    integer                       :: nomega, nomega1, ier1
+    complex(real12)               :: work
     type(greensfunc), allocatable :: workGFF(:, :, :)
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! first error check
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if ((.not.allocated(fineGF(1, 1, 1)%GF))&
          .or.(.not.allocated(coarseGF(1, 1, 1)%GF))) then
        ierr = 1
@@ -140,7 +153,9 @@ contains
     else
        ierr = 0
     end if
-    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! fetch array bounds
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     ncx = size(coarseGF, 1)
     ncy = size(coarseGF, 2)
     ncz = size(coarseGF, 3)
@@ -151,35 +166,21 @@ contains
 
     nomega = size(fineGF(1, 1, 1)%GF, 1)
     nomega1 = size(coarseGF(1, 1, 1)%GF, 1)
-
-    map_ok = .false.
-    do i = 1, ncx
-       if (map_ok) exit
-       do j = 1, ncy
-          if (map_ok) exit
-          do k = 1, ncz
-             map_test = coarseGF(i, j, k)%map
-             call check_map(map_ok, map_test)
-             if (map_ok) exit
-          enddo
-       enddo
-    enddo
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! second set of error checks
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if (nomega.ne.nomega1) then
        ierr = 2
        return
     elseif ((nfx.le.ncx).or.(nfy.le.ncy).or.(nfz.le.ncz)) then
        ierr = 3
        return
-    elseif (.not.(map_ok)) then
-       ierr = 4
-       return
     else
        continue
     end if
-    
-    
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! main routine
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     call allocateGF(workGFF, nfx, nfy, nfz, nomega, ier1)
     if (ier1.ne.0) then
        ! something has gone disastrously wrong!
@@ -200,38 +201,21 @@ contains
           enddo
        enddo
     enddo
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   contains
-
-    subroutine check_map(test, mapno)
-      logical, intent(out) :: test
-      integer, intent(in) :: mapno
-
-      integer :: fx, fy, fz
-
-      test=.false.
-
-      do fx = 1, nfx
-         do fy = 1, nfy
-            do fz = 1, nfz
-               if (mapno.eq.fineGF(fx, fy, fz)%map) then
-                  test = .true.
-                  return
-               end if
-            end do
-         end do
-      end do
-     
-    end subroutine check_map
-
+!------------------------------------------------------------------------------ 
     function sumfineGF(work, isite)
       type(greensfunc) :: sumfineGF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Sums values of work%GF where work%map equals isite
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       type(greensfunc), intent(in) :: work (:, :, :)
       integer, intent(in):: isite
-      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! routine variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
       integer :: fx, fy, fz, fl, imap
-
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       sumfineGF%map= isite
 
       allocate(sumfineGF%GF(nomega))
@@ -249,38 +233,59 @@ contains
             enddo
          enddo
       end do
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     end function sumfineGF
-      
-    
+!------------------------------------------------------------------------------ 
   end subroutine reduceGF
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   elemental subroutine invertGF(GF, ierr)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Inverts GF%GF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Error codes : ierr = 0 -- no problems
+!               ierr = 0 -- division by zero
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     type(greensfunc), intent(inout) :: GF
-    integer, intent(out)                :: ierr
-
+    integer, intent(out)            :: ierr
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! error check
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     check_div_by_zero:if ((any(abs(real(GF%GF)).lt.tolerance))&
          .and.(any(abs(aimag(GF%GF)).lt.tolerance))) then
        ierr = 1
        return
     end if check_div_by_zero
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     GF%GF = one/GF%GF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   end subroutine invertGF
-
-  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   elemental subroutine copymap(copy, original)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Copies original%map to copy%map
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(greensfunc), intent(inout) :: copy
-    type(greensfunc), intent(in)  :: original
-
+    type(greensfunc), intent(in)    :: original
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     copy%map = original%map
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   end subroutine copymap
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   elemental subroutine copyGF(copy, original)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Copies original%GF to copy%GF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(greensfunc), intent(inout) :: copy
-    type(greensfunc), intent(in)  :: original
-
+    type(greensfunc), intent(in)    :: original
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     copy%GF = original%GF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
   end subroutine copyGF
-    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module greensroutines
