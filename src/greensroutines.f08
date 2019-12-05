@@ -128,12 +128,18 @@ contains
     integer :: ncx, ncy, ncz
     integer :: nfx, nfy, nfz
     integer :: i, j, k, l, site_count
-    integer :: nomega, ier1
+    integer :: nomega, nomega1, ier1, map_test
     complex(real12) :: work
+    logical :: map_ok
     type(greensfunc), allocatable :: workGFF(:, :, :)
 
-
-    ierr = 0
+    if ((.not.allocated(fineGF(1, 1, 1)%GF))&
+         .or.(.not.allocated(coarseGF(1, 1, 1)%GF))) then
+       ierr = 1
+       return
+    else
+       ierr = 0
+    end if
     
     ncx = size(coarseGF, 1)
     ncy = size(coarseGF, 2)
@@ -143,10 +149,46 @@ contains
     nfy = size(fineGF, 2)
     nfz = size(fineGF, 3)
 
-    nomega = size(fineGF(1,1,1)%GF, 1)
+    nomega = size(fineGF(1, 1, 1)%GF, 1)
+    nomega1 = size(coarseGF(1, 1, 1)%GF, 1)
+
+    map_ok = .false.
+    do i = 1, ncx
+       if (map_ok) exit
+       do j = 1, ncy
+          if (map_ok) exit
+          do z = 1, ncz
+             map_test = coarseGF(1, 1, 1)%map
+             call check_map(map_ok, map_test)
+             if (map_ok) exit
+          enddo
+       enddo
+    enddo
+
+    if (nomega.ne.nomega1) then
+       ierr = 2
+       return
+    elseif ((nfx.le.ncx).or.(nfy.le.ncy).or.(nfz.le.ncz)) then
+       ierr = 3
+       return
+    elseif (.not.map_ok) then
+       ierr = 4
+       return
+    else
+       continue
+    end if
+    
+    
 
     call allocateGF(workGFF, nfx, nfy, nfz, nomega, ier1)
-    ! error handling code here
+    if (ier1.ne.0) then
+       ! something has gone disastrously wrong!
+       write (*, *) "Fatal error in module greensroutines, subroutine reduceGF"
+       write (*, *) "Unable to allocate workGFF array."
+       write (*, *) "Need to examine source code, correct and recompile."
+       write (*, *) "Halting execution."
+       stop
+    end if
     call copymap(workGFF, fineGF)
     call copyGF(workGFF, fineGF)
     
@@ -160,6 +202,24 @@ contains
     enddo
 
   contains
+
+    subroutine check_map(test, mapno)
+      logical, intent(out) :: test
+      integer :: testGF
+
+      integer :: fx, fy, fz
+
+      test = .true.
+
+      do fx = 1, nfx
+         do fy = 1, nfy
+            do fz = 1, nfz
+               if (map.eq.fineGF(fx, fy, fz)%map) return
+            end do
+         end do
+      end do
+      test = .false.
+    end subroutine check_map
 
     function sumfineGF(work, isite)
       type(greensfunc) :: sumfineGF
