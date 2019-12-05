@@ -157,8 +157,8 @@ contains
        if (map_ok) exit
        do j = 1, ncy
           if (map_ok) exit
-          do z = 1, ncz
-             map_test = coarseGF(1, 1, 1)%map
+          do k = 1, ncz
+             map_test = coarseGF(i, j, k)%map
              call check_map(map_ok, map_test)
              if (map_ok) exit
           enddo
@@ -171,7 +171,7 @@ contains
     elseif ((nfx.le.ncx).or.(nfy.le.ncy).or.(nfz.le.ncz)) then
        ierr = 3
        return
-    elseif (.not.map_ok) then
+    elseif (.not.(map_ok)) then
        ierr = 4
        return
     else
@@ -205,20 +205,23 @@ contains
 
     subroutine check_map(test, mapno)
       logical, intent(out) :: test
-      integer :: testGF
+      integer, intent(in) :: mapno
 
       integer :: fx, fy, fz
 
-      test = .true.
+      test=.false.
 
       do fx = 1, nfx
          do fy = 1, nfy
             do fz = 1, nfz
-               if (map.eq.fineGF(fx, fy, fz)%map) return
+               if (mapno.eq.fineGF(fx, fy, fz)%map) then
+                  test = .true.
+                  return
+               end if
             end do
          end do
       end do
-      test = .false.
+     
     end subroutine check_map
 
     function sumfineGF(work, isite)
