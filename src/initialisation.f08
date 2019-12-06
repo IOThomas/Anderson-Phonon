@@ -288,7 +288,9 @@ contains
 ! Error codes: ierr = 0 -- no problems
 !              ierr = 1 -- stored%omega_diff less than or equal to zero    
 !              ierr = 2 -- either or both of kgridCoarse and Dzero unallocated
-!              ierr = 3 -- Gzero already allocated    
+!              ierr = 3 -- Gzero already allocated
+!              ierr = 4 -- fine gridpoints in at least one direction <= # of
+!                          coarse gridpoints
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(storedparam), intent(in)                :: stored
     type(kappagrid), allocatable, intent(in)     :: kgridCoarse(:, :, :)
@@ -305,7 +307,8 @@ contains
     integer                       :: imap
     integer                       :: ier1
     complex(real12)               :: omega_diff
-    type(greensfunc), allocatable :: work(:, :, :, :), work1(:, :, :, :)
+    integer, allocatable          :: ier2
+    type(greensfunc), allocatable :: work(:, :, :), work1(:, :, :)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     omega_diff = stored%omega_diff
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -329,49 +332,64 @@ contains
     nx = size(kgridCoarse, 1)
     ny = size(kgridCoarse, 2)
     nz = size(kgridCoarse, 3)
+    allocate(ier2(nx, ny, nz))
     
     nxfin = size(Dzero, 1)
     nyfin = size(Dzero, 2)
     nzfin = size(Dzero, 3)
     nw2 = size(Dzero(1, 1, 1)%GF, 1)
-    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+    check_grid_sizes:if ((nx.le.nxfin).or.(ny.le.nyfin).or.(nz.le.nzfin)) then
+       ierr = 4
+       return
+    end if check_grid_sizes
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     call allocateGF(Gzero, nx, ny, nz, nw2, ier1)
-    call allocateGF(work, nx, ny, nz, ier1)
-    call allocateGF(work1, nxfin, nyfin, nzfin, nw2, ier1)
-    ! error handling code here
-    
-    assign_coarselabel: forall (i = 1:nw2)
-       Gzero(1:nx, 1:ny, 1:nz, i)%map=kgridCoarse(1:nx, 1:ny, 1:nz)%map
-    end forall assign_coarselabel
+    call allocateGF(work, nx, ny, nz, nw2 ier1)
+    allocation_error: if (ier1.ne.0) then
+      ! something has gone disastrously wrong!
+       write (*, *) "Fatal error code ", ier1 ,"in module initialisation,&
+            & subroutine initHybrid"
+       write (*, *) "Unable to allocate either or both of the Gzero and work&
+            & arrays."
+       write (*, *) "Need to examine source code, correct and recompile."
+       write (*, *) "Halting execution."
+       stop
+    end if allocation_error
+
+   
+     Gzero(1:nx, 1:ny, 1:nz)%map=kgridCoarse(1:nx, 1:ny, 1:nz)%map
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! calculate Gzero
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-! the calculation of work needs to be promoted to a greensroutine subroutine,
-! as we'll use it a lot (also makes handling div by zero issues easier)
-    do l = 1, nw2
-       do k = 1, nz
-          do j = 1, ny
-             do i = 1, nx
-                forall(ifi=1:nxfin, jf=1:nyfin, kf=1:nzfin, lf=1:nw2)
-                   work1(ifi, jf, kf)%GF(lf) = Dzero(ifi, jf, kf)%GF(lf)
-                end forall
-                where (Dzero%map /= kgridCoarse(i, j, k)%map)
-                   work1%GF = cmplx_zero
-                endwhere
-                work(i,j,k)%GF(l) = sum(work1(1:nxfin, 1:nyfin, 1:nzfin)%GF(l))
-             enddo
-          enddo
-       enddo
-    enddo
-    work = one/work
+
+    call reduceGF(work, Dzero, ier1)
+    reduce_error: if (ier1.ne.0) then
+      ! something has gone disastrously wrong!
+       write (*, *) "Fatal error code ", ier1 ,"in module initialisation,&
+            & subroutine initHybrid"
+       write (*, *) "reduceGF call failed"
+       write (*, *) "Need to examine source code, correct and recompile."
+       write (*, *) "Halting execution."
+       stop
+    end if reduce_error
+    call invertGF(work, ier2)
+    div_by_zero: if (any(ier2.ne.0)) then
+       write (*, *) "Fatal error in module initialisation,&
+            & subroutine initHybrid"
+       write (*, *) "at least one component of invertGF call signals &
+            & a division by zero"
+       write (*, *) "Halting execution."
+       stop
+    end if div_by_zero
     
     !may have to rewrite for matrix form...
     forall (i=1:nx, j=1:ny, k=1:nz, l=1:nw2)
-       Gzero(i,j,k,l)%GF = real(l**2,real12)*omega_diff**2&
-            - kgridCoarse(i, j, k)%omega2 - work(i,j,k,l)
+       Gzero(i,j,k)%GF(l) = real(l**2,real12)*omega_diff**2&
+            - kgridCoarse(i, j, k)%omega2 - work(i,j,k)%GF(l)
     end forall
    
-    deallocate(work, work1)
+    deallocate(work, ier2)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   end subroutine initHybrid
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
