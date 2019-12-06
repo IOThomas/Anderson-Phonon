@@ -1095,86 +1095,6 @@ module greensroutines_fun
  end subroutine reduceGF_ierr3
 
 
- subroutine reduceGF_ierr4
-
-     type(greensfunc), allocatable :: coarse(:, :, :)
-     type(greensfunc), allocatable :: fine(:, :, :)
-     type(greensfunc), allocatable :: test(:, :, :)
-     integer, parameter            :: coarse_size = 2
-     integer, parameter            :: fine_size = 4
-     integer, parameter            :: nomega = 2
-     integer                       :: ierr, i, j, k
-
-     call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
-         ierr)
-  ! Assert_Equal assertion
-  numAsserts = numAsserts + 1
-  if (noAssertFailed) then
-    if (.not.(ierr== 0)) then
-      print *, " *Assert_Equal failed* in test reduceGF_ierr4 &
-              &[greensroutines.fun:531]"
-      print *, "  ", "ierr (",ierr,") is not",  0
-      print *, ""
-      noAssertFailed = .false.
-      numFailures    = numFailures + 1
-    else
-      numAssertsTested = numAssertsTested + 1
-    endif
-  endif
-
-     call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
-  ! Assert_Equal assertion
-  numAsserts = numAsserts + 1
-  if (noAssertFailed) then
-    if (.not.(ierr== 0)) then
-      print *, " *Assert_Equal failed* in test reduceGF_ierr4 &
-              &[greensroutines.fun:534]"
-      print *, "  ", "ierr (",ierr,") is not",  0
-      print *, ""
-      noAssertFailed = .false.
-      numFailures    = numFailures + 1
-    else
-      numAssertsTested = numAssertsTested + 1
-    endif
-  endif
-
-     do i = 1, coarse_size
-     	 do j = 1, coarse_size
-	     do k = 1, coarse_size
-	     	coarse(i, j, k)%map = 23
-             enddo
-	 enddo
-     enddo
-
-     do i = 1, fine_size
-     	 do j = 1, fine_size
-	     do k = 1, fine_size
-	     	fine(i, j, k)%map = 2
-             enddo
-	 enddo
-     enddo
-
-     call reduceGF(coarse, fine, ierr)
-  ! Assert_Equal assertion
-  numAsserts = numAsserts + 1
-  if (noAssertFailed) then
-    if (.not.(ierr== 4)) then
-      print *, " *Assert_Equal failed* in test reduceGF_ierr4 &
-              &[greensroutines.fun:553]"
-      print *, "  ", "ierr (",ierr,") is not",  4
-      print *, ""
-      noAssertFailed = .false.
-      numFailures    = numFailures + 1
-    else
-      numAssertsTested = numAssertsTested + 1
-    endif
-  endif
-
-  numTests = numTests + 1
-
- end subroutine reduceGF_ierr4
-
-
  subroutine funit_setup
 
   noAssertFailed = .true.
@@ -1245,10 +1165,6 @@ module greensroutines_fun
 
   call funit_setup
   call reduceGF_ierr3
-  call funit_teardown
-
-  call funit_setup
-  call reduceGF_ierr4
   call funit_teardown
 
   nTests          = numTests

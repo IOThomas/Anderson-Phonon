@@ -517,40 +517,5 @@ test reduceGF_ierr3
      assert_equal(ierr, 3)
 end test
 
-test reduceGF_ierr4
-     type(greensfunc), allocatable :: coarse(:, :, :)
-     type(greensfunc), allocatable :: fine(:, :, :)
-     type(greensfunc), allocatable :: test(:, :, :)
-     integer, parameter            :: coarse_size = 2
-     integer, parameter            :: fine_size = 4
-     integer, parameter            :: nomega = 2
-     integer                       :: ierr, i, j, k
-
-     call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
-         ierr)
-     assert_equal(ierr, 0)
-
-     call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
-     assert_equal(ierr, 0)
-
-     do i = 1, coarse_size
-     	 do j = 1, coarse_size
-	     do k = 1, coarse_size
-	     	coarse(i, j, k)%map = 23
-             enddo
-	 enddo
-     enddo
-
-     do i = 1, fine_size
-     	 do j = 1, fine_size
-	     do k = 1, fine_size
-	     	fine(i, j, k)%map = 2
-             enddo
-	 enddo
-     enddo
-
-     call reduceGF(coarse, fine, ierr)
-     assert_equal(ierr, 4)
-end test
 
 end test_suite
