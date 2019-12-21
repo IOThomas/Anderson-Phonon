@@ -5,7 +5,8 @@ module initialisation
   use constants, only: real12, pi, half, two, zero, one, cmplx_zero
   use dispersions, only: finedispersion, coarseDispersion
   use definedtypes, only: settingparam, kappagrid, storedparam
-  use greensroutines, only: allocateGF,  calculateGF, greensfunc
+  use greensroutines, only: allocateGF,  calculateGF, greensfunc, reduceGF,&
+       invertGF
   implicit none
   private
   public initGrid, initDzero, initHybrid
@@ -307,7 +308,7 @@ contains
     integer                       :: imap
     integer                       :: ier1
     complex(real12)               :: omega_diff
-    integer, allocatable          :: ier2
+    integer, allocatable          :: ier2(:, :, :)
     type(greensfunc), allocatable :: work(:, :, :), work1(:, :, :)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     omega_diff = stored%omega_diff
@@ -345,7 +346,7 @@ contains
     end if check_grid_sizes
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     call allocateGF(Gzero, nx, ny, nz, nw2, ier1)
-    call allocateGF(work, nx, ny, nz, nw2 ier1)
+    call allocateGF(work, nx, ny, nz, nw2, ier1)
     allocation_error: if (ier1.ne.0) then
       ! something has gone disastrously wrong!
        write (*, *) "Fatal error code ", ier1 ,"in module initialisation,&
