@@ -5,8 +5,8 @@ integer,  parameter :: fine_points=6
 integer,  parameter :: ncoarse_cells=2
 integer             :: ierr
 type(settingparam)  :: settings
-type(finegrid),allocatable     :: kgridFine(:,:,:)
-type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
+type(kappagrid),allocatable     :: kgridFine(:,:,:)
+type(kappagrid),allocatable   :: kgridCoarse(:,:,:)
 
 
 setup              
@@ -256,7 +256,7 @@ test assigncell_maps
    npwrong=.false.
    do icell=1,maxcells
       cellcount=0
-      where (kgridFine%coarsemap==icell) cellcount=1
+      where (kgridFine%map==icell) cellcount=1
       testno=sum(cellcount)
       if (testno.ne.nfine) then
       	 npwrong=.true.
@@ -274,15 +274,15 @@ test assigncell_specific_fine_points
   call initgrid(settings,kgridFine,kgridCoarse,ierr)
    
    !test specific cells
-   testcell=kgridfine(5,5,4)%coarsemap
+   testcell=kgridfine(5,5,4)%map
    assert_equal(testcell,8)
-   testcell=kgridfine(1,1,1)%coarsemap
+   testcell=kgridfine(1,1,1)%map
    assert_equal(testcell,1)
-   testcell=kgridfine(1,1,6)%coarsemap
+   testcell=kgridfine(1,1,6)%map
    assert_equal(testcell,5)
-   testcell=kgridfine(1,6,6)%coarsemap
+   testcell=kgridfine(1,6,6)%map
    assert_equal(testcell,7)
-   testcell=kgridfine(6,6,6)%coarsemap
+   testcell=kgridfine(6,6,6)%map
    assert_equal(testcell,8)
    
 end test
@@ -300,7 +300,7 @@ test assign_coarse_labels
         if (problem) exit
         do iz=1,ncoarse_cells
            itest=ix+(iy-1)*ncoarse_cells+(iz-1)*ncoarse_cells*ncoarse_cells
-	   if (itest.ne.kgridcoarse(ix,iy,iz)%label) then
+	   if (itest.ne.kgridcoarse(ix,iy,iz)%map) then
 	      problem=.true.
 	      exit
 	   endif

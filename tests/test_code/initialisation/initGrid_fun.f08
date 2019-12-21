@@ -28,8 +28,8 @@ integer,  parameter :: fine_points=6
 integer,  parameter :: ncoarse_cells=2
 integer             :: ierr
 type(settingparam)  :: settings
-type(finegrid),allocatable     :: kgridFine(:,:,:)
-type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
+type(kappagrid),allocatable     :: kgridFine(:,:,:)
+type(kappagrid),allocatable   :: kgridCoarse(:,:,:)
 
 
  contains
@@ -1620,7 +1620,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
    npwrong=.false.
    do icell=1,maxcells
       cellcount=0
-      where (kgridFine%coarsemap==icell) cellcount=1
+      where (kgridFine%map==icell) cellcount=1
       testno=sum(cellcount)
       if (testno.ne.nfine) then
       	 npwrong=.true.
@@ -1656,7 +1656,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
   call initgrid(settings,kgridFine,kgridCoarse,ierr)
    
    !test specific cells
-   testcell=kgridfine(5,5,4)%coarsemap
+   testcell=kgridfine(5,5,4)%map
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
@@ -1671,7 +1671,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
       numAssertsTested = numAssertsTested + 1
     endif
   endif
-   testcell=kgridfine(1,1,1)%coarsemap
+   testcell=kgridfine(1,1,1)%map
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
@@ -1686,7 +1686,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
       numAssertsTested = numAssertsTested + 1
     endif
   endif
-   testcell=kgridfine(1,1,6)%coarsemap
+   testcell=kgridfine(1,1,6)%map
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
@@ -1701,7 +1701,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
       numAssertsTested = numAssertsTested + 1
     endif
   endif
-   testcell=kgridfine(1,6,6)%coarsemap
+   testcell=kgridfine(1,6,6)%map
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
@@ -1716,7 +1716,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
       numAssertsTested = numAssertsTested + 1
     endif
   endif
-   testcell=kgridfine(6,6,6)%coarsemap
+   testcell=kgridfine(6,6,6)%map
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
@@ -1752,7 +1752,7 @@ type(coarsegrid),allocatable   :: kgridCoarse(:,:,:)
         if (problem) exit
         do iz=1,ncoarse_cells
            itest=ix+(iy-1)*ncoarse_cells+(iz-1)*ncoarse_cells*ncoarse_cells
-	   if (itest.ne.kgridcoarse(ix,iy,iz)%label) then
+	   if (itest.ne.kgridcoarse(ix,iy,iz)%map) then
 	      problem=.true.
 	      exit
 	   endif
