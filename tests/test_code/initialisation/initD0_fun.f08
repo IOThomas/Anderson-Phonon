@@ -6,6 +6,7 @@ module initialisation_fun
  
  use constants
  use definedtypes
+ use greensroutines
  use initialisation
 
  implicit none
@@ -32,9 +33,9 @@ complex(real12), parameter   :: omax = (500.0_real12, zero)
 real(real12)                 :: tol = epsilon(one)
 type(settingparam)           :: settings
 type(storedparam)            :: stored
-type(finegrid),allocatable   :: kgridFine(:,:,:)
-type(coarsegrid),allocatable :: kgridCoarse(:,:,:)
-type(greensfunc),allocatable :: Dzero(:,:,:,:)
+type(kappagrid),allocatable   :: kgridFine(:,:,:)
+type(kappagrid),allocatable :: kgridCoarse(:,:,:)
+type(greensfunc),allocatable :: Dzero(:,:,:)
 
  contains
 
@@ -138,7 +139,7 @@ type(greensfunc),allocatable :: Dzero(:,:,:,:)
 
  subroutine dzero_already_allocated_ierr
 
-     allocate(Dzero(1,1,1,1))
+     allocate(Dzero(1,1,1))
      call initDzero(settings,kgridFine,stored,Dzero,ierr)
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
@@ -204,7 +205,7 @@ type(greensfunc),allocatable :: Dzero(:,:,:,:)
 
      call initDzero(settings,kgridFine,stored,Dzero,ierr)
 
-     nomsz = size(Dzero, 4)
+     nomsz = size(Dzero(1, 1, 1)%GF, 1)
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
@@ -352,8 +353,8 @@ type(greensfunc),allocatable :: Dzero(:,:,:,:)
 	   do iz = 1, fine_points
 	      if (dzmap_fail) exit
 	      do inom = 1, nomega_points
-	      	 kgridmap=kgridFine(ix,iy,iz)%coarseMap
-		 Dzmap=Dzero(ix,iy,iz,inom)%map
+	      	 kgridmap=kgridFine(ix,iy,iz)%map
+		 Dzmap=Dzero(ix,iy,iz)%map
 	      	 if (kgridmap.ne.Dzmap) then
 		    dzmap_fail = .false.
 		    exit

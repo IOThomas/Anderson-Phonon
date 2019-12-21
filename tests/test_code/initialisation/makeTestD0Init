@@ -3,8 +3,9 @@
 #
 # funit generated this file on 2019-09-17 23:43:00 +0100.
 # IOT modified file on 2019-10-24 14:57  +0100.
+# IOT modified file on 2019-12-21 16:46  +0000.
 
-OBJ=initD0_fun.o initialisation.o definedtypes.o constants.o dispersions.o TestD0init.o
+OBJ=initD0_fun.o constants.o definedtypes.o greensroutines.o initialisation.o dispersions.o TestD0init.o
 LDFLAGS= -lstdc++
 
 SRCDIR=../../../src
@@ -16,14 +17,15 @@ TestD0Init.x: $(OBJ)
 
 TestD0init.o: TestD0init.f08 initD0_fun.o 
 	(cd .; gfortran-9  -I. -c TestD0init.f08)
-initD0_fun.o: initD0_fun.f08 initialisation.o definedtypes.o 
+initD0_fun.o: initD0_fun.f08 constants.o definedtypes.o greensroutines.o initialisation.o
 	(cd .; gfortran-9  -I. -c initD0_fun.f08)
-initialisation.o: $(SRCDIR)/initialisation.f08 constants.o dispersions.o definedtypes.o 
-	(cd .; gfortran-9  -I. -c $(SRCDIR)/initialisation.f08)
 constants.o: $(SRCDIR)/constants.f08  
 	(cd .; gfortran-9  -I. -c $(SRCDIR)/constants.f08)
-dispersions.o: $(SRCDIR)/dispersions.f08 constants.o 
-	(cd .; gfortran-9  -I. -c $(SRCDIR)/dispersions.f08)
 definedtypes.o: $(SRCDIR)/definedtypes.f08 constants.o 
 	(cd .; gfortran-9  -I. -c $(SRCDIR)/definedtypes.f08)
-  
+greensroutines.o: $(SRCDIR)/greensroutines.f08 constants.o definedtypes.o 
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/greensroutines.f08)
+initialisation.o: $(SRCDIR)/initialisation.f08 constants.o dispersions.o definedtypes.o greensroutines.o
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/initialisation.f08)
+dispersions.o: $(SRCDIR)/dispersions.f08 constants.o 
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/dispersions.f08)

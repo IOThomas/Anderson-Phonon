@@ -9,9 +9,9 @@ complex(real12), parameter   :: omax = (500.0_real12, zero)
 real(real12)                 :: tol = epsilon(one)
 type(settingparam)           :: settings
 type(storedparam)            :: stored
-type(finegrid),allocatable   :: kgridFine(:,:,:)
-type(coarsegrid),allocatable :: kgridCoarse(:,:,:)
-type(greensfunc),allocatable :: Dzero(:,:,:,:)
+type(kappagrid),allocatable   :: kgridFine(:,:,:)
+type(kappagrid),allocatable :: kgridCoarse(:,:,:)
+type(greensfunc),allocatable :: Dzero(:,:,:)
 
 setup
     !code that should be run before each test
@@ -55,7 +55,7 @@ test kgridfine_not_allocated_ierr
 end test
 
 test dzero_already_allocated_ierr
-     allocate(Dzero(1,1,1,1))
+     allocate(Dzero(1,1,1))
      call initDzero(settings,kgridFine,stored,Dzero,ierr)
      assert_equal(ierr,4)
 end test
@@ -85,7 +85,7 @@ test allocate_nomega_correctly
 
      call initDzero(settings,kgridFine,stored,Dzero,ierr)
 
-     nomsz = size(Dzero, 4)
+     nomsz = size(Dzero(1, 1, 1)%GF, 1)
      assert_equal(nomsz, nomega_points)
 end test
 
@@ -122,8 +122,8 @@ test mappings_copied_correctly
 	   do iz = 1, fine_points
 	      if (dzmap_fail) exit
 	      do inom = 1, nomega_points
-	      	 kgridmap=kgridFine(ix,iy,iz)%coarseMap
-		 Dzmap=Dzero(ix,iy,iz,inom)%map
+	      	 kgridmap=kgridFine(ix,iy,iz)%map
+		 Dzmap=Dzero(ix,iy,iz)%map
 	      	 if (kgridmap.ne.Dzmap) then
 		    dzmap_fail = .false.
 		    exit
