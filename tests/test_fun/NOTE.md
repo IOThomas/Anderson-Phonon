@@ -23,5 +23,6 @@ Test suites and module correspondences
 |----------------       |--------------     |------                          |
 |`initGrid.fun`         |`initialisation`	|momentum grid setup (run first) |
 |`initD0.fun`           |`initialisation`   |D0 green's fn setup (run second)|
+|`initHybrid.fun`       |`initialisation`   |Hybridisation setup (run third) |
 |`dispersions.fun`	    |`dispersions`		|fine and coarse grid dispersions|
 |`greensroutines.fun`   |`greensroutines`   |GF allocation, calculation      |

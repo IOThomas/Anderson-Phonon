@@ -340,7 +340,7 @@ contains
     nzfin = size(Dzero, 3)
     nw2 = size(Dzero(1, 1, 1)%GF, 1)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-    check_grid_sizes:if ((nx.le.nxfin).or.(ny.le.nyfin).or.(nz.le.nzfin)) then
+    check_grid_sizes:if ((nx.ge.nxfin).or.(ny.ge.nyfin).or.(nz.ge.nzfin)) then
        ierr = 4
        return
     end if check_grid_sizes
