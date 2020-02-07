@@ -318,7 +318,7 @@ contains
     if (real(omega_diff).le.zero) then
        ierr = 1
        return
-    elseif ((.not.allocated(kgridCoarse)).and.(.not.allocated(Dzero))) then
+    elseif ((.not.allocated(kgridCoarse)).or.(.not.allocated(Dzero))) then
        ierr = 2
        return
     elseif (allocated(Gzero)) then
