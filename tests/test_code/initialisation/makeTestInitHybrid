@@ -1,0 +1,30 @@
+
+# makefile to compile TestRunner.f90
+#
+# funit generated this file on 2020-02-10 20:52:37 +0000.
+
+OBJ=initHybrid_fun.o constants.o definedtypes.o greensroutines.o initialisation.o dispersions.o TestInitHybrid.o
+LDFLAGS= -lstdc++
+
+SRCDIR=../../../src
+
+all:TestInitHybrid
+
+TestInitHybrid: $(OBJ)
+	gfortran-9   -o TestInitHybrid.x $(OBJ) $(LDFLAGS)
+
+TestInitHybrid.o: TestInitHybrid.f08 initHybrid_fun.o 
+	(cd .; gfortran-9  -I. -c TestInitHybrid.f08)
+initHybrid_fun.o: initHybrid_fun.f08 constants.o definedtypes.o greensroutines.o initialisation.o 
+	(cd .; gfortran-9  -I. -c initHybrid_fun.f08)
+constants.o: $(SRCDIR)/constants.f08  
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/constants.f08)
+definedtypes.o: $(SRCDIR)/definedtypes.f08 constants.o 
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/definedtypes.f08)
+greensroutines.o: $(SRCDIR)/greensroutines.f08 constants.o definedtypes.o 
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/greensroutines.f08)
+initialisation.o: $(SRCDIR)/initialisation.f08 constants.o dispersions.o definedtypes.o greensroutines.o 
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/initialisation.f08)
+dispersions.o: $(SRCDIR)/dispersions.f08 constants.o 
+	(cd .; gfortran-9  -I. -c $(SRCDIR)/dispersions.f08)
+  
