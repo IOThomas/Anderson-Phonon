@@ -363,7 +363,8 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! calculate Gzero
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-
+    ier1=0 !set error flags to zero
+    ier2=0 
     call reduceGF(work, Dzero, ier1)
     reduce_error: if (ier1.ne.0) then
       ! something has gone disastrously wrong!
