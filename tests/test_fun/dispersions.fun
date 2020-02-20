@@ -1,6 +1,5 @@
 test_suite dispersions
 
-real(real12), parameter :: tolerance = epsilon(one) 
 
 setup
 

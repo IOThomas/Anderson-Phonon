@@ -22,7 +22,6 @@ module dispersions_fun
 
 
 
-real(real12), parameter :: tolerance = epsilon(one) 
 
  contains
 
@@ -46,7 +45,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_disp_zero &
-              &[dispersions.fun:17]"
+              &[dispersions.fun:16]"
       print *, "  ", "real(test) (",real(test),") is not", &
  zero,"within",tolerance
       print *, ""
@@ -69,7 +68,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_disp_zero &
-              &[dispersions.fun:18]"
+              &[dispersions.fun:17]"
       print *, "  ", "aimag(test) (",aimag(test),") is not", &
  zero,"within",tolerance
       print *, ""
@@ -105,7 +104,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_max_kx &
-              &[dispersions.fun:27]"
+              &[dispersions.fun:26]"
       print *, "  ", "real(test) (",real(test),") is not", &
  expected,"within",tolerance
       print *, ""
@@ -128,7 +127,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_max_kx &
-              &[dispersions.fun:28]"
+              &[dispersions.fun:27]"
       print *, "  ", "aimag(test) (",aimag(test),") is not", &
  zero,"within",tolerance
       print *, ""
@@ -164,7 +163,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_max_ky &
-              &[dispersions.fun:37]"
+              &[dispersions.fun:36]"
       print *, "  ", "real(test) (",real(test),") is not", &
  expected,"within",tolerance
       print *, ""
@@ -187,7 +186,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_max_ky &
-              &[dispersions.fun:38]"
+              &[dispersions.fun:37]"
       print *, "  ", "aimag(test) (",aimag(test),") is not", &
  zero,"within",tolerance
       print *, ""
@@ -223,7 +222,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_max_kz &
-              &[dispersions.fun:47]"
+              &[dispersions.fun:46]"
       print *, "  ", "real(test) (",real(test),") is not", &
  expected,"within",tolerance
       print *, ""
@@ -246,7 +245,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_max_kz &
-              &[dispersions.fun:48]"
+              &[dispersions.fun:47]"
       print *, "  ", "aimag(test) (",aimag(test),") is not", &
  zero,"within",tolerance
       print *, ""
@@ -282,7 +281,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_max_kall &
-              &[dispersions.fun:57]"
+              &[dispersions.fun:56]"
       print *, "  ", "real(test) (",real(test),") is not", &
  expected,"within",tolerance
       print *, ""
@@ -305,7 +304,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_max_kall &
-              &[dispersions.fun:58]"
+              &[dispersions.fun:57]"
       print *, "  ", "aimag(test) (",aimag(test),") is not", &
  zero,"within",tolerance
       print *, ""
@@ -343,7 +342,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test1)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_periodicty_kx &
-              &[dispersions.fun:69]"
+              &[dispersions.fun:68]"
       print *, "  ", "real(test1) (",real(test1),") is not", &
  real(test2),"within",tolerance
       print *, ""
@@ -366,7 +365,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test1)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_periodicty_kx &
-              &[dispersions.fun:70]"
+              &[dispersions.fun:69]"
       print *, "  ", "aimag(test1) (",aimag(test1),") is not", &
  aimag(test2),"within",tolerance
       print *, ""
@@ -404,7 +403,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test1)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_periodicty_ky &
-              &[dispersions.fun:81]"
+              &[dispersions.fun:80]"
       print *, "  ", "real(test1) (",real(test1),") is not", &
  real(test2),"within",tolerance
       print *, ""
@@ -427,7 +426,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test1)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_periodicty_ky &
-              &[dispersions.fun:82]"
+              &[dispersions.fun:81]"
       print *, "  ", "aimag(test1) (",aimag(test1),") is not", &
  aimag(test2),"within",tolerance
       print *, ""
@@ -465,7 +464,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test1)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_periodicty_kz &
-              &[dispersions.fun:93]"
+              &[dispersions.fun:92]"
       print *, "  ", "real(test1) (",real(test1),") is not", &
  real(test2),"within",tolerance
       print *, ""
@@ -488,7 +487,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test1)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_periodicty_kz &
-              &[dispersions.fun:94]"
+              &[dispersions.fun:93]"
       print *, "  ", "aimag(test1) (",aimag(test1),") is not", &
  aimag(test2),"within",tolerance
       print *, ""
@@ -526,7 +525,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test1)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_periodicty_kall &
-              &[dispersions.fun:105]"
+              &[dispersions.fun:104]"
       print *, "  ", "real(test1) (",real(test1),") is not", &
  real(test2),"within",tolerance
       print *, ""
@@ -549,7 +548,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test1)) )) then
       print *, " *Assert_Equal_Within failed* in test fine_periodicty_kall &
-              &[dispersions.fun:106]"
+              &[dispersions.fun:105]"
       print *, "  ", "aimag(test1) (",aimag(test1),") is not", &
  aimag(test2),"within",tolerance
       print *, ""
@@ -595,7 +594,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test)) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_summation_someones &
-              &[dispersions.fun:125]"
+              &[dispersions.fun:124]"
       print *, "  ", "real(test) (",real(test),") is not", &
  expected,"within",tolerance
       print *, ""
@@ -618,7 +617,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test)) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_summation_someones &
-              &[dispersions.fun:126]"
+              &[dispersions.fun:125]"
       print *, "  ", "aimag(test) (",aimag(test),") is not", &
  zero,"within",tolerance
       print *, ""
@@ -661,7 +660,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test)) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_summation_allzero &
-              &[dispersions.fun:142]"
+              &[dispersions.fun:141]"
       print *, "  ", "real(test) (",real(test),") is not", &
  expected,"within",tolerance
       print *, ""
@@ -684,7 +683,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test)) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_summation_allzero &
-              &[dispersions.fun:143]"
+              &[dispersions.fun:142]"
       print *, "  ", "aimag(test) (",aimag(test),") is not", &
  expected,"within",tolerance
       print *, ""
@@ -728,7 +727,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (real(test)) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_summation_allone &
-              &[dispersions.fun:160]"
+              &[dispersions.fun:159]"
       print *, "  ", "real(test) (",real(test),") is not", &
  expected,"within",tolerance
       print *, ""
@@ -751,7 +750,7 @@ real(real12), parameter :: tolerance = epsilon(one)
      .le. &
      (aimag(test)) )) then
       print *, " *Assert_Equal_Within failed* in test coarse_summation_allone &
-              &[dispersions.fun:161]"
+              &[dispersions.fun:160]"
       print *, "  ", "aimag(test) (",aimag(test),") is not", &
  expected,"within",tolerance
       print *, ""
