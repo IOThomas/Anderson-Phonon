@@ -1,7 +1,7 @@
 program TMDCAnderson
   use constants, only: real12,uline,dline
-  use definedTypes, only: basis,settingparam,finegrid,coarsegrid,storedparam,&
-        greensfunc
+  use definedTypes, only: basis,settingparam,kappagrid,storedparam
+  use greensroutines, only: greensfunc
   use readsettings, only: readin
   use initialisation, only: initGrid,initDzero,initHybrid
 
@@ -10,13 +10,13 @@ program TMDCAnderson
   type(basis)::atomBasis
   type(settingparam)::settings
   type(storedparam)::stored
-  type(finegrid),allocatable::kgridFine(:,:,:)
-  type(coarsegrid),allocatable::kgridCoarse(:,:,:)
+  type(kappagrid),allocatable::kgridFine(:,:,:)
+  type(kappagrid),allocatable::kgridCoarse(:,:,:)
 
 
   integer                     :: ierr
-  type(greensfunc),allocatable :: Dzero(:,:,:,:)
-  type(greensfunc),allocatable :: GAMMAold(:,:,:,:),GAMMAnew(:,:,:,:)
+  type(greensfunc),allocatable :: Dzero(:,:,:)
+  type(greensfunc),allocatable :: GAMMAold(:,:,:),GAMMAnew(:,:,:)
  
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
