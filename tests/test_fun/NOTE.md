@@ -26,3 +26,4 @@ Test suites and module correspondences
 |`initHybrid.fun`       |`initialisation`   |Hybridisation setup (run third) |
 |`dispersions.fun`	    |`dispersions`		|fine and coarse grid dispersions|
 |`greensroutines.fun`   |`greensroutines`   |GF allocation, calculation      |
+|`gf_fourier.fun`       |`gf_fourier`       |GF related FFT (uses FFTW lib)  |

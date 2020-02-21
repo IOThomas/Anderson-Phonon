@@ -1,0 +1,32 @@
+
+# makefile to compile TestRunner.f90
+#
+# funit generated this file on 2020-02-21 16:15:55 +0000.
+# IOT modified this file on 2020-02-21 17:20 +0000.
+
+OBJ=gf_fourier_fun.o constants.o greensroutines.o gf_fourier.o definedtypes.o TestGf_fourier.o
+LDFLAGS= -lstdc++
+
+SRC=../../../src
+
+FFTINC=-I/usr/include/
+FFTLIB=-lfftw3q -lquadmath -lm
+
+all:testgf_fourier
+
+testgf_fourier: $(OBJ)
+	gfortran-9   -o TestGf_fourier $(OBJ) $(LDFLAGS) $(FFTLIB)
+
+TestGf_fourier.o: TestGf_fourier.f08 gf_fourier_fun.o 
+	(cd .; gfortran-9  -I. -c TestGf_fourier.f08)
+gf_fourier_fun.o: gf_fourier_fun.f08 constants.o greensroutines.o gf_fourier.o 
+	(cd .; gfortran-9  -I. -c gf_fourier_fun.f08)
+constants.o: $(SRC)/constants.f08  
+	(cd .; gfortran-9  -I. -c $(SRC)/constants.f08)
+greensroutines.o: $(SRC)/greensroutines.f08 constants.o definedtypes.o 
+	(cd .; gfortran-9  -I. -c $(SRC)/greensroutines.f08)
+definedtypes.o: $(SRC)/definedtypes.f08 constants.o 
+	(cd .; gfortran-9  -I. -c $(SRC)/definedtypes.f08)
+gf_fourier.o: $(SRC)/gf_fourier.f08 constants.o greensroutines.o 
+	(cd .; gfortran-9  -I. $(FFTINC) -c $(SRC)/gf_fourier.f08 )
+  
