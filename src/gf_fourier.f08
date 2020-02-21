@@ -9,8 +9,11 @@ module gf_fourier
   include 'fftw3q.f03'
   private
   public greensfunc_initplan, greensfunc_killplan, get_gf_plan_status, &
-       gf_fft
+       gf_fft, forward_fft, backward_fft
 
+  integer, parameter :: forward_fft = 1
+  integer, parameter :: backward_fft = -1
+  
   type(C_PTR) :: gf_plan_forward
   !stores information for forward GF FFT plan
   type(C_PTR) :: gf_plan_backward
