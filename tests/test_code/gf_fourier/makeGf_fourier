@@ -2,7 +2,7 @@
 # makefile to compile TestRunner.f90
 #
 # funit generated this file on 2020-02-21 16:15:55 +0000.
-# IOT modified this file on 2020-02-21 17:20 +0000.
+# IOT modified this file on 2020-02-21 18:28 +0000.
 
 OBJ=gf_fourier_fun.o constants.o greensroutines.o gf_fourier.o definedtypes.o TestGf_fourier.o
 LDFLAGS= -lstdc++
@@ -15,7 +15,7 @@ FFTLIB=-lfftw3q -lquadmath -lm
 all:testgf_fourier
 
 testgf_fourier: $(OBJ)
-	gfortran-9   -o TestGf_fourier $(OBJ) $(LDFLAGS) $(FFTLIB)
+	gfortran-9   -o TestGf_fourier.x $(OBJ) $(LDFLAGS) $(FFTLIB)
 
 TestGf_fourier.o: TestGf_fourier.f08 gf_fourier_fun.o 
 	(cd .; gfortran-9  -I. -c TestGf_fourier.f08)

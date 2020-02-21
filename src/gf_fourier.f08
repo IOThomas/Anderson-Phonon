@@ -123,6 +123,7 @@ contains
     integer, intent(in) :: type_flag !must be -1 or +1
     integer, intent(out) :: ierr
 
+    integer, parameter :: forward_trans = 1, backward_trans = -1
     integer :: x_size, y_size, z_size, n_omega
     integer :: ix, iy, iz, iom
     type(C_PTR) :: transform_type
@@ -138,9 +139,9 @@ contains
     call check_work_array_bounds()
     if (ierr.ne.0) return
 
-    if (type_flag.eq.-1) then
+    if (type_flag.eq.backward_trans) then
        transform_type = gf_plan_backward
-    else if (type_flag.eq.1) then
+    else if (type_flag.eq.forward_trans) then
        transform_type = gf_plan_forward
     end if
     
@@ -168,7 +169,8 @@ contains
 
       if (.not.(init_gfplan)) then
          ierr = 1
-      else if ((type_flag.ne.-1).and.(type_flag.ne.1)) then
+      else if ((type_flag.ne.backward_trans)&
+           .and.(type_flag.ne.forward_trans)) then
          ierr = 2
       end if
       

@@ -342,12 +342,365 @@ module gf_fourier_fun
  end subroutine initialise_kill_cycle
 
 
+ subroutine kill_without_initialisation
+
+
+     call greensfunc_killplan(ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==1)) then
+      print *, " *Assert_Equal failed* in test kill_without_initialisation &
+              &[gf_fourier.fun:68]"
+      print *, "  ", "ierr (",ierr,") is not", 1
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     
+
+  numTests = numTests + 1
+
+ end subroutine kill_without_initialisation
+
+
+ subroutine intialise_twice
+
+
+     call greensfunc_initplan(greens_function, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==0)) then
+      print *, " *Assert_Equal failed* in test intialise_twice &
+              &[gf_fourier.fun:75]"
+      print *, "  ", "ierr (",ierr,") is not", 0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     call greensfunc_initplan(greens_function, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==1)) then
+      print *, " *Assert_Equal failed* in test intialise_twice &
+              &[gf_fourier.fun:77]"
+      print *, "  ", "ierr (",ierr,") is not", 1
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     
+     call greensfunc_killplan(ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==0)) then
+      print *, " *Assert_Equal failed* in test intialise_twice &
+              &[gf_fourier.fun:80]"
+      print *, "  ", "ierr (",ierr,") is not", 0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+
+  numTests = numTests + 1
+
+ end subroutine intialise_twice
+
+
+ subroutine fft_without_initialisation
+
+
+     call gf_fft(greens_function, forward_fft, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==1)) then
+      print *, " *Assert_Equal failed* in test fft_without_initialisation &
+              &[gf_fourier.fun:87]"
+      print *, "  ", "ierr (",ierr,") is not", 1
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     
+
+  numTests = numTests + 1
+
+ end subroutine fft_without_initialisation
+
+
+ subroutine fft_wrong_transform_flag
+
+
+     call greensfunc_initplan(greens_function, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==0)) then
+      print *, " *Assert_Equal failed* in test fft_wrong_transform_flag &
+              &[gf_fourier.fun:94]"
+      print *, "  ", "ierr (",ierr,") is not", 0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     call gf_fft(greens_function, 0, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==2)) then
+      print *, " *Assert_Equal failed* in test fft_wrong_transform_flag &
+              &[gf_fourier.fun:97]"
+      print *, "  ", "ierr (",ierr,") is not", 2
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     call greensfunc_killplan(ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==0)) then
+      print *, " *Assert_Equal failed* in test fft_wrong_transform_flag &
+              &[gf_fourier.fun:100]"
+      print *, "  ", "ierr (",ierr,") is not", 0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+
+  numTests = numTests + 1
+
+ end subroutine fft_wrong_transform_flag
+
+
+ subroutine fft_array_too_big
+
+     type(greensfunc), allocatable:: test(:, :, :)
+     integer :: too_big = 20
+
+     call greensfunc_initplan(greens_function, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==0)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_big &
+              &[gf_fourier.fun:109]"
+      print *, "  ", "ierr (",ierr,") is not", 0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     call allocateGF(test, too_big, y_size, z_size, n_omega, ierr)
+     call gf_fft(test, forward_fft, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==3)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_big &
+              &[gf_fourier.fun:113]"
+      print *, "  ", "ierr (",ierr,") is not", 3
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     deallocate(test)
+
+     call allocateGF(test, x_size, too_big, z_size, n_omega, ierr)
+     call gf_fft(test, forward_fft, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==4)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_big &
+              &[gf_fourier.fun:118]"
+      print *, "  ", "ierr (",ierr,") is not", 4
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     deallocate(test)
+
+     call allocateGF(test, x_size, y_size, too_big, n_omega, ierr)
+     call gf_fft(test, forward_fft, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==5)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_big &
+              &[gf_fourier.fun:123]"
+      print *, "  ", "ierr (",ierr,") is not", 5
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     deallocate(test)
+
+     call greensfunc_killplan(ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==0)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_big &
+              &[gf_fourier.fun:127]"
+      print *, "  ", "ierr (",ierr,") is not", 0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+  numTests = numTests + 1
+
+ end subroutine fft_array_too_big
+
+
+ subroutine fft_array_too_small
+
+     type(greensfunc), allocatable:: test(:, :, :)
+     integer :: too_small = 1
+
+     call greensfunc_initplan(greens_function, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==0)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_small &
+              &[gf_fourier.fun:135]"
+      print *, "  ", "ierr (",ierr,") is not", 0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     call allocateGF(test, too_small, y_size, z_size, n_omega, ierr)
+     call gf_fft(test, forward_fft, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==3)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_small &
+              &[gf_fourier.fun:139]"
+      print *, "  ", "ierr (",ierr,") is not", 3
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     deallocate(test)
+
+     call allocateGF(test, x_size, too_small, z_size, n_omega, ierr)
+     call gf_fft(test, forward_fft, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==4)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_small &
+              &[gf_fourier.fun:144]"
+      print *, "  ", "ierr (",ierr,") is not", 4
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     deallocate(test)
+
+     call allocateGF(test, x_size, y_size, too_small, n_omega, ierr)
+     call gf_fft(test, forward_fft, ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==5)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_small &
+              &[gf_fourier.fun:149]"
+      print *, "  ", "ierr (",ierr,") is not", 5
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     deallocate(test)
+
+     call greensfunc_killplan(ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr==0)) then
+      print *, " *Assert_Equal failed* in test fft_array_too_small &
+              &[gf_fourier.fun:153]"
+      print *, "  ", "ierr (",ierr,") is not", 0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+  numTests = numTests + 1
+
+ end subroutine fft_array_too_small
 
      
 
  subroutine funit_setup
 
- call allocateGF(greens_function, x_size, z_size, y_size, n_omega, ierr)
+ call allocateGF(greens_function, x_size, y_size, z_size, n_omega, ierr)
  ierr=0
   noAssertFailed = .true.
  end subroutine funit_setup
@@ -371,6 +724,30 @@ module gf_fourier_fun
 
   call funit_setup
   call initialise_kill_cycle
+  call funit_teardown
+
+  call funit_setup
+  call kill_without_initialisation
+  call funit_teardown
+
+  call funit_setup
+  call intialise_twice
+  call funit_teardown
+
+  call funit_setup
+  call fft_without_initialisation
+  call funit_teardown
+
+  call funit_setup
+  call fft_wrong_transform_flag
+  call funit_teardown
+
+  call funit_setup
+  call fft_array_too_big
+  call funit_teardown
+
+  call funit_setup
+  call fft_array_too_small
   call funit_teardown
 
   nTests          = numTests
