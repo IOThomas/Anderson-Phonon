@@ -1,7 +1,7 @@
 obj =   constants.f08 \
 	definedtypes.f08 \
 	greensroutines.f08 \
-	greens_functions_fourier.f08 \
+	gf_fourier.f08 \
 	readin.f08 \
 	dispersions.f08 \
 	initialisation.f08

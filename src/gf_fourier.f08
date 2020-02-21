@@ -1,4 +1,4 @@
-module greens_function_fourier
+module gf_fourier
 
   ! currently configured to use quadruple precision ('fftw3q_') routines
   use constants, only: real12
@@ -188,5 +188,5 @@ contains
 
   end subroutine gf_fft
 
-end module greens_function_fourier
+end module gf_fourier
 
