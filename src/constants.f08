@@ -13,7 +13,12 @@ module constants
   real(real12), parameter, public :: three = 3.0_real12
   real(real12), parameter, public :: pi = two*acos(zero)
   real(real12), parameter, public :: cmplx_zero = (zero, zero)
-  real(real12), parameter, public :: tolerance = epsilon(zero)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! tolerances
+!!   tolerance is set at a value that doesn't break the FFT  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  real(real12), parameter, public :: scale_tol = 1.0e4_real12
+  real(real12), parameter, public :: tolerance = scale_tol*epsilon(one)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! character/other constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
