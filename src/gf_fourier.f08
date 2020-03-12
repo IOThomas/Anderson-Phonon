@@ -126,6 +126,7 @@ contains
     integer, parameter :: forward_trans = 1, backward_trans = -1
     integer :: x_size, y_size, z_size, n_omega
     integer :: ix, iy, iz, iom
+    real(real12) :: volume
     type(C_PTR) :: transform_type
 
     ierr = 0
@@ -135,6 +136,7 @@ contains
     x_size = size(greens_function, 1)
     y_size = size(greens_function, 2)
     z_size = size(greens_function, 3)
+    volume = real(x_size*y_size*z_size, real12)
     n_omega = size(greens_function(1, 1, 1)%GF, 1)
     call check_work_array_bounds()
     if (ierr.ne.0) return
@@ -157,6 +159,9 @@ contains
        do iz = 1, z_size
           do iy = 1, y_size
              do ix = 1, x_size
+                !scale backwards transformation
+                if (type_flag.eq.backward_trans) &
+                     gfwork_out(ix, iy, iz) = gfwork_out(ix, iy, iz)/volume
                 greens_function(ix, iy, iz)%GF(iom)=gfwork_out(ix, iy, iz)
              enddo
           enddo
