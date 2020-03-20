@@ -139,9 +139,8 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     integer                       :: ncx, ncy, ncz
     integer                       :: nfx, nfy, nfz
-    integer                       :: i, j, k, l, site_count
+    integer                       :: i, j, k, site_count
     integer                       :: nomega, nomega1, ier1
-    complex(real12)               :: work
     type(greensfunc), allocatable :: workGFF(:, :, :)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! first error check
@@ -214,7 +213,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-      integer :: fx, fy, fz, fl, imap
+      integer :: fx, fy, fz, fl
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       sumfineGF%map= isite
 

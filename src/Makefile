@@ -9,7 +9,9 @@ obj =   constants.f08 \
 
 compiler = gfortran-9
 
-opt = -fcheck=all
+opt = -fcheck=all -Wall
+trap = -ffpe-trap=invalid,overflow,zero
+prec = -ffpe-trap=precision
 inc = -I/usr/include/
 lib = -lfftw3q -lquadmath -lm 
 
@@ -19,7 +21,7 @@ xtest:
 
 debug:
 
-	$(compiler) $(opt) -O3 -g  $(inc) $(obj) $(lib) TMDCmain.f08 -o ../../C-Rhediadau-Anderson/debug
+	$(compiler) $(opt) $(trap) $(prec) -O3 -g  $(inc) $(obj) $(lib) TMDCmain.f08 -o ../../C-Rhediadau-Anderson/debug
 
 clean:
 	rm *mod

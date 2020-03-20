@@ -216,7 +216,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    integer         :: i, j, k, l
     integer         :: nfpoints(3)
     integer         :: nomega
     integer         :: icond(3)
@@ -304,12 +303,10 @@ contains
     integer                       :: nx, ny, nz, nw2
     integer                       :: nxfin, nyfin, nzfin
     integer                       :: i, j, k, l
-    integer                       :: ifi, jf, kf, lf
-    integer                       :: imap
     integer                       :: ier1
     complex(real12)               :: omega_diff
     integer, allocatable          :: ier2(:, :, :)
-    type(greensfunc), allocatable :: work(:, :, :), work1(:, :, :)
+    type(greensfunc), allocatable :: work(:, :, :)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     omega_diff = stored%omega_diff
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
