@@ -1,8 +1,8 @@
 module greensroutines
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Contains type definitions and functions associated with manipulating
-! the greensfunc type
- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Contains type definitions and functions associated with manipulating
+!# the greensfunc type
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   use constants, only: real12, one, cmplx_zero, tolerance
   use definedtypes, only: kappagrid
   implicit none
@@ -12,8 +12,11 @@ module greensroutines
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   type, public :: greensfunc
-     complex(real12),allocatable :: GF(:)    !value of GF for omega2
-     integer                     :: map   !coarse grid label assoc with kpoint
+     !# Green's function type
+     complex(real12),allocatable :: GF(:)
+     !# value of Green's function wrt omega
+     integer                     :: map
+     !# labels the associated coarse grid point 
   end type greensfunc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contains
@@ -21,18 +24,24 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine allocateGF(GFvariable, xsize, ysize, zsize, nomega, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Allocates arrays for greensfunc type variables
+!# Allocates arrays for greensfunc type variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Error codes: ierr = 0 -- Routine executed successfully
-!              ierr = 1 -- Array size less than 1 in at least one dimension
-!              ierr = 2 -- Array already allocated
+!# Error codes: ierr = 0 -- Routine executed successfully;
+!#              ierr = 1 -- Array size less than 1 in at least one dimension;
+!#              ierr = 2 -- Array already allocated.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     type(greensfunc), allocatable, intent(inout) :: GFvariable(:, :, :)
+    !# Greensfunction array to be allocated
     integer, intent(in)                          :: xsize
+    !# size in x direction
     integer, intent(in)                          :: ysize
+    !# size in y direction
     integer, intent(in)                          :: zsize
+    !# size in z direction
     integer, intent(in)                          :: nomega
+    !# number of frequency points
     integer, intent(out)                         :: ierr
+    !# error code
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -66,16 +75,21 @@ contains
   subroutine calculateGF(GFval, deltaw, dispersion, hybridisation,&
        ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Calculate the value of the greens function with or without hybridisation
+!# Calculate the value of the greens function with or without hybridisation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Error codes: ierr = 0 -- Routine completed successfully
-!              ierr = 1 -- Singular value of GF for at least one point
+!# Error codes: ierr = 0 -- Routine completed successfully;
+!#              ierr = 1 -- Singular value of GF for at least one point.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(greensfunc), intent(inout)              :: GFval(:, :, :)
+    !# greensfuction output
     complex(real12), intent(in)                  :: deltaw
+    !# frequency spacing
     type(kappagrid), intent(in)                  :: dispersion(:, :, :)
+    !# dispersion in k-space
     type(greensfunc), intent(in), optional       :: hybridisation(:, :, :)
+    !# hybridisation function
     integer, intent(out)                         :: ierr
+    !# error code
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -123,17 +137,20 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine reduceGF(coarseGF, fineGF, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Maps fineGF grid values to coarse grid values (i.e. sum over k~)
-! Assigns coarseGF labels to coarseGF%map     
+!# Maps fineGF grid values to coarse grid values (i.e. sum over k~)
+!# Assigns coarseGF labels to coarseGF%map     
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Error codes: ierr = 0 -- Routine completed successfully
-!              ierr = 1 -- GF component of type(greensfunc) vars not allocated
-!              ierr = 2 -- GF component of input differs from that of output
-!              ierr = 3 -- coarseGF has fewer k components than fineGF    
+!# Error codes: ierr = 0 -- Routine completed successfully;
+!#              ierr = 1 -- GF component of type(greensfunc) vars not allocated;
+!#              ierr = 2 -- GF component of input differs from that of output;
+!#              ierr = 3 -- coarseGF has fewer k components than fineGF.    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     type(greensfunc), intent(inout) :: coarseGF(:, :, :)
+    !# coarse grid greensfuction (output)
     type(greensfunc), intent(in)    :: fineGF(:, :, :)
+    !# fine grid greensfunction (input)
     integer, intent(out)            :: ierr
+    !# error code
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -241,13 +258,15 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   elemental subroutine invertGF(GF, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Inverts GF%GF
+!# Inverts greensfunction%GF component
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Error codes : ierr = 0 -- no problems
-!               ierr = 0 -- division by zero
+!# Error codes : ierr = 0 -- no problems;
+!#               ierr = 0 -- division by zero.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     type(greensfunc), intent(inout) :: GF
+    !# Greensfunction to be inverted (output in same array)
     integer, intent(out)            :: ierr
+    !# error code
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! error check
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
@@ -265,10 +284,12 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   elemental subroutine copymap(copy, original)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Copies original%map to copy%map
+!#  Copies original%map to copy%map
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(greensfunc), intent(inout) :: copy
+    !# output array
     type(greensfunc), intent(in)    :: original
+    !# input array
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     copy%map = original%map
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -278,10 +299,12 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   elemental subroutine copyGF(copy, original)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Copies original%GF to copy%GF
+!# Copies original%GF to copy%GF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(greensfunc), intent(inout) :: copy
+    !# output array
     type(greensfunc), intent(in)    :: original
+    !# input array
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     copy%GF = original%GF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 

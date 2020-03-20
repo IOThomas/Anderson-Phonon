@@ -1,6 +1,6 @@
 module initialisation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! contains initialisation subroutines for the calculation
+!# Contains initialisation subroutines for the calculation.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   use constants, only: real12, pi, half, two, zero, one, cmplx_zero
   use dispersions, only: finedispersion, coarseDispersion
@@ -16,19 +16,23 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine initGrid(settings, kgridFine, kgridCoarse, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Initialises coarse and fine momentum grids for the calculation
-! Note that the formula for assigning the kpoint values is a little non-obvious
-! and only works for *even* values of Ncell and Nfpoints
+!# Initialises coarse and fine momentum grids for the calculation.  
+!# Note that the formula for assigning the kpoint values is a little non-obvious
+!# and only works for *even* values of Ncell and Nfpoints.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Error codes: ierr=0: Routine executed fine
-!              ierr=1: Ncell or Nfpoints are negative or zero
-!              ierr=2: Ncell or Nfpoints are odd
-!              ierr=3: kgridFine or kgridCoarse already allocated    
+!# Error codes: ierr=0: Routine executed fine;
+!#              ierr=1: Ncell or Nfpoints are negative or zero;
+!#              ierr=2: Ncell or Nfpoints are odd;
+!#              ierr=3: kgridFine or kgridCoarse already allocated.    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(settingparam), intent(in)               :: settings
+    !# contains required settings information
     type(kappagrid), allocatable, intent(inout)  :: kgridFine(:,:,:)
+    !# fine momentum space grid
     type(kappagrid), allocatable, intent(inout)  :: kgridCoarse(:,:,:)
+    !# coarse momentum space grid
     integer                                      :: ierr
+    !# error code
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -199,20 +203,25 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine initDzero(settings, kgridFine, stored, Dzero, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Initialises fine grid non-interacting green's functions
+!# Initialises fine grid non-interacting Green's functions.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Error codes: ierr = 0 -- no problems
-!              ierr = 1 -- settings%nfpoints or settings%nomega less than one  
-!              ierr = 2 -- settings%omegamax less than settings%omegamin
-!              ierr = 3 -- kgridFine not allocated
-!              ierr = 4 -- Dzero already allocated
-!              ierr = 5 -- Division by zero when calculating Dzero%GF    
+!# Error codes: ierr = 0 -- no problems;
+!#              ierr = 1 -- settings%nfpoints or settings%nomega less than one; 
+!#              ierr = 2 -- settings%omegamax less than settings%omegamin;
+!#              ierr = 3 -- kgridFine not allocated;
+!#              ierr = 4 -- Dzero already allocated;
+!#              ierr = 5 -- Division by zero when calculating Dzero%GF.    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(settingparam), intent(inout)           :: settings
+    !# contains required settings information
     type(kappagrid), allocatable, intent(in)    :: kgridFine(:,:,:)
+    !# fine momentum grid
     type(storedparam), intent(inout)            :: stored
+    !# stored parameters
     type(greensfunc),allocatable, intent(inout) :: Dzero(:,:,:)
+    !# non-interacting Green's Function
     integer                                     :: ierr
+    !# error code
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -283,20 +292,25 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine initHybrid(stored, kgridCoarse, Dzero, Gzero, ierr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Initialises the coarse grid hybridisation function
+!# Initialises the coarse grid hybridisation function.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Error codes: ierr = 0 -- no problems
-!              ierr = 1 -- stored%omega_diff less than or equal to zero    
-!              ierr = 2 -- either or both of kgridCoarse and Dzero unallocated
-!              ierr = 3 -- Gzero already allocated
-!              ierr = 4 -- fine gridpoints in at least one direction <= # of
-!                          coarse gridpoints
+!# Error codes: ierr = 0 -- no problems; 
+!#              ierr = 1 -- stored%omega_diff less than or equal to zero;    
+!#              ierr = 2 -- either or both of kgridCoarse and Dzero unallocated;
+!#              ierr = 3 -- Gzero already allocated;
+!#              ierr = 4 -- fine gridpoints in at least one direction <= # of
+!#                          coarse gridpoints.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(storedparam), intent(in)                :: stored
+    !# contains required settings information
     type(kappagrid), allocatable, intent(in)     :: kgridCoarse(:, :, :)
+    !# coarse momentum grid
     type(greensfunc), allocatable, intent(in)    :: Dzero(:, :, :)
+    !# fine grid none-interacting Green's function
     type(greensfunc), allocatable, intent(inout) :: Gzero(:, :, :)
+    !# coarse grid hybridisation function
     integer, intent(out)                         :: ierr
+    !# error code
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! routine variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

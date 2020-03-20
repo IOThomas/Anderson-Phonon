@@ -1,6 +1,12 @@
 module gf_fourier
-
-  ! currently configured to use quadruple precision ('fftw3q_') routines
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# This contains wrapper and related functions for FFTW routines.
+!# Currently configured to use quadruple precision ('fftw3q_').
+!#
+!# To use: (1) call greensfunc_initplan for appropriate array size;
+!#         (2) call gf_fft for those array sizes until no longer needed;
+!#         (3) call greensfunc_killplan once done.  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   use constants, only: real12
   use greensroutines, only: greensfunc
   use, intrinsic :: iso_c_binding
@@ -10,10 +16,16 @@ module gf_fourier
   private
   public greensfunc_initplan, greensfunc_killplan, get_gf_plan_status, &
        gf_fft, forward_fft, backward_fft
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! useful public constants defining FFT direction
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   integer, parameter :: forward_fft = 1
+  !# use as type_flag to call a forward fft
   integer, parameter :: backward_fft = -1
-  
+  !# use as type_flag to call a backward fft
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! private variables and pointers for interoprability with C FFT routines
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   type(C_PTR) :: gf_plan_forward
   !stores information for forward GF FFT plan
   type(C_PTR) :: gf_plan_backward
@@ -21,14 +33,25 @@ module gf_fourier
   complex(C_FLOAT128_COMPLEX), allocatable :: gfwork_in(:,:,:)
   complex(C_FLOAT128_COMPLEX), allocatable :: gfwork_out(:,:,:)
   logical :: init_gfplan = .false.
-  ! have the gf plans been initialised
+  ! have the gf plans been initialised?
 
 contains
-
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine greensfunc_initplan(greens_function, ierr)
-    type(greensfunc), intent(in) :: greens_function(:, :, :)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Sets up FFTW parameters for computations.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Error codes: ierr = 0 -- Routine executed successfully;
+!#              ierr = 1 -- FFT parameters already set;
+!#              ierr = 2-4 -- Null pointers for forward, backward or both FFTs
+!#                       - a big problem!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    type(greensfunc), intent(in) :: greens_function(:, :, :) 
     integer, intent(out)         :: ierr  
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! routine variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     integer :: x_size, y_size, z_size
 
     ierr = 0
@@ -52,17 +75,18 @@ contains
     call check_plans()
     if (ierr.ne.0) return
     init_gfplan = .true.
-    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
   contains
-
+!------------------------------------------------------------------------------
     subroutine check_input()
-      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
       if (init_gfplan) ierr = 1
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     end subroutine check_input
-
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------ 
     subroutine check_plans()
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       if (c_associated(gf_plan_forward, C_NULL_PTR)) then
          ierr = 2
       else if (c_associated(gf_plan_backward, C_NULL_PTR)) then
@@ -71,14 +95,24 @@ contains
            (c_associated(gf_plan_backward, C_NULL_PTR))) then
          ierr = 4
       end if
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     end subroutine check_plans
-
+!------------------------------------------------------------------------------ 
   end subroutine greensfunc_initplan
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine greensfunc_killplan(ierr)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Cleans up after all FFTs are done
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Error codes : ierr = 0 -- no problems;
+!#               ierr = 1 -- FFT settings haven't been initialised.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     integer, intent(out)   :: ierr
-
+    !# error code
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ierr = 0
     call check_input()
     if (ierr.ne.0) return
@@ -89,40 +123,68 @@ contains
     deallocate(gfwork_in, gfwork_out)
 
     init_gfplan = .false.
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   contains
-    
+!------------------------------------------------------------------------------ 
     subroutine check_input()
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       if (.not.(init_gfplan)) ierr = 1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     end subroutine check_input
-    
+!------------------------------------------------------------------------------ 
   end subroutine greensfunc_killplan
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine get_gf_plan_status(init_plan, forward_associated,&
        backward_associated, work_allocated, forward_null, backward_null)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Check status of various private FFT related variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     logical, intent(out) :: init_plan
+    !# is the FFT plan initialised?
     logical, intent(out) :: forward_associated
+    !# is the forward FFT C pointer associated?
     logical, intent(out) :: backward_associated
+    !# is the backward FFT C pointer associated?
     logical, intent(out) :: work_allocated
+    !# are the work arrays allocated?
     logical, intent(out) :: forward_null
+    !# is the forward FFT C pointer null?
     logical, intent(out) :: backward_null
-
+    !# is the backward FFT C pointer null?
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     init_plan = init_gfplan
     work_allocated = (allocated(gfwork_in)).and.(allocated(gfwork_out))
     forward_associated = c_associated(gf_plan_forward)
     backward_associated = c_associated(gf_plan_backward)
     forward_null = c_associated(gf_plan_forward, C_NULL_PTR)
     backward_null = c_associated(gf_plan_backward, C_NULL_PTR)
- 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
   end subroutine get_gf_plan_status
-    
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine gf_fft(greens_function, type_flag, ierr)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# FFT of the matrix greens_function, output to greens_function
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Error codes : ierr = 0 -- no problems;
+!#               ierr = 1 -- FFT plan not initialised;
+!#               ierr = 2 -- type_flag has invalid value;
+!#               ierr = 3-5 -- *x*, *y* or *z* array sizes of greens_function
+!#                        (respectively) don't match initialised settings.  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(greensfunc), intent(inout) :: greens_function(:, :, :)
+    !# Green's function to be FFTed
     integer, intent(in) :: type_flag !must be -1 or +1
+    !# set to **forward_fft** or **backward_fft** when calling subroutine
     integer, intent(out) :: ierr
-
+    !# error code
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! routine variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     integer, parameter :: forward_trans = 1, backward_trans = -1
     integer :: x_size, y_size, z_size, n_omega
     integer :: ix, iy, iz, iom
@@ -167,22 +229,23 @@ contains
           enddo
        enddo
     enddo
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   contains
-
+!------------------------------------------------------------------------------
     subroutine check_input()
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       if (.not.(init_gfplan)) then
          ierr = 1
       else if ((type_flag.ne.backward_trans)&
            .and.(type_flag.ne.forward_trans)) then
          ierr = 2
       end if
-      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     end subroutine check_input
-
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------ 
     subroutine check_work_array_bounds()
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       if ((x_size.ne.size(gfwork_in, 1)).or.(x_size.ne.size(gfwork_out, 1))) &
            then
          ierr = 3
@@ -193,10 +256,10 @@ contains
            (z_size.ne.size(gfwork_out, 3))) then
          ierr = 5
       endif
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     end subroutine check_work_array_bounds
-
+!------------------------------------------------------------------------------
   end subroutine gf_fft
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module gf_fourier
 
