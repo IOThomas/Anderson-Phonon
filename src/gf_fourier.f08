@@ -261,5 +261,100 @@ contains
 !------------------------------------------------------------------------------
   end subroutine gf_fft
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  subroutine momspace_to_realspace(momentum, rlspace, ierr)
+    type(greensfunc), intent(in) :: momentum(:, :, :)
+    type(greensfunc), intent(out) :: rlspace(:, :)
+    integer :: ierr
+
+    !routine variables
+    type(greensfunc), allocatable :: workreal(:, :, :, :, :, :)
+    type(greensfunc), allocatable :: workslice(:, :, :)
+    integer :: x_size, y_size, z_size, nomega
+    integer :: npoints
+    integer :: ierr1
+    integer :: ix, iy, iz, jx, jy, jz, io
+
+    x_size = size(momentum,1)
+    y_size = size(momentum,2)
+    z_size = size(momentum,3)
+    nomega = size(momentum(1, 1, 1)%GF, 1)
+
+    call allocateGF(workslice, x_size, y_size, z_size, nomega, ierr1)
+    call allocate_workreal() ! allocates and sets all entries to zero
+
+    !copy mom space to diagonal
+    do ix= 1, x_size
+       do iy = 1, y_size
+          do iz = 1, z_size
+             do io = 1, nomega
+                workreal(ix, iy, iz, ix, iy, iz)%GF(io) = &
+                     & momentum(ix, iy, iz)%GF(io)
+             enddo
+          enddo
+       enddo
+    enddo
+
+    !backward fft on k'
+    do ix= 1, x_size
+       do iy = 1, y_size
+          do iz = 1, z_size
+             call copyGF (workslice, workreal(ix, iy, iz, 1:x_size,&
+                  & 1:y_size, 1:z_size))
+             call gf_fft(workslice, backward_fft, ierr1)
+             call copyGF(workreal(ix, iy, iz, 1:x_size, 1:y_size,&
+                  & 1:z_size), workslice)
+          enddo
+       enddo
+    enddo
+
+    !forward fft on k'
+    do ix= 1, x_size
+       do iy = 1, y_size
+          do iz = 1, z_size
+             call copyGF (workslice, workreal(1:x_size, 1:y_size,&
+                  & 1:z_size, ix, iy iz))
+             call gf_fft(workslice, forward_fft, ierr1)
+             call copyGF(workreal(1:x_size, 1:y_size, 1:z_size, ix,&
+                  & iy, iz), workslice)
+          enddo
+       enddo
+    enddo
+
+    !reshape array
+    rlspace=reshape(workreal, [npoints, npoints])
+
+  end subroutine momspace_to_realspace
+
+  subroutine allocate_workreal(workreal, x_size, y_size, z_size,&
+       & nomega, ierr)
+    type(greensfunc), allocatable, intent(inout) :: workreal(:, :, :, :, :, :)
+    integer :: x_size, y_size, z_size, nomega
+    integer :: ierr
+    
+    
+    allocate(workreal(x_size, y_size, z_size,x_size, y_size, z_size))
+    do ix = 1, x_size
+       do iy = 1, y_size
+          do iz = 1, z_size
+             do jx = 1, x_size
+                do jy = 1, y_size
+                   do jz = 1, z_size
+                      allocate((workreal(ix, iy, iz, jx, jy, jz)%GF(nomega)))
+                      do io = 1, nomega
+                         workreal(ix, iy, iz, jx, jy, jz)%GF(io) = cmplx_zero
+                      enddo
+                   enddo
+                enddo
+             enddo
+          enddo
+       enddo
+    enddo
+      
+    end subroutine allocate_workreal
+
+
+    
 end module gf_fourier
 

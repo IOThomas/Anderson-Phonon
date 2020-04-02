@@ -1,9 +1,9 @@
 module dynamicalLoop
   
-  use constants
-  use definedtypes
-  use greensroutines
-  use gf_fourier
+  use constants, only: real12
+  use definedtypes, only: settingparam, storedparam, kappagrid
+  use greensroutines, only: greensfunc, allocateGF, calculateGF
+  use gf_fourier, only: greensfunc_initplan, greensfunc_killplan
   implicit none
 
 contains
@@ -43,8 +43,14 @@ contains
     
     call allocateGF(new_hybrid, settings%ncell(1), settings%ncell(2),&
          & settings%ncell(3), settings%nomega, ierr1)
+    ! error handling
     call allocateGF(GF_typ, settings%ncell(1), settings%ncell(2),&
          & settings%ncell(3), settings%nomega, ierr1)
+    ! error handling
+
+    !initialise fourier transform settings
+    call greensfunc_initplan(GF_mom, ierr1)
+    ! error handling
 
     self_consistent_loop:do iloop = 1, settings%max_loops
 
@@ -56,7 +62,7 @@ contains
        call momspace_to_realspace(GF_mom, GF_real, ierr1)
        ! error handling
 
-       call disorder(GF_real, GF_typ, ADOS, PDOS, ierr1)
+       call disorder_effects(GF_real, GF_typ, ADOS, PDOS, ierr1)
        ! error handling
 
        call new_hyb(GF_mom, GF_typ, hybridisation, new_hybrid,&
@@ -70,12 +76,16 @@ contains
        
 
     end do self_consistent_loop
+
+    call greensfunc_killplan(ierr1)
+    ! error handling
        
     if (.not.converged) then
        ! not converged error handling
     end if
 
   end subroutine loop
-    
+
+  
 
 end module 
