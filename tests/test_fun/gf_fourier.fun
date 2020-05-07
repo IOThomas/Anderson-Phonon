@@ -31,6 +31,9 @@ test initialise_kill_cycle
      logical :: forward_associated, backward_associated
      logical :: work_allocated, forward_null, backward_null
 
+     !calls the plan initialisation routines and then kills the plan
+     !checks plan status before, during and after 
+
      call get_gf_plan_status(init_plan, forward_associated,&
        backward_associated, work_allocated, forward_null, backward_null)
 
@@ -70,6 +73,7 @@ end test
 
 test kill_without_initialisation
 
+     ! checks that error issued if plan is killed before it's initialised
      call greensfunc_killplan(ierr)
      assert_equal(ierr,1)
      
@@ -77,6 +81,7 @@ end test
 
 test intialise_twice
 
+     ! checks plan can't be initialised twice, then kills plan
      call greensfunc_initplan(greens_function, ierr)
      assert_equal(ierr,0)
      call greensfunc_initplan(greens_function, ierr)
@@ -89,6 +94,7 @@ end test
 
 test fft_without_initialisation
 
+     !checks you can't run the FFT without initialising a plan
      call gf_fft(greens_function, forward_fft, ierr)
      assert_equal(ierr,1)
      
@@ -96,6 +102,8 @@ end test
 
 test fft_wrong_transform_flag
 
+     !checks an FFT can't be called if the type of transform
+     ! is set to an invalid value
      call greensfunc_initplan(greens_function, ierr)
      assert_equal(ierr,0)
 
@@ -111,6 +119,8 @@ test fft_array_too_big
      type(greensfunc), allocatable:: test(:, :, :)
      integer :: too_big = 300
 
+     !checks that errors are returned if array sizes different from those
+     !in the plan are passed to the FFT
      call greensfunc_initplan(greens_function, ierr)
      assert_equal(ierr,0)
 
@@ -136,6 +146,9 @@ end test
 test fft_array_too_small
      type(greensfunc), allocatable:: test(:, :, :)
      integer :: too_small = 1
+
+     !checks that errors are returned if array sizes different from those
+     !in the plan are passed to the FFT
 
      call greensfunc_initplan(greens_function, ierr)
      assert_equal(ierr,0)
@@ -173,40 +186,18 @@ test forward_then_back_real
      logical          :: imag_final_prob = .false.
      logical          :: is_problem = .false.
 
+     !checks that the FFT can transform a known function and back again
      !initialise test values
      do i = 1, x_size
      	do j = 1, y_size
 	   do k = 1, z_size
 	      allocate(initial_gf(i, j, k)%GF(n_omega))
               allocate(intermediate_gf(i, j, k)%GF(n_omega))
-	      start = cmplx(alpha**real(i+j+k-3,real12),zero,real12)
-
-	      phase = cmplx(zero, -two*pi*real((i-1),real12)/x_length,real12)
-	      if ((real(start,real12).eq.real(exp(-phase),real12))&
-	      .and.(aimag(start).eq.aimag(exp(-phase))).and.(alpha.eq.one)) then
-	         intermediate = cmplx(x_length,zero,real12)
-	      else
-	         denom = cmplx(one,zero,real12) - cmplx(alpha, zero,real12)*exp(phase)
-	         intermediate = cmplx(one-alpha**(x_length), zero, real12)/denom
-	      endif
-
-              phase = cmplx(zero, -two*pi*real((j-1),real12)/y_length,real12)
-	      if ((real(start,real12).eq.real(exp(-phase),real12))&
-	      .and.(aimag(start).eq.aimag(exp(-phase))).and.(alpha.eq.one)) then
-	         intermediate = intermediate*cmplx(y_length,zero,real12)
-	      else
-	         denom = cmplx(one,zero,real12) - cmplx(alpha, zero,real12)*exp(phase)
-	         intermediate = intermediate*cmplx(one-alpha**(y_length), zero, real12)/denom
-	      endif
-
-              phase = cmplx(zero, -two*pi*real((k-1),real12)/z_length, real12)
-	      if ((real(start,real12).eq.real(exp(-phase),real12))&
-	      .and.(aimag(start).eq.aimag(exp(-phase))).and.(alpha.eq.one)) then
-	         intermediate = intermediate*cmplx(z_length,zero,real12)
-	      else
-	         denom = cmplx(one,zero,real12) - cmplx(alpha, zero,real12)*exp(phase)
-	         intermediate = intermediate*cmplx(one-alpha**(z_length), zero, real12)/denom
-	      endif
+	      start = initial_function(alpha, i, j, k)
+       
+              intermediate=intermediate_function(alpha, i, x_length, start)* &
+                   & intermediate_function(alpha, j, y_length, start)* &
+                   & intermediate_function(alpha, k, z_length, start)
 	      
 	      do l = 1, n_omega
 	      	 initial_gf(i, j, k)%GF(l) = start
@@ -234,7 +225,7 @@ test forward_then_back_real
 	      do l = 1, n_omega
 	      	 test_value=real(greens_function(i, j, k)%GF(l))
 		 target_value=real(intermediate_gf(i, j, k)%GF(l))
-		 write(15,*) i, j, k, l, test_value, target_value, (test_value-target_value)
+		
 	      	 !if (test_value.ne.target_value) then
 		 if (abs(test_value-target_value).gt.tolerance) then
 		    real_inter_prob = .true.
@@ -271,7 +262,6 @@ test forward_then_back_real
 	      do l = 1, n_omega
 	      	 test_value=real(greens_function(i, j, k)%GF(l))
 		 target_value=real(initial_gf(i, j, k)%GF(l))
-		 write(17,*) i, j, k, l, test_value, target_value, (test_value-target_value)
 	      	 !if (test_value.ne.target_value) then
 		 if (abs(test_value-target_value).gt.tolerance) then
 		    real_final_prob = .true.
@@ -306,5 +296,6 @@ test forward_then_back_real
 	   enddo
 	enddo
      enddo
+
 end test
 end test_suite

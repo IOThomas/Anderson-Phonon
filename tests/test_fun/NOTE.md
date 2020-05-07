@@ -27,3 +27,18 @@ Test suites and module correspondences
 |`dispersions.fun`	    |`dispersions`		|fine and coarse grid dispersions|
 |`greensroutines.fun`   |`greensroutines`   |GF allocation, calculation      |
 |`gf_fourier.fun`       |`gf_fourier`       |GF related FFT (uses FFTW lib)  |
+
+
+Test suites containing external code (functions etc.) for tests
+----------------------------------------------------------------
+
+Some complicated routines needed for testing have been removed from the body of 
+the tests and placed in modules whose source code is kept in the relevent 
+`test_code` directory. Suites for which this is the case have been listed here.
+
+
+|SUITE                  |MODULE             |EXTERNAL TEST CODE FILE         |
+|----------------       |--------------     |------                          |
+|`gf_fourier.fun`       |`gf_fourier`       |`gf_test_routines.f08`          |
+  
+

@@ -3,9 +3,11 @@
 ! funit generated this file from gf_fourier.fun
 
 module gf_fourier_fun
- 
+
  use constants
+ use definedtypes
  use greensroutines
+ use gf_test_routines
  use gf_fourier
 
  implicit none
@@ -47,6 +49,9 @@ module gf_fourier_fun
      logical :: forward_associated, backward_associated
      logical :: work_allocated, forward_null, backward_null
 
+     !calls the plan initialisation routines and then kills the plan
+     !checks plan status before, during and after 
+
      call get_gf_plan_status(init_plan, forward_associated,&
        backward_associated, work_allocated, forward_null, backward_null)
 
@@ -55,7 +60,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (init_plan) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:37]"
+              &[gf_fourier.fun:40]"
       print *, "  ", "init_plan is not false"
       print *, ""
       noAssertFailed = .false.
@@ -69,7 +74,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (forward_associated) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:38]"
+              &[gf_fourier.fun:41]"
       print *, "  ", "forward_associated is not false"
       print *, ""
       noAssertFailed = .false.
@@ -83,7 +88,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (backward_associated) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:39]"
+              &[gf_fourier.fun:42]"
       print *, "  ", "backward_associated is not false"
       print *, ""
       noAssertFailed = .false.
@@ -97,7 +102,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (work_allocated) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:40]"
+              &[gf_fourier.fun:43]"
       print *, "  ", "work_allocated is not false"
       print *, ""
       noAssertFailed = .false.
@@ -111,7 +116,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (forward_null) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:41]"
+              &[gf_fourier.fun:44]"
       print *, "  ", "forward_null is not false"
       print *, ""
       noAssertFailed = .false.
@@ -125,7 +130,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (backward_null) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:42]"
+              &[gf_fourier.fun:45]"
       print *, "  ", "backward_null is not false"
       print *, ""
       noAssertFailed = .false.
@@ -141,7 +146,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:45]"
+              &[gf_fourier.fun:48]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -159,7 +164,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(init_plan)) then
       print *, " *Assert_True failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:50]"
+              &[gf_fourier.fun:53]"
       print *, "  ", "init_plan is not true"
       print *, ""
       noAssertFailed = .false.
@@ -173,7 +178,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(forward_associated)) then
       print *, " *Assert_True failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:51]"
+              &[gf_fourier.fun:54]"
       print *, "  ", "forward_associated is not true"
       print *, ""
       noAssertFailed = .false.
@@ -187,7 +192,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(backward_associated)) then
       print *, " *Assert_True failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:52]"
+              &[gf_fourier.fun:55]"
       print *, "  ", "backward_associated is not true"
       print *, ""
       noAssertFailed = .false.
@@ -201,7 +206,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(work_allocated)) then
       print *, " *Assert_True failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:53]"
+              &[gf_fourier.fun:56]"
       print *, "  ", "work_allocated is not true"
       print *, ""
       noAssertFailed = .false.
@@ -215,7 +220,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (forward_null) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:54]"
+              &[gf_fourier.fun:57]"
       print *, "  ", "forward_null is not false"
       print *, ""
       noAssertFailed = .false.
@@ -229,7 +234,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (backward_null) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:55]"
+              &[gf_fourier.fun:58]"
       print *, "  ", "backward_null is not false"
       print *, ""
       noAssertFailed = .false.
@@ -245,7 +250,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:58]"
+              &[gf_fourier.fun:61]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -263,7 +268,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (init_plan) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:63]"
+              &[gf_fourier.fun:66]"
       print *, "  ", "init_plan is not false"
       print *, ""
       noAssertFailed = .false.
@@ -277,7 +282,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(forward_associated)) then
       print *, " *Assert_True failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:64]"
+              &[gf_fourier.fun:67]"
       print *, "  ", "forward_associated is not true"
       print *, ""
       noAssertFailed = .false.
@@ -291,7 +296,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(backward_associated)) then
       print *, " *Assert_True failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:65]"
+              &[gf_fourier.fun:68]"
       print *, "  ", "backward_associated is not true"
       print *, ""
       noAssertFailed = .false.
@@ -305,7 +310,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (work_allocated) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:66]"
+              &[gf_fourier.fun:69]"
       print *, "  ", "work_allocated is not false"
       print *, ""
       noAssertFailed = .false.
@@ -319,7 +324,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (forward_null) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:67]"
+              &[gf_fourier.fun:70]"
       print *, "  ", "forward_null is not false"
       print *, ""
       noAssertFailed = .false.
@@ -333,7 +338,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (backward_null) then
       print *, " *Assert_False failed* in test initialise_kill_cycle &
-              &[gf_fourier.fun:68]"
+              &[gf_fourier.fun:71]"
       print *, "  ", "backward_null is not false"
       print *, ""
       noAssertFailed = .false.
@@ -351,13 +356,14 @@ module gf_fourier_fun
  subroutine kill_without_initialisation
 
 
+     ! checks that error issued if plan is killed before it's initialised
      call greensfunc_killplan(ierr)
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (.not.(ierr==1)) then
       print *, " *Assert_Equal failed* in test kill_without_initialisation &
-              &[gf_fourier.fun:74]"
+              &[gf_fourier.fun:78]"
       print *, "  ", "ierr (",ierr,") is not", 1
       print *, ""
       noAssertFailed = .false.
@@ -376,13 +382,14 @@ module gf_fourier_fun
  subroutine intialise_twice
 
 
+     ! checks plan can't be initialised twice, then kills plan
      call greensfunc_initplan(greens_function, ierr)
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test intialise_twice &
-              &[gf_fourier.fun:81]"
+              &[gf_fourier.fun:86]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -397,7 +404,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==1)) then
       print *, " *Assert_Equal failed* in test intialise_twice &
-              &[gf_fourier.fun:83]"
+              &[gf_fourier.fun:88]"
       print *, "  ", "ierr (",ierr,") is not", 1
       print *, ""
       noAssertFailed = .false.
@@ -413,7 +420,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test intialise_twice &
-              &[gf_fourier.fun:86]"
+              &[gf_fourier.fun:91]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -432,13 +439,14 @@ module gf_fourier_fun
  subroutine fft_without_initialisation
 
 
+     !checks you can't run the FFT without initialising a plan
      call gf_fft(greens_function, forward_fft, ierr)
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (.not.(ierr==1)) then
       print *, " *Assert_Equal failed* in test fft_without_initialisation &
-              &[gf_fourier.fun:93]"
+              &[gf_fourier.fun:99]"
       print *, "  ", "ierr (",ierr,") is not", 1
       print *, ""
       noAssertFailed = .false.
@@ -457,13 +465,15 @@ module gf_fourier_fun
  subroutine fft_wrong_transform_flag
 
 
+     !checks an FFT can't be called if the type of transform
+     ! is set to an invalid value
      call greensfunc_initplan(greens_function, ierr)
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test fft_wrong_transform_flag &
-              &[gf_fourier.fun:100]"
+              &[gf_fourier.fun:108]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -479,7 +489,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==2)) then
       print *, " *Assert_Equal failed* in test fft_wrong_transform_flag &
-              &[gf_fourier.fun:103]"
+              &[gf_fourier.fun:111]"
       print *, "  ", "ierr (",ierr,") is not", 2
       print *, ""
       noAssertFailed = .false.
@@ -495,7 +505,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test fft_wrong_transform_flag &
-              &[gf_fourier.fun:106]"
+              &[gf_fourier.fun:114]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -516,13 +526,15 @@ module gf_fourier_fun
      type(greensfunc), allocatable:: test(:, :, :)
      integer :: too_big = 300
 
+     !checks that errors are returned if array sizes different from those
+     !in the plan are passed to the FFT
      call greensfunc_initplan(greens_function, ierr)
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test fft_array_too_big &
-              &[gf_fourier.fun:115]"
+              &[gf_fourier.fun:125]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -539,7 +551,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==3)) then
       print *, " *Assert_Equal failed* in test fft_array_too_big &
-              &[gf_fourier.fun:119]"
+              &[gf_fourier.fun:129]"
       print *, "  ", "ierr (",ierr,") is not", 3
       print *, ""
       noAssertFailed = .false.
@@ -557,7 +569,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==4)) then
       print *, " *Assert_Equal failed* in test fft_array_too_big &
-              &[gf_fourier.fun:124]"
+              &[gf_fourier.fun:134]"
       print *, "  ", "ierr (",ierr,") is not", 4
       print *, ""
       noAssertFailed = .false.
@@ -575,7 +587,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==5)) then
       print *, " *Assert_Equal failed* in test fft_array_too_big &
-              &[gf_fourier.fun:129]"
+              &[gf_fourier.fun:139]"
       print *, "  ", "ierr (",ierr,") is not", 5
       print *, ""
       noAssertFailed = .false.
@@ -592,7 +604,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test fft_array_too_big &
-              &[gf_fourier.fun:133]"
+              &[gf_fourier.fun:143]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -612,13 +624,16 @@ module gf_fourier_fun
      type(greensfunc), allocatable:: test(:, :, :)
      integer :: too_small = 1
 
+     !checks that errors are returned if array sizes different from those
+     !in the plan are passed to the FFT
+
      call greensfunc_initplan(greens_function, ierr)
   ! Assert_Equal assertion
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test fft_array_too_small &
-              &[gf_fourier.fun:141]"
+              &[gf_fourier.fun:154]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -635,7 +650,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==3)) then
       print *, " *Assert_Equal failed* in test fft_array_too_small &
-              &[gf_fourier.fun:145]"
+              &[gf_fourier.fun:158]"
       print *, "  ", "ierr (",ierr,") is not", 3
       print *, ""
       noAssertFailed = .false.
@@ -653,7 +668,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==4)) then
       print *, " *Assert_Equal failed* in test fft_array_too_small &
-              &[gf_fourier.fun:150]"
+              &[gf_fourier.fun:163]"
       print *, "  ", "ierr (",ierr,") is not", 4
       print *, ""
       noAssertFailed = .false.
@@ -671,7 +686,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==5)) then
       print *, " *Assert_Equal failed* in test fft_array_too_small &
-              &[gf_fourier.fun:155]"
+              &[gf_fourier.fun:168]"
       print *, "  ", "ierr (",ierr,") is not", 5
       print *, ""
       noAssertFailed = .false.
@@ -688,7 +703,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test fft_array_too_small &
-              &[gf_fourier.fun:159]"
+              &[gf_fourier.fun:172]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -718,40 +733,18 @@ module gf_fourier_fun
      logical          :: imag_final_prob = .false.
      logical          :: is_problem = .false.
 
+     !checks that the FFT can transform a known function and back again
      !initialise test values
      do i = 1, x_size
      	do j = 1, y_size
 	   do k = 1, z_size
 	      allocate(initial_gf(i, j, k)%GF(n_omega))
               allocate(intermediate_gf(i, j, k)%GF(n_omega))
-	      start = cmplx(alpha**real(i+j+k-3,real12),zero,real12)
-
-	      phase = cmplx(zero, -two*pi*real((i-1),real12)/x_length,real12)
-	      if ((real(start,real12).eq.real(exp(-phase),real12))&
-	      .and.(aimag(start).eq.aimag(exp(-phase))).and.(alpha.eq.one)) then
-	         intermediate = cmplx(x_length,zero,real12)
-	      else
-	         denom = cmplx(one,zero,real12) - cmplx(alpha, zero,real12)*exp(phase)
-	         intermediate = cmplx(one-alpha**(x_length), zero, real12)/denom
-	      endif
-
-              phase = cmplx(zero, -two*pi*real((j-1),real12)/y_length,real12)
-	      if ((real(start,real12).eq.real(exp(-phase),real12))&
-	      .and.(aimag(start).eq.aimag(exp(-phase))).and.(alpha.eq.one)) then
-	         intermediate = intermediate*cmplx(y_length,zero,real12)
-	      else
-	         denom = cmplx(one,zero,real12) - cmplx(alpha, zero,real12)*exp(phase)
-	         intermediate = intermediate*cmplx(one-alpha**(y_length), zero, real12)/denom
-	      endif
-
-              phase = cmplx(zero, -two*pi*real((k-1),real12)/z_length, real12)
-	      if ((real(start,real12).eq.real(exp(-phase),real12))&
-	      .and.(aimag(start).eq.aimag(exp(-phase))).and.(alpha.eq.one)) then
-	         intermediate = intermediate*cmplx(z_length,zero,real12)
-	      else
-	         denom = cmplx(one,zero,real12) - cmplx(alpha, zero,real12)*exp(phase)
-	         intermediate = intermediate*cmplx(one-alpha**(z_length), zero, real12)/denom
-	      endif
+	      start = initial_function(alpha, i, j, k)
+       
+              intermediate=intermediate_function(alpha, i, x_length, start)* &
+                   & intermediate_function(alpha, j, y_length, start)* &
+                   & intermediate_function(alpha, k, z_length, start)
 	      
 	      do l = 1, n_omega
 	      	 initial_gf(i, j, k)%GF(l) = start
@@ -771,7 +764,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test forward_then_back_real &
-              &[gf_fourier.fun:224]"
+              &[gf_fourier.fun:215]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -786,7 +779,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test forward_then_back_real &
-              &[gf_fourier.fun:226]"
+              &[gf_fourier.fun:217]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -805,7 +798,7 @@ module gf_fourier_fun
 	      do l = 1, n_omega
 	      	 test_value=real(greens_function(i, j, k)%GF(l))
 		 target_value=real(intermediate_gf(i, j, k)%GF(l))
-		 write(15,*) i, j, k, l, test_value, target_value, (test_value-target_value)
+		
 	      	 !if (test_value.ne.target_value) then
 		 if (abs(test_value-target_value).gt.tolerance) then
 		    real_inter_prob = .true.
@@ -832,7 +825,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test forward_then_back_real &
-              &[gf_fourier.fun:259]"
+              &[gf_fourier.fun:250]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -848,7 +841,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (real_inter_prob) then
       print *, " *Assert_False failed* in test forward_then_back_real &
-              &[gf_fourier.fun:262]"
+              &[gf_fourier.fun:253]"
       print *, "  ", "real_inter_prob is not false"
       print *, ""
       noAssertFailed = .false.
@@ -862,7 +855,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (imag_inter_prob) then
       print *, " *Assert_False failed* in test forward_then_back_real &
-              &[gf_fourier.fun:263]"
+              &[gf_fourier.fun:254]"
       print *, "  ", "imag_inter_prob is not false"
       print *, ""
       noAssertFailed = .false.
@@ -881,7 +874,6 @@ module gf_fourier_fun
 	      do l = 1, n_omega
 	      	 test_value=real(greens_function(i, j, k)%GF(l))
 		 target_value=real(initial_gf(i, j, k)%GF(l))
-		 write(17,*) i, j, k, l, test_value, target_value, (test_value-target_value)
 	      	 !if (test_value.ne.target_value) then
 		 if (abs(test_value-target_value).gt.tolerance) then
 		    real_final_prob = .true.
@@ -907,7 +899,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (real_final_prob) then
       print *, " *Assert_False failed* in test forward_then_back_real &
-              &[gf_fourier.fun:295]"
+              &[gf_fourier.fun:285]"
       print *, "  ", "real_final_prob is not false"
       print *, ""
       noAssertFailed = .false.
@@ -921,7 +913,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (imag_final_prob) then
       print *, " *Assert_False failed* in test forward_then_back_real &
-              &[gf_fourier.fun:296]"
+              &[gf_fourier.fun:286]"
       print *, "  ", "imag_final_prob is not false"
       print *, ""
       noAssertFailed = .false.
@@ -937,7 +929,7 @@ module gf_fourier_fun
   if (noAssertFailed) then
     if (.not.(ierr==0)) then
       print *, " *Assert_Equal failed* in test forward_then_back_real &
-              &[gf_fourier.fun:299]"
+              &[gf_fourier.fun:289]"
       print *, "  ", "ierr (",ierr,") is not", 0
       print *, ""
       noAssertFailed = .false.
@@ -955,6 +947,7 @@ module gf_fourier_fun
 	   enddo
 	enddo
      enddo
+
 
   numTests = numTests + 1
 
