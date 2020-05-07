@@ -1,6 +1,6 @@
 module constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!# Constants used throughout program.
+!# Constants and error handling routines used throughout program.  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   use, intrinsic :: iso_fortran_env
   implicit none
@@ -32,4 +32,18 @@ module constants
   character(len=79), parameter, public :: dline = repeat("-", 79)
   !# row of dashes for output formatting
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+contains
+  
+
+  subroutine fatal_error_from_call(ierr, location, called_code_unit)
+    integer, intent(in) :: ierr
+    character(len=*)   :: location
+    character(len=*)   :: called_code_unit
+
+    write(*, *) "Fatal error in subroutine ", location
+    write(*, *) "Call to ", called_code_unit, " failed with code ", ierr
+    write(*, *) "Halting program"
+    
+  end subroutine fatal_error_from_call
+
 end module constants
