@@ -482,7 +482,7 @@ module greensroutines_fun
  end subroutine calculateGF_divbyzero
 
 
- subroutine GF_copying
+ subroutine GF_copying_individual_components
 
      type(greensfunc), allocatable :: original(:, :, :)
      type(greensfunc), allocatable :: copy(:, :, :)
@@ -499,7 +499,7 @@ module greensroutines_fun
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
-      print *, " *Assert_Equal failed* in test GF_copying &
+      print *, " *Assert_Equal failed* in test GF_copying_individual_components &
               &[greensroutines.fun:253]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
@@ -516,7 +516,7 @@ module greensroutines_fun
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
-      print *, " *Assert_Equal failed* in test GF_copying &
+      print *, " *Assert_Equal failed* in test GF_copying_individual_components &
               &[greensroutines.fun:257]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
@@ -541,7 +541,6 @@ module greensroutines_fun
 
      call copymap(copy, original)
      call copyGF(copy, original)
-
      
      do i = 1, arraysize
         if (copyGF_prob.and.copymap_prob) exit
@@ -565,8 +564,8 @@ module greensroutines_fun
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (copyGF_prob) then
-      print *, " *Assert_False failed* in test GF_copying &
-              &[greensroutines.fun:293]"
+      print *, " *Assert_False failed* in test GF_copying_individual_components &
+              &[greensroutines.fun:292]"
       print *, "  ", "copyGF_prob is not false"
       print *, ""
       noAssertFailed = .false.
@@ -579,8 +578,8 @@ module greensroutines_fun
   numAsserts = numAsserts + 1
   if (noAssertFailed) then
     if (copymap_prob) then
-      print *, " *Assert_False failed* in test GF_copying &
-              &[greensroutines.fun:294]"
+      print *, " *Assert_False failed* in test GF_copying_individual_components &
+              &[greensroutines.fun:293]"
       print *, "  ", "copymap_prob is not false"
       print *, ""
       noAssertFailed = .false.
@@ -593,7 +592,7 @@ module greensroutines_fun
 
   numTests = numTests + 1
 
- end subroutine GF_copying
+ end subroutine GF_copying_individual_components
 
 
  subroutine GF_invert
@@ -614,7 +613,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test GF_invert &
-              &[greensroutines.fun:310]"
+              &[greensroutines.fun:309]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -643,7 +642,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(all(ierr1 ==  0))) then
       print *, " *Assert_True failed* in test GF_invert &
-              &[greensroutines.fun:326]"
+              &[greensroutines.fun:325]"
       print *, "  ", "all(ierr1 ==  0) is not true"
       print *, ""
       noAssertFailed = .false.
@@ -675,7 +674,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (invertGF_prob) then
       print *, " *Assert_False failed* in test GF_invert &
-              &[greensroutines.fun:345]"
+              &[greensroutines.fun:344]"
       print *, "  ", "invertGF_prob is not false"
       print *, ""
       noAssertFailed = .false.
@@ -708,7 +707,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test GFinvert_ierr_divby0 &
-              &[greensroutines.fun:360]"
+              &[greensroutines.fun:359]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -739,7 +738,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(any(ierr_invertGF == 1))) then
       print *, " *Assert_True failed* in test GFinvert_ierr_divby0 &
-              &[greensroutines.fun:378]"
+              &[greensroutines.fun:377]"
       print *, "  ", "any(ierr_invertGF == 1) is not true"
       print *, ""
       noAssertFailed = .false.
@@ -776,7 +775,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test GF_reduction &
-              &[greensroutines.fun:397]"
+              &[greensroutines.fun:396]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -792,7 +791,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test GF_reduction &
-              &[greensroutines.fun:400]"
+              &[greensroutines.fun:399]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -832,7 +831,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test GF_reduction &
-              &[greensroutines.fun:427]"
+              &[greensroutines.fun:426]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -868,7 +867,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (reduce_problem) then
       print *, " *Assert_False failed* in test GF_reduction &
-              &[greensroutines.fun:450]"
+              &[greensroutines.fun:449]"
       print *, "  ", "reduce_problem is not false"
       print *, ""
       noAssertFailed = .false.
@@ -901,7 +900,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr1 &
-              &[greensroutines.fun:465]"
+              &[greensroutines.fun:464]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -917,7 +916,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr1 &
-              &[greensroutines.fun:468]"
+              &[greensroutines.fun:467]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -935,7 +934,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 1)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr1 &
-              &[greensroutines.fun:473]"
+              &[greensroutines.fun:472]"
       print *, "  ", "ierr (",ierr,") is not",  1
       print *, ""
       noAssertFailed = .false.
@@ -951,7 +950,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 1)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr1 &
-              &[greensroutines.fun:476]"
+              &[greensroutines.fun:475]"
       print *, "  ", "ierr (",ierr,") is not",  1
       print *, ""
       noAssertFailed = .false.
@@ -984,7 +983,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr2 &
-              &[greensroutines.fun:491]"
+              &[greensroutines.fun:490]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -1000,7 +999,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr2 &
-              &[greensroutines.fun:494]"
+              &[greensroutines.fun:493]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -1016,7 +1015,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 2)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr2 &
-              &[greensroutines.fun:497]"
+              &[greensroutines.fun:496]"
       print *, "  ", "ierr (",ierr,") is not",  2
       print *, ""
       noAssertFailed = .false.
@@ -1048,7 +1047,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr3 &
-              &[greensroutines.fun:511]"
+              &[greensroutines.fun:510]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -1064,7 +1063,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 0)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr3 &
-              &[greensroutines.fun:514]"
+              &[greensroutines.fun:513]"
       print *, "  ", "ierr (",ierr,") is not",  0
       print *, ""
       noAssertFailed = .false.
@@ -1080,7 +1079,7 @@ module greensroutines_fun
   if (noAssertFailed) then
     if (.not.(ierr== 3)) then
       print *, " *Assert_Equal failed* in test reduceGF_ierr3 &
-              &[greensroutines.fun:517]"
+              &[greensroutines.fun:516]"
       print *, "  ", "ierr (",ierr,") is not",  3
       print *, ""
       noAssertFailed = .false.
@@ -1093,6 +1092,239 @@ module greensroutines_fun
   numTests = numTests + 1
 
  end subroutine reduceGF_ierr3
+
+
+ subroutine GF_overloaded_allocation
+
+     type(greensfunc), allocatable :: original(:, :, :)
+     type(greensfunc), allocatable :: copy(:, :, :)
+     integer, parameter            :: arraysize = 2
+     integer, parameter            :: testmap = 2
+     real(real12), parameter       :: testGF = two
+     integer                       :: i, j, k, l, ierr
+     logical                       :: copymap_prob = .false.
+     logical                       :: copyGF_prob = .false.
+
+     call allocateGF(original, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr== 0)) then
+      print *, " *Assert_Equal failed* in test GF_overloaded_allocation &
+              &[greensroutines.fun:531]"
+      print *, "  ", "ierr (",ierr,") is not",  0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     call allocateGF(copy, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr== 0)) then
+      print *, " *Assert_Equal failed* in test GF_overloaded_allocation &
+              &[greensroutines.fun:535]"
+      print *, "  ", "ierr (",ierr,") is not",  0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     
+     do i = 1, arraysize
+     	do j = 1, arraysize
+	   do k = 1, arraysize
+	      original(i, j, k)%map = testmap
+	      do l = 1, arraysize
+		 original(i, j, k)%GF(l) = cmplx(testGF, testGF)
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     copy = original
+     
+     do i = 1, arraysize
+        if (copyGF_prob.and.copymap_prob) exit
+     	do j = 1, arraysize
+	   if (copyGF_prob.and.copymap_prob) exit
+	   do k = 1, arraysize
+	      if (copyGF_prob.and.copymap_prob) exit
+	      if (original(i, j, k)%map /= testmap) copymap_prob = .true.
+	      do l = 1, arraysize
+	         if (copyGF_prob.and.copymap_prob) exit
+		 if (real(original(i, j, k)%GF(l)) /= testGF) &
+		     copyGF_prob = .true.
+		 if (aimag(original(i, j, k)%GF(l)) /= testGF) &
+		     copyGF_prob = .true.
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+  ! Assert_False assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (copyGF_prob) then
+      print *, " *Assert_False failed* in test GF_overloaded_allocation &
+              &[greensroutines.fun:569]"
+      print *, "  ", "copyGF_prob is not false"
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+  ! Assert_False assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (copymap_prob) then
+      print *, " *Assert_False failed* in test GF_overloaded_allocation &
+              &[greensroutines.fun:570]"
+      print *, "  ", "copymap_prob is not false"
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+     deallocate(original, copy)
+
+  numTests = numTests + 1
+
+ end subroutine GF_overloaded_allocation
+
+
+ subroutine copy_slices_to_from
+
+     complex(real12), allocatable :: original(:, :, :, :)
+     complex(real12), allocatable :: slice(:, :, :)
+     type(greensfunc), allocatable :: copy(:, :, :)
+     integer, parameter            :: arraysize = 2
+     integer, parameter            :: testmap = 2
+     integer, parameter            :: insert_slice=2
+     real(real12), parameter       :: testGF(2) = (/ one, two /)
+     real(real12), parameter       :: insert = zero
+     integer                       :: i, j, k, l, ierr
+     logical                       :: copy_from_complex_prob = .false.
+     logical                       :: copy_to_complex_prob = .false.
+   
+
+     call allocateGF(copy, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+  ! Assert_Equal assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (.not.(ierr== 0)) then
+      print *, " *Assert_Equal failed* in test copy_slices_to_from &
+              &[greensroutines.fun:590]"
+      print *, "  ", "ierr (",ierr,") is not",  0
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     allocate(original(arraysize, arraysize, arraysize, arraysize))
+     allocate(slice(arraysize, arraysize, arraysize))
+
+     do i = 1, arraysize
+     	original(1:arraysize, 1:arraysize, 1:arraysize, i) = &
+			      & cmplx(testGF(i), testGF(i))
+     enddo
+
+     do i = 1, arraysize
+     	call copy_gf_slice(copy,&
+	     & original(1:arraysize, 1:arraysize, 1:arraysize, i), i)
+     enddo
+
+     do i = 1, arraysize
+     	if (copy_from_complex_prob) exit
+	do j = 1, arraysize
+	   if (copy_from_complex_prob) exit
+	   do k = 1, arraysize
+	       if (copy_from_complex_prob) exit
+	       do l =1, arraysize
+		  if (real(copy(i, j, k)%GF(l)).ne.testGF(l)) then
+		     copy_from_complex_prob = .true.
+		     exit
+		  endif
+		  if (aimag(copy(i, j, k)%GF(l)).ne.testGF(l)) then
+		     copy_from_complex_prob = .true.
+	    	     exit
+		  endif
+               enddo
+	   enddo
+	enddo      
+     enddo
+
+  ! Assert_False assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (copy_from_complex_prob) then
+      print *, " *Assert_False failed* in test copy_slices_to_from &
+              &[greensroutines.fun:625]"
+      print *, "  ", "copy_from_complex_prob is not false"
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+     call copy_gf_slice(slice,copy,insert_slice)
+
+     do i = 1, arraysize
+     	if (copy_to_complex_prob) exit
+	do j = 1, arraysize
+	   if (copy_to_complex_prob) exit
+	   do k = 1, arraysize
+	       if (copy_to_complex_prob) exit
+	       if (real(slice(i, j, k)).ne.testGF(insert_slice)) then
+		  copy_to_complex_prob = .true.
+		  exit
+	       endif
+	       if (aimag(slice(i, j, k)).ne.testGF(insert_slice)) then
+		  copy_to_complex_prob = .true.
+	    	  exit
+	       endif
+	   enddo
+	enddo      
+     enddo    
+
+  ! Assert_False assertion
+  numAsserts = numAsserts + 1
+  if (noAssertFailed) then
+    if (copy_to_complex_prob) then
+      print *, " *Assert_False failed* in test copy_slices_to_from &
+              &[greensroutines.fun:647]"
+      print *, "  ", "copy_to_complex_prob is not false"
+      print *, ""
+      noAssertFailed = .false.
+      numFailures    = numFailures + 1
+    else
+      numAssertsTested = numAssertsTested + 1
+    endif
+  endif
+
+
+  numTests = numTests + 1
+
+ end subroutine copy_slices_to_from
 
 
  subroutine funit_setup
@@ -1140,7 +1372,7 @@ module greensroutines_fun
   call funit_teardown
 
   call funit_setup
-  call GF_copying
+  call GF_copying_individual_components
   call funit_teardown
 
   call funit_setup
@@ -1165,6 +1397,14 @@ module greensroutines_fun
 
   call funit_setup
   call reduceGF_ierr3
+  call funit_teardown
+
+  call funit_setup
+  call GF_overloaded_allocation
+  call funit_teardown
+
+  call funit_setup
+  call copy_slices_to_from
   call funit_teardown
 
   nTests          = numTests

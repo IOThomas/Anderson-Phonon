@@ -238,7 +238,7 @@ test calculateGF_divbyzero
 
 end test
 
-test GF_copying 
+test GF_copying_individual_components
      type(greensfunc), allocatable :: original(:, :, :)
      type(greensfunc), allocatable :: copy(:, :, :)
      integer, parameter            :: arraysize = 2
@@ -270,7 +270,6 @@ test GF_copying
 
      call copymap(copy, original)
      call copyGF(copy, original)
-
      
      do i = 1, arraysize
         if (copyGF_prob.and.copymap_prob) exit
@@ -517,5 +516,135 @@ test reduceGF_ierr3
      assert_equal(ierr, 3)
 end test
 
+test GF_overloaded_allocation
+     type(greensfunc), allocatable :: original(:, :, :)
+     type(greensfunc), allocatable :: copy(:, :, :)
+     integer, parameter            :: arraysize = 2
+     integer, parameter            :: testmap = 2
+     real(real12), parameter       :: testGF = two
+     integer                       :: i, j, k, l, ierr
+     logical                       :: copymap_prob = .false.
+     logical                       :: copyGF_prob = .false.
 
+     call allocateGF(original, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+     assert_equal(ierr, 0)
+
+     call allocateGF(copy, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+     assert_equal(ierr, 0)
+
+     
+     do i = 1, arraysize
+     	do j = 1, arraysize
+	   do k = 1, arraysize
+	      original(i, j, k)%map = testmap
+	      do l = 1, arraysize
+		 original(i, j, k)%GF(l) = cmplx(testGF, testGF)
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     copy = original
+     
+     do i = 1, arraysize
+        if (copyGF_prob.and.copymap_prob) exit
+     	do j = 1, arraysize
+	   if (copyGF_prob.and.copymap_prob) exit
+	   do k = 1, arraysize
+	      if (copyGF_prob.and.copymap_prob) exit
+	      if (original(i, j, k)%map /= testmap) copymap_prob = .true.
+	      do l = 1, arraysize
+	         if (copyGF_prob.and.copymap_prob) exit
+		 if (real(original(i, j, k)%GF(l)) /= testGF) &
+		     copyGF_prob = .true.
+		 if (aimag(original(i, j, k)%GF(l)) /= testGF) &
+		     copyGF_prob = .true.
+	      enddo
+	   enddo
+	enddo
+     enddo
+
+     assert_false(copyGF_prob)
+     assert_false(copymap_prob)
+     deallocate(original, copy)
+end test
+
+test copy_slices_to_from
+     complex(real12), allocatable :: original(:, :, :, :)
+     complex(real12), allocatable :: slice(:, :, :)
+     type(greensfunc), allocatable :: copy(:, :, :)
+     integer, parameter            :: arraysize = 2
+     integer, parameter            :: testmap = 2
+     integer, parameter            :: insert_slice=2
+     real(real12), parameter       :: testGF(2) = (/ one, two /)
+     real(real12), parameter       :: insert = zero
+     integer                       :: i, j, k, l, ierr
+     logical                       :: copy_from_complex_prob = .false.
+     logical                       :: copy_to_complex_prob = .false.
+   
+
+     call allocateGF(copy, arraysize, arraysize, arraysize, arraysize,&
+     	  ierr)
+     assert_equal(ierr, 0)
+
+     allocate(original(arraysize, arraysize, arraysize, arraysize))
+     allocate(slice(arraysize, arraysize, arraysize))
+
+     do i = 1, arraysize
+     	original(1:arraysize, 1:arraysize, 1:arraysize, i) = &
+			      & cmplx(testGF(i), testGF(i))
+     enddo
+
+     do i = 1, arraysize
+     	call copy_gf_slice(copy,&
+	     & original(1:arraysize, 1:arraysize, 1:arraysize, i), i)
+     enddo
+
+     do i = 1, arraysize
+     	if (copy_from_complex_prob) exit
+	do j = 1, arraysize
+	   if (copy_from_complex_prob) exit
+	   do k = 1, arraysize
+	       if (copy_from_complex_prob) exit
+	       do l =1, arraysize
+		  if (real(copy(i, j, k)%GF(l)).ne.testGF(l)) then
+		     copy_from_complex_prob = .true.
+		     exit
+		  endif
+		  if (aimag(copy(i, j, k)%GF(l)).ne.testGF(l)) then
+		     copy_from_complex_prob = .true.
+	    	     exit
+		  endif
+               enddo
+	   enddo
+	enddo      
+     enddo
+
+     assert_false(copy_from_complex_prob)
+
+     call copy_gf_slice(slice,copy,insert_slice)
+
+     do i = 1, arraysize
+     	if (copy_to_complex_prob) exit
+	do j = 1, arraysize
+	   if (copy_to_complex_prob) exit
+	   do k = 1, arraysize
+	       if (copy_to_complex_prob) exit
+	       if (real(slice(i, j, k)).ne.testGF(insert_slice)) then
+		  copy_to_complex_prob = .true.
+		  exit
+	       endif
+	       if (aimag(slice(i, j, k)).ne.testGF(insert_slice)) then
+		  copy_to_complex_prob = .true.
+	    	  exit
+	       endif
+	   enddo
+	enddo      
+     enddo    
+
+     assert_false(copy_to_complex_prob)
+
+ end test
 end test_suite
