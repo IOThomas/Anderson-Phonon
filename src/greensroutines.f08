@@ -8,7 +8,7 @@ module greensroutines
   implicit none
   private
   public allocateGF,  calculateGF, greensfunc, copymap, copyGF, invertGF,&
-       reduceGF, assignment (=), copy_gf_slice   
+       reduceGF, assignment (=), copy_gf_slice 
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   type, public :: greensfunc
@@ -16,7 +16,13 @@ module greensroutines
      complex(real12),allocatable :: GF(:)
      !# value of Green's function wrt omega
      integer                     :: map
-     !# labels the associated coarse grid point 
+     !# labels the associated coarse grid point
+     integer, private            :: nGF_points = 0
+     !# size the size of GF (0 means not yet allocated)
+   contains
+     procedure, public  :: get_size
+     !# fetches the number of nGF_points
+     !# by design, nGF_points should be identical for all members of same array
   end type greensfunc
   interface assignment (=)
      module procedure copy_all_gf
@@ -67,16 +73,31 @@ contains
     endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     allocate(GFvariable(xsize, ysize, zsize))
-    do i = 1, xsize
-       do j = 1, ysize
-          do k = 1, zsize
-             allocate(GFvariable(i,j,k)%GF(nomega))
-          enddo
-       end do
-    end do
+    call allocate_GF(GFvariable, nomega)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   end subroutine allocateGF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  elemental subroutine allocate_GF(GF_array, n_points)
+    type(greensfunc), intent(inout) :: GF_array
+    integer, intent(in)             :: n_points
+
+    GF_array%nGF_points = n_points
+    allocate(GF_array%GF(n_points))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  end subroutine allocate_GF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  function get_size(this)
+    integer           :: get_size
+    class(greensfunc) :: this
+    
+    get_size = this%nGF_points
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  end function get_size
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine calculateGF(GFval, deltaw, dispersion, hybridisation,&
