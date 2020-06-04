@@ -8,7 +8,7 @@ module gf_fourier
 !#         (3) call greensfunc_killplan once done.  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   use constants, only: real12, zero, cmplx_zero, fatal_error_from_call
-  use greensroutines, only: greensfunc
+  use greensroutines, only: greensfunc, copy_slice, allocate_GF, copyGF
   use, intrinsic :: iso_c_binding
   implicit none
   include 'fftw3.f03'
@@ -225,24 +225,11 @@ contains
     end if
     
     do iom = 1, n_omega
-       do iz = 1, z_size
-          do iy = 1, y_size
-             do ix = 1, x_size
-                gfwork_in(ix, iy, iz) = greens_function(ix, iy, iz)%GF(iom)
-             enddo
-          enddo
-       enddo
+       call copy_slice(gfwork_in, greens_function, iom) 
        call fftwq_execute_dft(transform_type, gfwork_in, gfwork_out)
-       do iz = 1, z_size
-          do iy = 1, y_size
-             do ix = 1, x_size
-                !scale backwards transformation
-                if (type_flag.eq.backward_trans) &
-                     gfwork_out(ix, iy, iz) = gfwork_out(ix, iy, iz)/volume
-                greens_function(ix, iy, iz)%GF(iom)=gfwork_out(ix, iy, iz)
-             enddo
-          enddo
-       enddo
+       !scale backwards transformation
+       if (type_flag.eq.backward_trans) gfwork_out = gfwork_out/volume
+       call copy_slice(greens_function, gfwork_out, iom)
     enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   contains

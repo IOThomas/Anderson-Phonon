@@ -8,15 +8,15 @@ module greensroutines
   implicit none
   private
   public allocate_GF, calculateGF, greensfunc, copymap, copyGF, invertGF,&
-       reduceGF, assignment (=), copy_gf_slice 
+       reduceGF, assignment (=), copy_gf_slice, initialise_GF
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   type, public :: greensfunc
      !# Green's function type
      complex(real12),allocatable :: GF(:)
      !# value of Green's function wrt omega
-     integer                     :: map
-     !# labels the associated coarse grid point
+     integer                     :: map = -1
+     !# labels the associated coarse grid point (-1 means unassigned)
      integer, private            :: nGF_points = 0
      !# size the size of GF (0 means not yet allocated)
    contains
@@ -54,6 +54,19 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   end function get_size
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  elemental subroutine initialise_GF(GF_array, GF_init)
+    type(greensfunc), intent(inout) :: GF_array
+    complex(real12), intent(in)     :: GF_init
+
+    integer :: nGF_points, i
+
+    nGF_points = GF_array%get_size()
+    do i = 1, nGF_points
+       GF_array%GF(i)=GF_init
+    enddo
+  end subroutine initialise_GF
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine calculateGF(GFval, deltaw, dispersion, hybridisation,&

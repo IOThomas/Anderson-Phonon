@@ -21,10 +21,9 @@ contains
 
     call error_check()
 
-    call allocate_workreal(workreal, x_size, y_size, z_size,&
-         & nomega, ierr1) ! allocates and sets all entries to zero
-    if (ierr1.ne.0) call fatal_error_from_call(ierr1, "realspace_to_mo&
-         &mspace", "allocate_workreal")
+    allocate(workreal(x_size, y_size, z_size,x_size, y_size, z_size))
+    call allocate_gf(workreal, nomega)
+    call initialise_gf(workreal,cmplx_zero)
     
     copy_momspace_to_diagonal:do ix= 1, x_size
        do iy = 1, y_size
@@ -79,10 +78,8 @@ contains
     nomega = size(momentum(1, 1, 1)%GF, 1)
     call error_check()
 
-    call allocate_workreal(workreal, x_size, y_size, z_size,&
-         & nomega, ierr1) ! allocates and sets all entries to zero
-    if (ierr1.ne.0) call fatal_error_from_call(ierr1, "momspace_to_rl&
-         &space", "allocate_workreal")
+    allocate(workreal(x_size, y_size, z_size,x_size, y_size, z_size))
+    call allocate_gf(workreal, nomega)
 
     workreal = reshape(rlspace, [x_size, y_size, z_size, x_size,&
          & y_size, z_size])
@@ -173,11 +170,9 @@ contains
     y_size = size(workreal,5)
     z_size = size(workreal,6)
     nomega = size(workreal(1, 1, 1, 1, 1, 1)%GF, 1)
-    
-    call allocateGF(workslice, x_size, y_size, z_size, nomega, ierr1)
-    if (ierr1.ne.0) then
-       call fatal_error_call_from_call(ierr1, "fft_on_kdash", "allocateGF")
-    end if
+
+    allocate(workslice(x_size, y_size, z_size)
+    call allocate_gf(workslice, nomega)
 
     fft_each_slice_in_turn:do ix= 1, x_size
        do iy = 1, y_size
@@ -198,53 +193,5 @@ contains
     enddo fft_each_slice_in_turn
     
   end subroutine fft_on_kdash   
-
-  
-  subroutine allocate_workreal(workreal, x_size, y_size, z_size,&
-       & nomega, ierr)
-    type(greensfunc), allocatable, intent(inout) :: workreal(:, :, :, :, :, :)
-    integer :: x_size, y_size, z_size, nomega
-    integer :: ix, iy, iz, io
-    integer :: jx, jy, jz
-    integer :: ierr
-
-    call error_check()
-        
-    allocate(workreal(x_size, y_size, z_size,x_size, y_size, z_size))
-    do ix = 1, x_size
-       do iy = 1, y_size
-          do iz = 1, z_size
-             do jx = 1, x_size
-                do jy = 1, y_size
-                   do jz = 1, z_size
-                      allocate(workreal(ix, iy, iz, jx, jy, jz)%GF(nomega))
-                      do io = 1, nomega
-                         workreal(ix, iy, iz, jx, jy, jz)%GF(io) = cmplx_zero
-                      enddo
-                   enddo
-                enddo
-             enddo
-          enddo
-       enddo
-    enddo
-
-  contains
-    
-    subroutine error_check()
-      
-      if (.not.allocated(workreal)) then
-         ierr = 1
-      elseif ((x_size.le.0).or.(y_size.le.0).or.(z_size.le.0)&
-           & .or.(nomega.le.0)) then
-         ierr = 2
-      else
-         ierr = 0
-      endif
-      
-    end subroutine error_check
-
-  end subroutine allocate_workreal
-
-
-    
+   
 end submodule gf_transforms
