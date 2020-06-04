@@ -7,7 +7,7 @@ module greensroutines
   use definedtypes, only: kappagrid
   implicit none
   private
-  public allocateGF,  calculateGF, greensfunc, copymap, copyGF, invertGF,&
+  public allocate_GF, calculateGF, greensfunc, copymap, copyGF, invertGF,&
        reduceGF, assignment (=), copy_gf_slice 
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -33,50 +33,6 @@ module greensroutines
   end interface copy_gf_slice
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contains
-!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine allocateGF(GFvariable, xsize, ysize, zsize, nomega, ierr)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!# Allocates arrays for greensfunc type variables
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!# Error codes: ierr = 0 -- Routine executed successfully;
-!#              ierr = 1 -- Array size less than 1 in at least one dimension;
-!#              ierr = 2 -- Array already allocated.
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-    type(greensfunc), allocatable, intent(inout) :: GFvariable(:, :, :)
-    !# Greensfunction array to be allocated
-    integer, intent(in)                          :: xsize
-    !# size in x direction
-    integer, intent(in)                          :: ysize
-    !# size in y direction
-    integer, intent(in)                          :: zsize
-    !# size in z direction
-    integer, intent(in)                          :: nomega
-    !# number of frequency points
-    integer, intent(out)                         :: ierr
-    !# error code
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! routine variables
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    integer :: i, j, k
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! check for errors
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if ((xsize.lt.1).or.(ysize.lt.1).or.(zsize.lt.1).or.(nomega.lt.1)) then
-       ierr = 1
-       return
-    elseif (allocated(GFvariable)) then
-       ierr = 2
-       return
-    else
-       ierr = 0
-    endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    allocate(GFvariable(xsize, ysize, zsize))
-    call allocate_GF(GFvariable, nomega)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  end subroutine allocateGF
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   elemental subroutine allocate_GF(GF_array, n_points)
@@ -225,15 +181,9 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! main routine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    call allocateGF(workGFF, nfx, nfy, nfz, nomega, ier1)
-    if (ier1.ne.0) then
-       ! something has gone disastrously wrong!
-       write (*, *) "Fatal error in module greensroutines, subroutine reduceGF"
-       write (*, *) "Unable to allocate workGFF array."
-       write (*, *) "Need to examine source code, correct and recompile."
-       write (*, *) "Halting execution."
-       stop
-    end if
+    allocate(workGFF(nfx, nfy, nfz))
+    call allocate_GF(workGFF, nomega)
+    
     call copymap(workGFF, fineGF)
     call copyGF(workGFF, fineGF)
     

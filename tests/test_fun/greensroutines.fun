@@ -11,78 +11,38 @@ end teardown
 test allocateGF_sizes
      integer, parameter            :: array_size = 2
      type(greensfunc), allocatable :: testGF(:, :, :)
-     integer                       :: ierr
      logical                       :: GFsize_prob = .false.
-     integer                       :: i, j, k, itest
+     logical                       :: get_size_prob = .false.
+     integer                       :: i, j, k, itest, igettest
 
-     call allocateGF(testGF, array_size, array_size, array_size, array_size,&
-     	  ierr)
+     allocate(testGF(array_size, array_size, array_size))
+     call allocate_GF(testGF, array_size)
 
      assert_equal(size(testGF, 1), array_size)
      assert_equal(size(testGF, 2), array_size)
      assert_equal(size(testGF, 3), array_size)
-     assert_equal(ierr, 0)
+
 
      do i = 1, array_size
-     	if (GFsize_prob) then
-	   exit
-	endif
+     	if (GFsize_prob.or.get_size_prob) exit
      	do j = 1, array_size
-	   if (GFsize_prob) then
-	      exit
-	   endif
-	   do k = 1, array_size
+	   if (GFsize_prob.or.get_size_prob) exit
+           do k = 1, array_size
+              if (GFsize_prob.or.get_size_prob) exit
+              
 	      itest = size(testGF(i, j, k)%GF, 1)
-	      if (itest.ne.array_size) then
-	      	 GFsize_prob = .true.
-		 exit
-	      end if
+              if (itest.ne.array_size) GFsize_prob = .true.
+              igettest=testGF(i, j, k)%get_size()
+              if (itest.ne.igettest) get_size_prob = .true.
 	   enddo
 	enddo
       enddo
 
       assert_false(GFsize_prob)
+      assert_false(get_size_prob)
       deallocate(testGF)
 end test
 
-test allocateGF_ierr_code1
-     integer, parameter            :: array_size = 2
-     integer, parameter            :: array_wrong = -10
-     type(greensfunc), allocatable :: testGF(:, :, :)
-     integer                       :: ierr
-
-     call allocateGF(testGF, array_wrong, array_size, array_size, array_size,&
-     	  ierr)
-     assert_equal(ierr, 1)
-     
-
-     call allocateGF(testGF, array_size, array_wrong, array_size, array_size,&
-     	  ierr)
-     assert_equal(ierr, 1)
-     
-
-     call allocateGF(testGF, array_size, array_size, array_wrong, array_size,&
-     	  ierr)
-     assert_equal(ierr, 1)
-    
-
-     call allocateGF(testGF, array_wrong, array_size, array_size, array_wrong,&
-     	  ierr)
-     assert_equal(ierr, 1)
-     
-end test
-
-test allocateGF_ierr_code2
-     integer, parameter            :: array_size = 2
-     type(greensfunc), allocatable :: testGF(:, :, :)
-     integer                       :: ierr
-
-     allocate(testGF(array_size,array_size,array_size))
-     call allocateGF(testGF, array_size, array_size, array_size, array_size,&
-     	  ierr)
-     assert_equal(ierr, 2)
-     deallocate(testGF)
-end test
 
 test calculateGF_output_withhyb
      type(greensfunc)           :: testGF(2, 2, 2)
@@ -248,13 +208,11 @@ test GF_copying_individual_components
      logical                       :: copymap_prob = .false.
      logical                       :: copyGF_prob = .false.
 
-     call allocateGF(original, arraysize, arraysize, arraysize, arraysize,&
-     	  ierr)
-     assert_equal(ierr, 0)
+     allocate(original(arraysize, arraysize, arraysize))
+     call allocate_GF(original, arraysize)
 
-     call allocateGF(copy, arraysize, arraysize, arraysize, arraysize,&
-     	  ierr)
-     assert_equal(ierr, 0)
+     allocate(copy(arraysize, arraysize, arraysize))
+     call allocate_GF(copy, arraysize)
 
      
      do i = 1, arraysize
@@ -304,9 +262,8 @@ test GF_invert
      integer, allocatable          :: ierr1(:, :, :)
      logical                       :: invertGF_prob = .false.
 
-     call allocateGF(test, arraysize, arraysize, arraysize, arraysize,&
-     	  ierr)
-     assert_equal(ierr, 0)
+     allocate(test(arraysize, arraysize, arraysize))
+     call allocate_GF(test,arraysize)
 
      allocate(ierr1(arraysize, arraysize, arraysize))
      
@@ -343,7 +300,7 @@ test GF_invert
 
      assert_false(invertGF_prob)
      
-     deallocate(test,ierr1)
+     deallocate(test, ierr1)
 end test
 
 test GFinvert_ierr_divby0
@@ -354,9 +311,8 @@ test GFinvert_ierr_divby0
      integer                       :: i, j, k, l, ierr
      integer, allocatable          :: ierr_invertGF(:, :, :)
 
-     call allocateGF(test, arraysize, arraysize, arraysize, arraysize,&
-     	  ierr)
-     assert_equal(ierr, 0)
+     allocate(test(arraysize, arraysize, arraysize))
+     call allocate_GF(test, arraysize)
 
      allocate(ierr_invertGF(arraysize, arraysize, arraysize))
      
@@ -391,12 +347,11 @@ test GF_reduction
      integer                       :: ic, jc, kc
      logical                       :: reduce_problem = .false.
 
-     call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
-         ierr)
-     assert_equal(ierr, 0)
+     allocate(coarse(coarse_size, coarse_size, coarse_size))
+     call allocate_GF(coarse, nomega)
 
-     call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
-     assert_equal(ierr, 0)
+     allocate(fine(fine_size, fine_size, fine_size))
+     call allocate_GF(fine, nomega)
 
      do ic = 1, coarse_size
      	do jc = 1, coarse_size
@@ -459,12 +414,12 @@ test reduceGF_ierr1
      integer, parameter            :: nomega = 2
      integer                       :: ierr
 
-     call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
-         ierr)
-     assert_equal(ierr, 0)
+     allocate(coarse(coarse_size, coarse_size, coarse_size))
+     call allocate_GF(coarse, nomega)
 
-     call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
-     assert_equal(ierr, 0)
+     allocate(fine(fine_size, fine_size, fine_size))
+     call allocate_GF(fine, nomega)
+   
 
      allocate(test(1, 1, 1))
      
@@ -485,12 +440,11 @@ test reduceGF_ierr2
      integer, parameter            :: nomega1 = 1
      integer                       :: ierr
 
-     call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
-         ierr)
-     assert_equal(ierr, 0)
+     allocate(coarse(coarse_size, coarse_size, coarse_size))
+     call allocate_GF(coarse, nomega)
 
-     call allocateGF(fine, fine_size, fine_size, fine_size, nomega1, ierr)
-     assert_equal(ierr, 0)
+     allocate(fine(fine_size, fine_size, fine_size))
+     call allocate_GF(fine, nomega1)
 
      call reduceGF(coarse, fine, ierr)
      assert_equal(ierr, 2)
@@ -505,18 +459,17 @@ test reduceGF_ierr3
      integer, parameter            :: nomega = 2
      integer                       :: ierr
 
-     call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
-         ierr)
-     assert_equal(ierr, 0)
+     allocate(coarse(coarse_size, coarse_size, coarse_size))
+     call allocate_GF(coarse, nomega)
 
-     call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
-     assert_equal(ierr, 0)
+     allocate(fine(fine_size, fine_size, fine_size))
+     call allocate_GF(fine, nomega)
 
      call reduceGF(coarse, fine, ierr)
      assert_equal(ierr, 3)
 end test
 
-test GF_overloaded_allocation
+test GF_overloaded_equals
      type(greensfunc), allocatable :: original(:, :, :)
      type(greensfunc), allocatable :: copy(:, :, :)
      integer, parameter            :: arraysize = 2
@@ -526,13 +479,11 @@ test GF_overloaded_allocation
      logical                       :: copymap_prob = .false.
      logical                       :: copyGF_prob = .false.
 
-     call allocateGF(original, arraysize, arraysize, arraysize, arraysize,&
-     	  ierr)
-     assert_equal(ierr, 0)
+     allocate(original(arraysize, arraysize, arraysize))
+     call allocate_GF(original, arraysize)
 
-     call allocateGF(copy, arraysize, arraysize, arraysize, arraysize,&
-     	  ierr)
-     assert_equal(ierr, 0)
+     allocate(copy(arraysize, arraysize, arraysize))
+     call allocate_GF(copy, arraysize)
 
      
      do i = 1, arraysize
@@ -573,7 +524,7 @@ end test
 
 test copy_slices_to_from
      complex(real12), allocatable :: original(:, :, :, :)
-     complex(real12), allocatable :: slice(:, :, :)
+     complex(real12), allocatable  :: slice(:, :, :)
      type(greensfunc), allocatable :: copy(:, :, :)
      integer, parameter            :: arraysize = 2
      integer, parameter            :: testmap = 2
@@ -585,9 +536,8 @@ test copy_slices_to_from
      logical                       :: copy_to_complex_prob = .false.
    
 
-     call allocateGF(copy, arraysize, arraysize, arraysize, arraysize,&
-     	  ierr)
-     assert_equal(ierr, 0)
+     allocate(copy(arraysize, arraysize, arraysize))
+     call allocate_GF(copy, arraysize)
 
      allocate(original(arraysize, arraysize, arraysize, arraysize))
      allocate(slice(arraysize, arraysize, arraysize))
@@ -645,6 +595,6 @@ test copy_slices_to_from
      enddo    
 
      assert_false(copy_to_complex_prob)
-
+     
  end test
 end test_suite
