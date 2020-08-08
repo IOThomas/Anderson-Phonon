@@ -62,7 +62,7 @@ contains
 
     integer :: nGF_points, i
 
-    nGF_points = GF_array%get_size()
+    nGF_points = size(GF_array%GF, 1)
     do i = 1, nGF_points
        GF_array%GF(i)=GF_init
     enddo
