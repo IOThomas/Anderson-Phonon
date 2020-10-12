@@ -1,3 +1,4 @@
 /.cproject
 /.project
-/test_dispersions.F90
+/*.F90
+/*.inc

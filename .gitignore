@@ -6,3 +6,4 @@
 *.x
 fort.*
 /.project
+tests/tests_pFUnit/my_tests
