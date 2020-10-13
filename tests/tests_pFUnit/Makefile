@@ -7,7 +7,7 @@ ifeq (nagfor,$(findstring nagfor,$(FC)))
 endif
 SRCDIR = ../../src
 
-all: my_tests
+all: test_dispersions
 
 FFLAGS += $(PFUNIT_EXTRA_FFLAGS)
 FFLAGS += -I../../src 
@@ -18,9 +18,9 @@ FFLAGS += -I../../src
 %.o : %.F90 
 	$(FC1) -c $(FFLAGS)  $< 
 
-my_tests_TESTS := test_dispersions.pf #put test files for suite here
-my_tests_OTHER_SRCS := dispersions constants #put object file dependencies here
-$(eval $(call make_pfunit_test,my_tests))
+test_dispersions_TESTS := test_dispersions.pf #put test files for suite here
+test_dispersions_OTHER_SRCS := dispersions constants #put object file dependencies here
+$(eval $(call make_pfunit_test,test_dispersions))
 
 
 clean:
