@@ -1,0 +1,61 @@
+module test_helpers
+    use funit
+    use constants, only: real12, one, zero
+    use greensroutines, only: greensfunc
+    use greensroutines_helper
+    implicit none
+
+contains
+
+    @test
+    subroutine test_is_problem_false()
+        type(greensfunc) :: testGF(4, 4, 4)
+        logical :: is_problem
+        integer :: i, j, k, l
+
+
+        do i = 1, 4
+            do j = 1, 4
+                do k = 1, 4
+                    allocate(testGF(i,j,k)%GF(4))
+                    do l = 1, 4
+                        testGF(i,j,k)%GF(l) = cmplx(one, one, real12)
+                    enddo
+                enddo
+            enddo
+        enddo
+
+        is_problem = grid_test_value_3D(testGF, cmplx(one, one, real12))
+
+        @assertFalse(is_problem)
+    end subroutine 
+
+    @test
+    subroutine test_is_problem_true()
+        type(greensfunc) :: testGF(4, 4, 4)
+        logical :: is_problem
+        integer :: i, j, k, l
+
+
+        do i = 1, 4
+            do j = 1, 4
+                do k = 1, 4
+                    allocate(testGF(i,j,k)%GF(4))
+                    do l = 1, 4
+                        testGF(i,j,k)%GF(l) = cmplx(one, one, real12)
+                    enddo
+                enddo
+            enddo
+        enddo
+
+        testGF(1,2,3)%GF(3) = cmplx(zero, one)
+
+        is_problem = grid_test_value_3D(testGF, cmplx(one, one, real12))
+
+        @assertTrue(is_problem)
+    end subroutine 
+
+end module
+
+
+

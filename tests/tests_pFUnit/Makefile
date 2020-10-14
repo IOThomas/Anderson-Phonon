@@ -7,16 +7,23 @@ ifeq (nagfor,$(findstring nagfor,$(FC)))
 endif
 SRCDIR = ../../src
 
-all: test_dispersions
+all: test_helpers test_dispersions
 
 FFLAGS += $(PFUNIT_EXTRA_FFLAGS)
-FFLAGS += -I../../src 
+FFLAGS += -I../../src -I./helper_modules
 
-%.o: ${SRCDIR}/%.f08   #not entirely sure how this only manages to compile the required files from the src directory but oh well...
+#%.o: ./helper_modules/%.f08
+#	$(FC1) -c $(FFLAGS)  $<
+
+%.o: ./helper_modules/%.f08 ${SRCDIR}/%.f08   
 	$(FC1) -c $(FFLAGS)  $< 
 
 %.o : %.F90 
 	$(FC1) -c $(FFLAGS)  $< 
+
+test_helpers_TESTS := test_helpers.pf
+test_helpers_OTHER_SRCS := greensroutines_helper greensroutines constants
+$(eval $(call make_pfunit_test,test_helpers))
 
 test_dispersions_TESTS := test_dispersions.pf #put test files for suite here
 test_dispersions_OTHER_SRCS := dispersions constants #put object file dependencies here

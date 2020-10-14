@@ -27,16 +27,15 @@ contains
                 if (is_problem) exit
                 do k = 1, dim3
                     if (is_problem) exit
-                        do l = 1, nomega
-                            if (real(greens_array(i, j, k)%GF(l)).ne.real(test_value)) is_problem = .true.
-                             if (aimag(greens_array(i, j, k)%GF(l)).ne.aimag(test_value)) is_problem = .true.
-                             if (is_problem) exit
-                        enddo
+                    do l = 1, nomega
+                        if (real(greens_array(i, j, k)%GF(l)).ne.real(test_value)) is_problem = .true.
+                        if (aimag(greens_array(i, j, k)%GF(l)).ne.aimag(test_value)) is_problem = .true.
+                        if (is_problem) exit
                     enddo
                 enddo
             enddo
         enddo
-
+               
         grid_test_value_3D = is_problem
 
     end function
