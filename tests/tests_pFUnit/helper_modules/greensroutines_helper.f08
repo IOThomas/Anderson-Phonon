@@ -5,39 +5,37 @@ module greensroutines_helper
 
 contains
 
-    function grid_test_value_3D(greens_array, test_value)
-        logical :: grid_test_value_3D
+    elemental function does_GF_have_problem(greens_array, test_value)
+        logical :: does_GF_have_problem
         ! dummy variables
-        type(greensfunc), intent(in) :: greens_array(:,:,:)
-        complex(real12), intent(in):: test_value
+        type(greensfunc), intent(in)  :: greens_array
+        complex(real12), intent(in)   :: test_value
 
-        integer :: dim1, dim2, dim3, nomega
-        integer :: i, j, k, l
-        logical :: is_problem
+        integer :: iomega, nomega
+        
+        nomega = size(greens_array%GF, 1)
 
-        dim1 = size(greens_array, 1)
-        dim2 = size(greens_array, 2)
-        dim3 = size(greens_array, 3)
-        nomega = size(greens_array(1, 1, 1)%GF, 1)
+        does_GF_have_problem = .false.
+        do iomega = 1, nomega
+            if (real(greens_array%GF(iomega)) .ne. real(test_value)) does_GF_have_problem = .true.
+            if (aimag(greens_array%GF(iomega)) .ne. aimag(test_value)) does_GF_have_problem = .true.
+            if (does_GF_have_problem) exit
+        end do
 
-        is_problem = .false.
-        do i = 1, dim1
-            if (is_problem) exit
-            do j = 1, dim2
-                if (is_problem) exit
-                do k = 1, dim3
-                    if (is_problem) exit
-                    do l = 1, nomega
-                        if (real(greens_array(i, j, k)%GF(l)).ne.real(test_value)) is_problem = .true.
-                        if (aimag(greens_array(i, j, k)%GF(l)).ne.aimag(test_value)) is_problem = .true.
-                        if (is_problem) exit
-                    enddo
-                enddo
-            enddo
-        enddo
-               
-        grid_test_value_3D = is_problem
+    end function
 
+    elemental function  does_map_have_problem(greens_array, test_value)
+        logical :: does_map_have_problem
+        ! dummy variables
+        type(greensfunc), intent(in)  :: greens_array
+        integer, intent(in) :: test_value
+
+        if (greens_array%map == test_value) then
+            does_map_have_problem = .false.
+        else
+            does_map_have_problem = .true.
+        end if
+        
     end function
 
 end module

@@ -8,8 +8,9 @@ module test_helpers
 contains
 
     @test
-    subroutine test_is_problem_false()
+    subroutine test_is_GF_problem_false()
         type(greensfunc) :: testGF(4, 4, 4)
+        complex(real12) :: test_val(4, 4, 4)
         logical :: is_problem
         integer :: i, j, k, l
 
@@ -25,14 +26,17 @@ contains
             enddo
         enddo
 
-        is_problem = grid_test_value_3D(testGF, cmplx(one, one, real12))
+        test_val = cmplx(one, one, real12)
+
+        is_problem = any(does_GF_have_problem(testGF, test_val))
 
         @assertFalse(is_problem)
     end subroutine 
 
     @test
-    subroutine test_is_problem_true()
+    subroutine test_is_GF_problem_true_in_real()
         type(greensfunc) :: testGF(4, 4, 4)
+        complex(real12) :: test_val(4, 4, 4)
         logical :: is_problem
         integer :: i, j, k, l
 
@@ -48,9 +52,89 @@ contains
             enddo
         enddo
 
-        testGF(1,2,3)%GF(3) = cmplx(zero, one)
+        testGF(1,2,3)%GF(3) = cmplx(zero, one, real12)
+        
+        test_val = cmplx(one, one, real12)
+        
+        is_problem = any(does_GF_have_problem(testGF, test_val))
 
-        is_problem = grid_test_value_3D(testGF, cmplx(one, one, real12))
+        @assertTrue(is_problem)
+    end subroutine 
+
+    @test
+    subroutine test_is_GF_problem_true_in_aimag()
+        type(greensfunc) :: testGF(4, 4, 4)
+        complex(real12) :: test_val(4, 4, 4)
+        logical :: is_problem
+        integer :: i, j, k, l
+
+
+        do i = 1, 4
+            do j = 1, 4
+                do k = 1, 4
+                    allocate(testGF(i,j,k)%GF(4))
+                    do l = 1, 4
+                        testGF(i,j,k)%GF(l) = cmplx(one, one, real12)
+                    enddo
+                enddo
+            enddo
+        enddo
+
+        testGF(1,2,3)%GF(3) = cmplx(one, zero, real12)
+        
+        test_val = cmplx(one, one, real12)
+        
+        is_problem = any(does_GF_have_problem(testGF, test_val))
+
+        @assertTrue(is_problem)
+    end subroutine 
+
+    @test
+    subroutine test_with_map_problem_false()
+        type(greensfunc) :: testGF(4, 4, 4)
+        integer :: test_val(4, 4, 4)
+        logical :: is_problem
+        integer :: i, j, k
+
+
+        do i = 1, 4
+            do j = 1, 4
+                do k = 1, 4
+                    testGF(i,j,k)%map = 1
+                enddo
+            enddo
+        enddo
+
+        test_val = 1
+
+            is_problem = any(does_map_have_problem(testGF, test_val))
+
+        @assertFalse(is_problem)
+    end subroutine 
+
+    
+
+    @test
+    subroutine test_map_is_problem_true()
+        type(greensfunc) :: testGF(4, 4, 4)
+        integer :: test_val(4, 4, 4)
+        logical :: is_problem
+        integer :: i, j, k
+
+
+        do i = 1, 4
+            do j = 1, 4
+                do k = 1, 4
+                    testGF(i,j,k)%map = 1
+                enddo
+            enddo
+        enddo
+
+        testGF(1,2,3)%map = 0
+
+        test_val = 1
+
+        is_problem = any(does_map_have_problem(testGF, test_val))
 
         @assertTrue(is_problem)
     end subroutine 
