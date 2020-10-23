@@ -9,3 +9,4 @@ fort.*
 tests/tests_pFUnit/my_tests
 tests/tests_pFUnit/test_dispersions
 tests/tests_pFUnit/test_helpers
+.vscode/settings.json
