@@ -270,6 +270,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! error check
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+    ierr = 0
     check_div_by_zero:if ((any(abs(real(GF%GF)).lt.tolerance))&
          .and.(any(abs(aimag(GF%GF)).lt.tolerance))) then
        ierr = 1

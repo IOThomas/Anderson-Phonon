@@ -1,9 +1,10 @@
 module test_greensroutines
    use constants
-   use defined_types
+   use definedtypes
    use greensroutines
    use greensroutines_helper
    use funit
+   implicit none
 
 contains
 
@@ -27,7 +28,7 @@ contains
      	   do j = 1, array_size
 	         if (GFsize_prob) exit
 	         do k = 1, array_size
-	            itest_= size(testGF(i, j, k)%GF, 1)
+	            itest = size(testGF(i, j, k)%GF, 1)
 	            if (itest.ne.array_size) then
 	      	      GFsize_prob = .true.
 		            exit
@@ -92,7 +93,7 @@ contains
       real(real12), parameter    :: Hybval = 1.0_real12
       real(real12), parameter    :: Dispval = 1.0_real12
       complex(real12), parameter :: Deltamom = (2.0_real12, zero)
-      real(real12), parameter    :: test_val(2) = [one/2.0_real12,zero one/14.0_real12]
+      real(real12), parameter    :: test_val(2) = [one/2.0_real12, one/14.0_real12]
       logical                    :: outwh_prob = .false.
 
      
@@ -114,8 +115,8 @@ contains
 
       do i = 1, array_size
          slice = cmplx(test_val(i), zero, real12)
-         outnoh_prob = any(does_GF_element_have_problem(testGF, i, slice))
-         if (outnoh_prob) exit
+         outwh_prob = any(does_GF_element_have_problem(testGF, i, slice))
+         if (outwh_prob) exit
       enddo
 
       @assertFalse(outwh_prob)
@@ -199,25 +200,26 @@ contains
    subroutine test_GF_copying() 
       type(greensfunc), allocatable :: original(:, :, :)
       type(greensfunc), allocatable :: copy(:, :, :)
-      integer, parameter            :: arraysize = 2
-      integer, parameter            :: testmap(2, 2, 2) = 2
+      integer, parameter            :: array_size = 2
+      integer, parameter            :: tmap = 2
+      integer                       :: testmap(2, 2, 2)
       complex(real12), parameter    :: testGF(2, 2, 2) = (two, two)
       integer                       :: i, j, k, l, ierr
       logical                       :: copymap_prob = .false.
       logical                       :: copyGF_prob = .false.
 
-      call allocateGF(original, arraysize, arraysize, arraysize, arraysize, ierr)
+      call allocateGF(original, array_size, array_size, array_size, array_size, ierr)
       @assertEqual(ierr, 0)
 
-      call allocateGF(copy, arraysize, arraysize, arraysize, arraysize, ierr)
+      call allocateGF(copy, array_size, array_size, array_size, array_size, ierr)
       @assertEqual(ierr, 0)
 
-     
-      do i = 1, arraysize
-     	   do j = 1, arraysize
-	         do k = 1, arraysize
+      testmap = tmap
+      do i = 1, array_size
+     	   do j = 1, array_size
+	         do k = 1, array_size
 	            original(i, j, k)%map = testmap(i, j, k)
-	            do l = 1, arraysize
+	            do l = 1, array_size
 		            original(i, j, k)%GF(l) = testGF(i, j, k)
 	            enddo
 	         enddo
@@ -227,7 +229,7 @@ contains
       call copymap(copy, original)
       call copyGF(copy, original)
 
-      copymap_prob = any(does_map_have_problem(copy, test_map))
+      copymap_prob = any(does_map_have_problem(copy, testmap))
       copyGF_prob = any(does_GF_have_problem(copy, testGF))
     
       @assertFalse(copyGF_prob)
@@ -239,7 +241,7 @@ contains
    @test
    subroutine test_GF_invert()
       type(greensfunc), allocatable :: test(:, :, :)
-      integer, parameter            :: arraysize = 2
+      integer, parameter            :: array_size = 2
       integer, parameter            :: testmap = 2
       real(real12), parameter       :: testGF = two
       complex(real12), parameter    :: GFans(array_size, array_size, array_size) = (0.5_real12, zero)
@@ -247,17 +249,17 @@ contains
       integer, allocatable          :: ierr1(:, :, :)
       logical                       :: invertGF_prob = .false.
 
-      call allocateGF(test, arraysize, arraysize, arraysize, arraysize,&
+      call allocateGF(test, array_size, array_size, array_size, array_size,&
          ierr)
       @assertEqual(ierr, 0)
 
-      allocate(ierr1(arraysize, arraysize, arraysize))
+      allocate(ierr1(array_size, array_size, array_size))
       
-      do i = 1, arraysize
-         do j = 1, arraysize
-            do k = 1, arraysize
+      do i = 1, array_size
+         do j = 1, array_size
+            do k = 1, array_size
                test(i, j, k)%map = testmap
-               do l = 1, arraysize
+               do l = 1, array_size
                   test(i, j, k)%GF(l) = cmplx(testGF, zero)
                enddo
             enddo
@@ -265,6 +267,7 @@ contains
       enddo
 
       call invertGF(test, ierr1)
+         
       @assertTrue(all(ierr1 ==  0))
       
       invertGF_prob = any(does_GF_have_problem(test, GFans))
@@ -277,23 +280,23 @@ contains
    @test
    subroutine test_GFinvert_ierr_divby0()
       type(greensfunc), allocatable :: test(:, :, :)
-      integer, parameter            :: arraysize = 2
+      integer, parameter            :: array_size = 2
       integer, parameter            :: testmap = 2
       real(real12), parameter       :: testGF = two
       integer                       :: i, j, k, l, ierr
       integer, allocatable          :: ierr_invertGF(:, :, :)
 
-      call allocateGF(test, arraysize, arraysize, arraysize, arraysize,&
+      call allocateGF(test, array_size, array_size, array_size, array_size,&
          ierr)
       @assertEqual(ierr, 0)
 
-      allocate(ierr_invertGF(arraysize, arraysize, arraysize))
+      allocate(ierr_invertGF(array_size, array_size, array_size))
       
-      do i = 1, arraysize
-         do j = 1, arraysize
-            do k = 1, arraysize
+      do i = 1, array_size
+         do j = 1, array_size
+            do k = 1, array_size
                test(i, j, k)%map = testmap
-               do l = 1, arraysize
+               do l = 1, array_size
                   test(i, j, k)%GF(l) = cmplx(testGF, zero)
                enddo
             enddo

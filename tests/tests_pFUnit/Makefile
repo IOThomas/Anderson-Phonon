@@ -7,7 +7,7 @@ ifeq (nagfor,$(findstring nagfor,$(FC)))
 endif
 SRCDIR = ../../src
 
-all: make_helper test_helpers test_dispersions
+all: make_helper test_helpers test_greensroutines test_dispersions
 .PHONY: all
 
 make_helper:
@@ -30,6 +30,10 @@ test_helpers_TESTS := test_helpers.pf
 test_helpers_OTHER_SRCS := greensroutines_helper greensroutines constants
 $(eval $(call make_pfunit_test,test_helpers))
 
+test_greensroutines_TESTS := test_greensroutines.pf
+test_greensroutines_OTHER_SRCS := greensroutines_helper greensroutines definedtypes constants
+$(eval $(call make_pfunit_test,test_greensroutines))
+
 test_dispersions_TESTS := test_dispersions.pf 
 test_dispersions_OTHER_SRCS := dispersions constants 
 $(eval $(call make_pfunit_test,test_dispersions))
@@ -37,16 +41,17 @@ $(eval $(call make_pfunit_test,test_dispersions))
 .PHONY: clean
 clean:
 	$(RM) *.o *.mod *.a *.inc
-	$(RM) test_dispersions.F90 test_helpers.F90
+	$(RM) test_dispersions.F90 test_greensroutines.F90 test_helpers.F90
 	$(MAKE) -C helper_modules clean
 
 .PHONY: cleantests
 cleantests:
-	$(RM) test_dispersions test_helpers
+	$(RM) test_dispersions test_greensroutines test_helpers
 
 ###########################################################################
 .PHONY: runtests
 runtests:
 	./test_helpers
+	./test_greensroutines
 	./test_dispersions
 	
