@@ -46,7 +46,7 @@ clean:
 
 .PHONY: cleantests
 cleantests:
-	$(RM) test_dispersions test_greensroutines test_helpers
+	$(RM) test_dispersions test_greensroutines gittest_helpers
 
 ###########################################################################
 .PHONY: runtests
