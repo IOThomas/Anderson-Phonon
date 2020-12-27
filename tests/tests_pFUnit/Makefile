@@ -4,7 +4,7 @@ FC1 = gfortran-9
 
 SRCDIR = ../../src
 
-all: make_helper test_helpers test_greensroutines test_dispersions test_initHybrid
+all: make_helper test_helpers test_greensroutines test_dispersions test_initialisation
 .PHONY: all
 
 make_helper:
@@ -35,9 +35,9 @@ test_dispersions_TESTS := test_dispersions.pf
 test_dispersions_OTHER_SRCS := dispersions constants 
 $(eval $(call make_pfunit_test,test_dispersions))
 
-test_initHybrid_TESTS := test_initHybrid.pf
-test_initHybrid_OTHER_SRCS := initialisation dispersions greensroutines definedtypes constants
-$(eval $(call make_pfunit_test,test_initHybrid))
+test_initialisation_TESTS := test_initHybrid.pf
+test_initialisation_OTHER_SRCS := initialisation dispersions greensroutines definedtypes constants
+$(eval $(call make_pfunit_test,test_initialisation))
 
 .PHONY: clean
 clean:
@@ -47,7 +47,7 @@ clean:
 
 .PHONY: cleantests
 cleantests:
-	$(RM) test_dispersions test_greensroutines gittest_helpers
+	$(RM) test_dispersions test_greensroutines test_helpers test_initialisation
 
 ###########################################################################
 .PHONY: runtests
@@ -55,4 +55,5 @@ runtests:
 	./test_helpers
 	./test_greensroutines
 	./test_dispersions
+	./test_initialisation
 	
