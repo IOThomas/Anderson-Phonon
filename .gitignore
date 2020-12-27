@@ -12,3 +12,4 @@ tests/tests_pFUnit/test_helpers
 .vscode/settings.json
 tests/tests_pFUnit/test_greensroutines
 tests/tests_pFUnit/test_initHybrid
+tests/tests_pFUnit/test_initialisation
