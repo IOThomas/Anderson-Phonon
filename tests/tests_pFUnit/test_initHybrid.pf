@@ -53,11 +53,26 @@ contains
    @after
    subroutine tear_down()
       !code that runs after each test
+      logical :: ck_outfile = .false.
+      logical :: fk_outfile = .false.
 
       if (allocated(kgridFine)) deallocate(kgridFine)
       if (allocated(kgridCoarse)) deallocate(kgridCoarse)
       if (allocated(Dzero)) deallocate(Dzero)
       if (allocated(Hybrid)) deallocate(Hybrid)
+
+      inquire(file='coarsekgrid.out', exist=ck_outfile)
+      inquire(file='finekgrid.out', exist=fk_outfile)
+
+      if (ck_outfile) then 
+         open(unit=10, file='coarsekgrid.out')
+         close(unit=10, status='delete')
+      end if
+
+      if (fk_outfile) then
+         open(unit=10, file='finekgrid.out')
+         close(unit=10, status='delete')
+      end if
       
    end subroutine tear_down
 
