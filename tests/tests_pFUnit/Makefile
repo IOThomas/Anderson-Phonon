@@ -35,7 +35,7 @@ test_dispersions_TESTS := test_dispersions.pf
 test_dispersions_OTHER_SRCS := dispersions constants 
 $(eval $(call make_pfunit_test,test_dispersions))
 
-test_initialisation_TESTS := test_initHybrid.pf test_initDzero.pf
+test_initialisation_TESTS := test_initHybrid.pf test_initDzero.pf test_initGrid.pf
 test_initialisation_OTHER_SRCS := initialisation dispersions greensroutines definedtypes constants
 $(eval $(call make_pfunit_test,test_initialisation))
 
