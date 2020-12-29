@@ -1,0 +1,174 @@
+module test_initDzero
+
+     use funit
+     use constants
+     use definedtypes
+     use greensroutines
+     use initialisation
+
+     implicit none
+
+     integer,  parameter          :: fine_points = 6   
+     integer,  parameter          :: ncoarse_cells = 2
+     integer,  parameter          :: nomega_points= 4
+     integer                      :: ierr
+     complex(real12), parameter   :: omax = (500.0_real12, zero) 
+     real(real12)                 :: tol = epsilon(one)
+     type(settingparam)           :: settings
+     type(storedparam)            :: stored
+     type(kappagrid),allocatable   :: kgridFine(:,:,:)
+     type(kappagrid),allocatable :: kgridCoarse(:,:,:)
+     type(greensfunc),allocatable :: Dzero(:,:,:)
+
+contains
+
+     @before
+     subroutine set_up()
+          !code that should be run before each test
+          settings%nfpoints = fine_points
+          settings%ncell = ncoarse_cells
+          settings%nomega = nomega_points
+          settings%omegaMax = omax
+          call initgrid(settings,kgridFine,kgridCoarse,ierr)
+     end subroutine set_up
+
+     @after
+     subroutine tear_down()
+          !code that runs after each test
+          logical :: ck_outfile = .false.
+          logical :: fk_outfile = .false.
+
+          if (allocated(kgridFine)) deallocate(kgridFine)
+          if (allocated(kgridCoarse)) deallocate(kgridCoarse)
+          if (allocated(Dzero)) deallocate(Dzero)
+
+          inquire(file='coarsekgrid.out', exist=ck_outfile)
+          inquire(file='finekgrid.out', exist=fk_outfile)
+
+          if (ck_outfile) then 
+          open(unit=10, file='coarsekgrid.out')
+          close(unit=10, status='delete')
+          end if
+
+          if (fk_outfile) then
+          open(unit=10, file='finekgrid.out')
+          close(unit=10, status='delete')
+          end if
+     end subroutine tear_down
+
+     @test
+     subroutine test_nf_points_lt_one_ierr()
+          settings%nfpoints = -10
+          call initDzero(settings,kgridFine,stored,Dzero,ierr)
+          @assertEqual(ierr,1)
+     end subroutine test_nf_points_lt_one_ierr
+
+     @test
+     subroutine test_nom_pts_lt_one_ierr()
+          settings%nomega = -10
+          call initDzero(settings,kgridFine,stored,Dzero,ierr)
+          @assertEqual(ierr,1)
+     end subroutine test_nom_pts_lt_one_ierr
+
+     @test 
+     subroutine test_rl_ommx_lt_rl_ommn_ierr()
+          settings%omegamax = cmplx(-one, zero)
+          call initDzero(settings,kgridFine,stored,Dzero,ierr)
+          @assertEqual(ierr,2)
+     end subroutine test_rl_ommx_lt_rl_ommn_ierr
+
+     @test
+     subroutine test_kgf_not_alloc_ierr()
+          deallocate(kgridfine)
+          call initDzero(settings,kgridFine,stored,Dzero,ierr)
+          @assertEqual(ierr,3)
+     end subroutine test_kgf_not_alloc_ierr
+
+     @test
+     subroutine test_dzro_alrdy_alloc_ierr()
+          allocate(Dzero(1,1,1))
+          call initDzero(settings,kgridFine,stored,Dzero,ierr)
+          @assertEqual(ierr,4)
+     end subroutine test_dzro_alrdy_alloc_ierr
+
+     @test
+     subroutine test_alloc_ksz_correct()
+          integer :: kfx, dzx
+          integer :: kfy, dzy
+          integer :: kfz, dzz
+          logical :: kalloc_fail = .false.
+          
+          call initDzero(settings,kgridFine,stored,Dzero,ierr)
+
+          kfx = size(kgridFine, 1)
+          kfy = size(kgridFine, 2)
+          kfz = size(kgridFine, 3)
+
+          dzx = size(Dzero, 1)
+          dzy = size(Dzero, 2)
+          dzz = size(Dzero, 3)
+
+          if ((kfx.ne.dzx).or.(kfy.ne.dzy).or.(kfz.ne.dzz)) kalloc_fail = .true.
+          @assertFalse(kalloc_fail)
+     end subroutine test_alloc_ksz_correct
+
+     @test
+     subroutine test_alloc_nom_correct()
+          integer :: nomsz
+
+          call initDzero(settings,kgridFine,stored,Dzero,ierr)
+
+          nomsz = size(Dzero(1, 1, 1)%GF, 1)
+          @assertEqual(nomsz, nomega_points)
+     end subroutine test_alloc_nom_correct
+
+     @test
+     subroutine test_correct_omega_diff()
+          complex(real12) :: omegadiff_test
+          complex(real12) :: omegamax_test
+
+          settings%omegaMax = cmplx(one, one)
+          omegadiff_test= settings%omegaMax - settings%omegaMin
+          omegadiff_test= omegadiff_test/real(nomega_points)
+
+          call initDzero(settings,kgridFine,stored,Dzero,ierr)
+
+          @assertEqual(real(omegadiff_test),real(stored%omega_diff),tol)
+          @assertEqual(aimag(omegadiff_test),aimag(stored%omega_diff),tol)
+
+          omegamax_test=omegadiff_test*real(nomega_points)
+          @assertEqual(real(omegamax_test),real(settings%omegaMax),tol)
+          @assertEqual(aimag(omegamax_test),aimag(settings%omegaMax),tol)    
+     end subroutine test_correct_omega_diff
+
+     @test
+     subroutine test_copy_map_correct()
+          integer :: kgridmap
+          integer :: Dzmap
+          integer :: ix, iy, iz, inom
+          logical :: dzmap_fail = .false.
+
+          call initDzero(settings,kgridFine,stored,Dzero,ierr)
+
+          do ix = 1, fine_points
+               if (dzmap_fail) exit
+               do iy = 1, fine_points
+                    if (dzmap_fail) exit
+                    do iz = 1, fine_points
+                         if (dzmap_fail) exit
+                         do inom = 1, nomega_points
+                              kgridmap=kgridFine(ix,iy,iz)%map
+                              Dzmap=Dzero(ix,iy,iz)%map
+                              if (kgridmap.ne.Dzmap) then
+                                   dzmap_fail = .false.
+                                   exit
+                              endif
+                         enddo
+                    enddo
+               enddo
+          enddo
+
+          @assertFalse(dzmap_fail)
+     end subroutine test_copy_map_correct
+
+end module test_initDzero

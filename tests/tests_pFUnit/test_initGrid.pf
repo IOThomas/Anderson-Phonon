@@ -1,0 +1,848 @@
+module test_initGrid
+
+   use funit
+   use constants
+   use definedtypes
+   use greensroutines
+   use initialisation
+
+   implicit none
+
+   !global variables here (don't change fine_points or ncoarse_cells)
+   integer,  parameter :: fine_points=6   
+   integer,  parameter :: ncoarse_cells=2
+   integer             :: ierr
+   type(settingparam)  :: settings
+   type(kappagrid),allocatable     :: kgridFine(:,:,:)
+   type(kappagrid),allocatable   :: kgridCoarse(:,:,:)
+
+contains
+
+   @before
+   subroutine set_up()              
+      !code that should be run before each test
+      settings%nfpoints=fine_points
+      settings%ncell=ncoarse_cells
+   end subroutine set_up
+
+   @after
+   subroutine tear_down()
+      !code runs after each test
+      integer :: stat
+      logical :: ck_outfile
+      logical :: fk_outfile
+
+      if (allocated(kgridFine)) deallocate(kgridFine)
+      if (allocated(kgridCoarse)) deallocate(kgridCoarse)
+
+      inquire(file='coarsekgrid.out', exist=ck_outfile)
+      inquire(file='finekgrid.out', exist=fk_outfile)
+
+      if (ck_outfile) then 
+         open(unit=10, file='coarsekgrid.out')
+         close(unit=10, status='delete')
+      end if
+
+      if (fk_outfile) then
+         open(unit=10, file='finekgrid.out')
+         close(unit=10, status='delete')
+      end if
+   end subroutine tear_down
+
+   @test
+   subroutine test_neg_fgrid_ierr()
+      settings%nfpoints(3)=-1
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+      @assertEqual(ierr,1)
+   end subroutine test_neg_fgrid_ierr
+
+   @test
+   subroutine test_odd_fgrid_ierr()
+      settings%nfpoints(3)=5
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+      @assertEqual(ierr,2)
+   end subroutine test_odd_fgrid_ierr
+
+   @test
+   subroutine test_not_alloc_fgrid_ierr()
+      allocate(kgridFine(fine_points,fine_points,fine_points))
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+      @assertEqual(ierr,3)
+   end subroutine test_not_alloc_fgrid_ierr
+
+   @test
+   subroutine test_not_alloc_cgrid_ierr()
+      allocate(kgridCoarse(ncoarse_cells,ncoarse_cells,ncoarse_cells))
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+      @assertEqual(ierr,3)
+   end subroutine
+
+   @test
+   subroutine test_neg_cgrid_ierr()
+      settings%ncell(3)=-1
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+      @assertEqual(ierr,1)
+   end subroutine test_neg_cgrid_ierr
+
+   @test
+   subroutine test_odd_cgrid_ierr()
+      settings%ncell(3)=5
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+      @assertEqual(ierr,2)
+   end subroutine
+
+   @test
+   subroutine test_fpnts_stored_crctly()
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+      @assertEqual(settings%nfpoints(1),fine_points)
+      @assertEqual(settings%nfpoints(2),fine_points)
+      @assertEqual(settings%nfpoints(3),fine_points) 
+   end subroutine test_fpnts_stored_crctly
+
+   @test
+   subroutine test_cell_no_stored_crctly()
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+      @assertEqual(settings%ncell(1),ncoarse_cells)
+      @assertEqual(settings%ncell(2),ncoarse_cells)
+      @assertEqual(settings%ncell(3),ncoarse_cells) 
+   end subroutine test_cell_no_stored_crctly
+
+   @test
+   subroutine test_fgrid_array_size()
+      integer:: ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      ix=size(kgridFine,1)
+      iy=size(kgridFine,2)
+      iz=size(kgridFine,3)
+
+      @assertEqual(ix,fine_points)
+      @assertEqual(iy,fine_points)
+      @assertEqual(iz,fine_points)
+   
+   end subroutine test_fgrid_array_size
+
+   @test
+   subroutine test_cgrid_array_size()
+      integer:: ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      ix=size(kgridCoarse,1)
+      iy=size(kgridCoarse,2)
+      iz=size(kgridCoarse,3)
+
+      @assertEqual(ix,ncoarse_cells)
+      @assertEqual(iy,ncoarse_cells)
+      @assertEqual(iz,ncoarse_cells)
+   
+   end subroutine test_cgrid_array_size
+
+   @test
+   subroutine test_fgrid_vals_corners()
+      real(real12),parameter::first=-pi/3.0_real12
+      real(real12),parameter::last=4.0_real12*pi/3.0_real12
+      real(real12),parameter::tolerance=epsilon(pi)
+      real(real12)::testx,testy,testz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      testx=kgridFine(1,1,1)%kx
+      testy=kgridFine(1,1,1)%ky
+      testz=kgridFine(1,1,1)%kz
+      @assertEqual(testx,first,tolerance)
+      @assertEqual(testy,first,tolerance)
+      @assertEqual(testz,first,tolerance)
+
+      testx=kgridFine(fine_points,1,1)%kx
+      testy=kgridFine(fine_points,1,1)%ky
+      testz=kgridFine(fine_points,1,1)%kz
+      @assertEqual(testx,last,tolerance)
+      @assertEqual(testy,first,tolerance)
+      @assertEqual(testz,first,tolerance)
+
+      testx=kgridFine(1,fine_points,1)%kx
+      testy=kgridFine(1,fine_points,1)%ky
+      testz=kgridFine(1,fine_points,1)%kz
+      @assertEqual(testx,first,tolerance)
+      @assertEqual(testy,last,tolerance)
+      @assertEqual(testz,first,tolerance)
+
+      testx=kgridFine(1,1,fine_points)%kx
+      testy=kgridFine(1,1,fine_points)%ky
+      testz=kgridFine(1,1,fine_points)%kz
+      @assertEqual(testx,first,tolerance)
+      @assertEqual(testy,first,tolerance)
+      @assertEqual(testz,last,tolerance)
+
+      testx=kgridFine(fine_points,fine_points,1)%kx
+      testy=kgridFine(fine_points,fine_points,1)%ky
+      testz=kgridFine(fine_points,fine_points,1)%kz
+      @assertEqual(testx,last,tolerance)
+      @assertEqual(testy,last,tolerance)
+      @assertEqual(testz,first,tolerance)
+
+      testx=kgridFine(fine_points,1,fine_points)%kx
+      testy=kgridFine(fine_points,1,fine_points)%ky
+      testz=kgridFine(fine_points,1,fine_points)%kz
+      @assertEqual(testx,last,tolerance)
+      @assertEqual(testy,first,tolerance)
+      @assertEqual(testz,last,tolerance)
+
+      testx=kgridFine(1,fine_points,fine_points)%kx
+      testy=kgridFine(1,fine_points,fine_points)%ky
+      testz=kgridFine(1,fine_points,fine_points)%kz
+      @assertEqual(testx,first,tolerance)
+      @assertEqual(testy,last,tolerance)
+      @assertEqual(testz,last,tolerance)
+
+      testx=kgridFine(fine_points,fine_points,fine_points)%kx
+      testy=kgridFine(fine_points,fine_points,fine_points)%ky
+      testz=kgridFine(fine_points,fine_points,fine_points)%kz
+      @assertEqual(testx,last,tolerance)
+      @assertEqual(testy,last,tolerance)
+      @assertEqual(testz,last,tolerance)
+
+      
+   end subroutine test_fgrid_vals_corners
+  
+
+   @test
+   subroutine test_cgrid_vals_corners()
+      real(real12),parameter::first=0.0_real12
+      real(real12),parameter::last=pi
+      real(real12),parameter::tolerance=epsilon(pi)
+      real(real12)::testx,testy,testz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      testx=kgridCoarse(1,1,1)%kx
+      testy=kgridCoarse(1,1,1)%ky
+      testz=kgridCoarse(1,1,1)%kz
+      @assertEqual(testx,first,tolerance)
+      @assertEqual(testy,first,tolerance)
+      @assertEqual(testz,first,tolerance)
+
+      testx=kgridCoarse(ncoarse_cells,1,1)%kx
+      testy=kgridCoarse(ncoarse_cells,1,1)%ky
+      testz=kgridCoarse(ncoarse_cells,1,1)%kz
+      @assertEqual(testx,last,tolerance)
+      @assertEqual(testy,first,tolerance)
+      @assertEqual(testz,first,tolerance)
+
+      testx=kgridCoarse(1,ncoarse_cells,1)%kx
+      testy=kgridCoarse(1,ncoarse_cells,1)%ky
+      testz=kgridCoarse(1,ncoarse_cells,1)%kz
+      @assertEqual(testx,first,tolerance)
+      @assertEqual(testy,last,tolerance)
+      @assertEqual(testz,first,tolerance)
+
+      testx=kgridCoarse(1,1,ncoarse_cells)%kx
+      testy=kgridCoarse(1,1,ncoarse_cells)%ky
+      testz=kgridCoarse(1,1,ncoarse_cells)%kz
+      @assertEqual(testx,first,tolerance)
+      @assertEqual(testy,first,tolerance)
+      @assertEqual(testz,last,tolerance)
+
+      testx=kgridCoarse(ncoarse_cells,ncoarse_cells,1)%kx
+      testy=kgridCoarse(ncoarse_cells,ncoarse_cells,1)%ky
+      testz=kgridCoarse(ncoarse_cells,ncoarse_cells,1)%kz
+      @assertEqual(testx,last,tolerance)
+      @assertEqual(testy,last,tolerance)
+      @assertEqual(testz,first,tolerance)
+
+      testx=kgridCoarse(ncoarse_cells,1,ncoarse_cells)%kx
+      testy=kgridCoarse(ncoarse_cells,1,ncoarse_cells)%ky
+      testz=kgridCoarse(ncoarse_cells,1,ncoarse_cells)%kz
+      @assertEqual(testx,last,tolerance)
+      @assertEqual(testy,first,tolerance)
+      @assertEqual(testz,last,tolerance)
+
+      testx=kgridCoarse(1,ncoarse_cells,ncoarse_cells)%kx
+      testy=kgridCoarse(1,ncoarse_cells,ncoarse_cells)%ky
+      testz=kgridCoarse(1,ncoarse_cells,ncoarse_cells)%kz
+      @assertEqual(testx,first,tolerance)
+      @assertEqual(testy,last,tolerance)
+      @assertEqual(testz,last,tolerance)
+
+      testx=kgridCoarse(ncoarse_cells,ncoarse_cells,ncoarse_cells)%kx
+      testy=kgridCoarse(ncoarse_cells,ncoarse_cells,ncoarse_cells)%ky
+      testz=kgridCoarse(ncoarse_cells,ncoarse_cells,ncoarse_cells)%kz
+      @assertEqual(testx,last,tolerance)
+      @assertEqual(testy,last,tolerance)
+      @assertEqual(testz,last,tolerance)
+   
+   end subroutine test_cgrid_vals_corners
+
+   @test
+   subroutine test_assigncell_maps()
+      integer,parameter::nfine=27
+      integer,parameter::maxcells=ncoarse_cells**3
+      integer,allocatable::cellCount(:,:,:)
+      integer:: icell,testno
+      logical:: npwrong
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      !subroutine test_the number of points mapped to each cell is correct
+      allocate(cellcount(fine_points,fine_points,fine_points))
+         !loop over cells
+      npwrong=.false.
+      do icell=1,maxcells
+         cellcount=0
+         where (kgridFine%map==icell) cellcount=1
+         testno=sum(cellcount)
+         if (testno.ne.nfine) then
+            npwrong=.true.
+            exit
+         endif
+      enddo
+      @assertFalse(npwrong)
+      deallocate(cellcount)
+      
+   end subroutine test_assigncell_maps
+
+   subroutine test_assigncell_spefc_fpts()
+      integer::testcell
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+      
+      !subroutine test_specific cells
+      testcell=kgridfine(5,5,4)%map
+      @assertEqual(testcell,8)
+      testcell=kgridfine(1,1,1)%map
+      @assertEqual(testcell,1)
+      testcell=kgridfine(1,1,6)%map
+      @assertEqual(testcell,5)
+      testcell=kgridfine(1,6,6)%map
+      @assertEqual(testcell,7)
+      testcell=kgridfine(6,6,6)%map
+      @assertEqual(testcell,8)
+   
+   end subroutine test_assigncell_spefc_fpts
+    
+   @test
+   subroutine test_assign_clabels()
+      integer::ix,iy,iz,itest
+      logical::problem
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+         if (problem) exit
+         do iz=1,ncoarse_cells
+            itest=ix+(iy-1)*ncoarse_cells+(iz-1)*ncoarse_cells*ncoarse_cells
+         if (itest.ne.kgridcoarse(ix,iy,iz)%map) then
+            problem=.true.
+            exit
+         endif
+      enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+      
+      
+   end subroutine test_assign_clabels
+
+   @test
+   subroutine test_fpoints_rls_are_nums()
+      logical::problem
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               if (isnan(kgridfine(ix,iy,iz)%kx)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               if (isnan(kgridfine(ix,iy,iz)%ky)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               if (isnan(kgridfine(ix,iy,iz)%kz)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+            
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               if (isnan(kgridfine(ix,iy,iz)%kz)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               if (isnan(kgridfine(ix,iy,iz)%norm)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               if (isnan(real(kgridfine(ix,iy,iz)%omega2))) problem=.true.
+               if (isnan(aimag(kgridfine(ix,iy,iz)%omega2))) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+      
+   end subroutine test_fpoints_rls_are_nums
+
+   @test
+   subroutine test_fgrid_kx_in_range()
+      real(real12),parameter::upper=3.0_real12*pi/2.0_real12
+      real(real12),parameter::lower=-pi/2.0_real12
+      logical::problem
+      real(real12)::test
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               test=kgridfine(ix,iy,iz)%kx
+               if (test.lt.lower) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               test=kgridfine(ix,iy,iz)%kx
+               if (test.ge.upper) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+   
+   end subroutine test_fgrid_kx_in_range
+  
+   @test
+   subroutine test_fgrid_ky_in_range()
+      real(real12),parameter::upper=3.0_real12*pi/2.0_real12
+      real(real12),parameter::lower=-pi/2.0_real12
+      logical::problem
+      real(real12)::test
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+         do iz=1,fine_points
+            test=kgridfine(ix,iy,iz)%ky
+            if (test.lt.lower) problem=.true.
+            if (problem) exit
+         enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+         do iz=1,fine_points
+            test=kgridfine(ix,iy,iz)%ky
+            if (test.ge.upper) problem=.true.
+            if (problem) exit
+         enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+   
+   end subroutine test_fgrid_ky_in_range
+
+   @test
+   subroutine test_fgrid_kz_in_range()
+      real(real12),parameter::upper=3.0_real12*pi/2.0_real12
+      real(real12),parameter::lower=-pi/2.0_real12
+      logical::problem
+      real(real12)::test
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               test=kgridfine(ix,iy,iz)%kz
+               if (test.lt.lower) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+            do iz=1,fine_points
+               test=kgridfine(ix,iy,iz)%kz
+               if (test.ge.upper) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+      
+   end subroutine
+
+   @test
+   subroutine test_fgrid_knorm_in_range()
+      real(real12),parameter::upper=sqrt(27.0_real12*pi*pi/4.0_real12)
+      real(real12),parameter::lower=0.0_real12
+      logical::problem
+      real(real12)::test
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+         do iz=1,fine_points
+            test=kgridfine(ix,iy,iz)%norm
+            if (test.lt.lower) problem=.true.
+            if (problem) exit
+         enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,fine_points
+         if (problem) exit
+         do iy=1,fine_points
+            if (problem) exit
+         do iz=1,fine_points
+            test=kgridfine(ix,iy,iz)%norm
+            if (test.ge.upper) problem=.true.
+            if (problem) exit
+         enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+      
+   end subroutine test_fgrid_knorm_in_range
+
+   @test
+   subroutine test_cpoints_rls_are_nums()
+      logical::problem
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               if (isnan(kgridCoarse(ix,iy,iz)%kx)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               if (isnan(kgridCoarse(ix,iy,iz)%ky)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               if (isnan(kgridCoarse(ix,iy,iz)%kz)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+            
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               if (isnan(kgridCoarse(ix,iy,iz)%kz)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               if (isnan(kgridCoarse(ix,iy,iz)%norm)) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               if (isnan(real(kgridCoarse(ix,iy,iz)%omega2))) problem=.true.
+               if (isnan(aimag(kgridCoarse(ix,iy,iz)%omega2))) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+      
+   end subroutine test_cpoints_rls_are_nums
+
+   @test
+   subroutine test_cgrid_kx_in_range()
+      real(real12),parameter::upper=3.0_real12*pi/2.0_real12
+      real(real12),parameter::lower=-pi/2.0_real12
+      logical::problem
+      real(real12)::test
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               test=kgridCoarse(ix,iy,iz)%kx
+               if (test.lt.lower) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               test=kgridCoarse(ix,iy,iz)%kx
+               if (test.ge.upper) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+      
+   end subroutine test_cgrid_kx_in_range
+ 
+   @test   
+   subroutine test_cgrid_ky_in_range()
+      real(real12),parameter::upper=3.0_real12*pi/2.0_real12
+      real(real12),parameter::lower=-pi/2.0_real12
+      logical::problem
+      real(real12)::test
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               test=kgridCoarse(ix,iy,iz)%ky
+               if (test.lt.lower) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               test=kgridCoarse(ix,iy,iz)%ky
+               if (test.ge.upper) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+      
+   end subroutine test_cgrid_ky_in_range
+
+   @test
+   subroutine test_cgrid_kz_in_range()
+      real(real12),parameter::upper=3.0_real12*pi/2.0_real12
+      real(real12),parameter::lower=-pi/2.0_real12
+      logical::problem
+      real(real12)::test
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               test=kgridCoarse(ix,iy,iz)%kz
+               if (test.lt.lower) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               test=kgridCoarse(ix,iy,iz)%kz
+               if (test.ge.upper) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+   
+   end subroutine test_cgrid_kz_in_range
+
+   @test
+   subroutine test_cgrid_knorm_in_range()
+      real(real12),parameter::upper=sqrt(27.0_real12*pi*pi/4.0_real12)
+      real(real12),parameter::lower=0.0_real12
+      logical::problem
+      real(real12)::test
+      integer::ix,iy,iz
+
+      call initgrid(settings,kgridFine,kgridCoarse,ierr)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               test=kgridCoarse(ix,iy,iz)%norm
+               if (test.lt.lower) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+      problem=.false.
+      do ix=1,ncoarse_cells
+         if (problem) exit
+         do iy=1,ncoarse_cells
+            if (problem) exit
+            do iz=1,ncoarse_cells
+               test=kgridCoarse(ix,iy,iz)%norm
+               if (test.ge.upper) problem=.true.
+               if (problem) exit
+            enddo
+         enddo
+      enddo
+      @assertFalse(problem)
+
+   end subroutine test_cgrid_knorm_in_range
+
+end module test_initGrid
+  

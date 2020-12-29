@@ -1,0 +1,173 @@
+module test_dispersions
+    use funit_core
+    use funit
+    use constants
+    use dispersions
+    implicit none
+
+contains
+
+    @test
+    subroutine test_fine_disp_zero()
+        complex(real12)         :: test    
+
+        test = fineDispersion(zero, zero, zero)
+        @assertEqual(real(test), zero, tolerance)
+        @assertEqual(aimag(test), zero, tolerance)
+    end subroutine test_fine_disp_zero
+
+    @test
+    subroutine test_fine_max_kx()
+        complex(real12)         :: test
+        real(real12), parameter :: input = pi
+        real(real12), parameter :: expected = one
+        
+        test = fineDispersion(input, zero, zero)
+        @assertEqual(real(test), expected, tolerance)
+        @assertEqual(aimag(test), zero, tolerance)
+    end subroutine test_fine_max_kx
+
+    @test
+    subroutine test_fine_max_ky()
+        complex(real12)          :: test
+        real(real12), parameter :: input = pi
+        real(real12), parameter :: expected = one
+        
+        test = fineDispersion(zero, input, zero)
+        @assertEqual(real(test), expected, tolerance)
+        @assertEqual(aimag(test), zero, tolerance)
+    end subroutine test_fine_max_ky
+
+    @test
+    subroutine test_fine_max_kz()
+        complex(real12)         :: test
+        real(real12), parameter :: input = pi
+        real(real12), parameter :: expected = one
+        
+        test = fineDispersion(zero, zero, input)
+        @assertEqual(real(test), expected, tolerance)
+        @assertEqual(aimag(test), zero, tolerance)
+    end subroutine test_fine_max_kz
+
+    @test
+    subroutine test_fine_max_kall()
+        complex(real12)         :: test
+        real(real12), parameter :: input = pi
+        real(real12), parameter :: expected = three
+
+        test = fineDispersion(input, input, input)
+        @assertEqual(real(test), expected, tolerance)
+        @assertEqual(aimag(test), zero, tolerance)
+    end subroutine test_fine_max_kall
+
+    @test
+    subroutine test_fine_periodicty_kx()
+        complex(real12)         :: test1
+        complex(real12)         :: test2 
+        real(real12), parameter :: input1= pi + 0.1_real12
+        real(real12), parameter :: input2= -pi + 0.1_real12
+    
+        test1 = fineDispersion(input1, zero, zero)
+        test2 = fineDispersion(input2, zero, zero)
+        @assertEqual(real(test1),real(test2), tolerance)
+        @assertEqual(aimag(test1), aimag(test2), tolerance)
+    end subroutine test_fine_periodicty_kx
+
+    @test
+    subroutine test_fine_periodicty_ky()
+        complex(real12)         :: test1
+        complex(real12)         :: test2 
+        real(real12), parameter :: input1= pi + 0.1_real12
+        real(real12), parameter :: input2= -pi + 0.1_real12
+        
+        test1 = fineDispersion(zero, input1 , zero)
+        test2 = fineDispersion(zero, input1 , zero)
+        @assertEqual(real(test1),real(test2), tolerance)
+        @assertEqual(aimag(test1), aimag(test2), tolerance)
+    end subroutine test_fine_periodicty_ky
+
+    @test
+    subroutine test_fine_periodicty_kz()
+        complex(real12)            :: test1
+        complex(real12)            :: test2 
+        real(real12), parameter :: input1= pi + 0.1_real12
+        real(real12), parameter :: input2= -pi + 0.1_real12
+
+        test1 = fineDispersion(zero, zero, input1)
+         test2 = fineDispersion(zero, zero, input2)
+        @assertEqual(real(test1),real(test2), tolerance)
+        @assertEqual(aimag(test1), aimag(test2), tolerance)
+    end subroutine test_fine_periodicty_kz
+
+    @test
+    subroutine test_fine_periodicty_kall()
+        complex(real12)         :: test1
+        complex(real12)         :: test2 
+        real(real12), parameter :: input1= pi + 0.1_real12
+        real(real12), parameter :: input2= -pi + 0.1_real12
+    
+         test1 = fineDispersion(input1, input1, input1)
+        test2 = fineDispersion(input2, input2, input2)
+        @assertEqual(real(test1),real(test2), tolerance)
+        @assertEqual(aimag(test1), aimag(test2), tolerance)
+    end subroutine test_fine_periodicty_kall
+
+    @test
+    subroutine test_coarse_summation_someones()
+        integer, parameter      :: ifinecell = 4
+        integer, parameter      :: ifinetot = ifinecell**3
+        integer, parameter      :: icoarsetot = 8
+        complex(real12)         :: testgrid(ifinecell, ifinecell, ifinecell)
+        complex(real12)         :: test
+        real(real12), parameter :: nonzero_vals = three
+        real(real12), parameter :: ratio = real(icoarsetot) / real(ifinetot)
+        real(real12), parameter :: expected = nonzero_vals * ratio
+        
+        testgrid=(zero, zero)
+        testgrid(2, 1, 3) = (one, zero)
+        testgrid(1, 4, 3) = (one, zero)
+        testgrid(3, 1, 2) = (one, zero)
+
+        test=coarseDispersion(testgrid, icoarsetot, ifinetot)
+        @assertEqual(real(test), expected, tolerance)
+        @assertEqual(aimag(test), zero, tolerance)     
+    end subroutine test_coarse_summation_someones
+
+    @test
+    subroutine test_coarse_summation_allzero()
+        integer, parameter      :: ifinecell = 4
+        integer, parameter      :: ifinetot = ifinecell**3
+        integer, parameter      :: icoarsetot = 8
+        complex(real12)         :: testgrid(ifinecell, ifinecell, ifinecell)
+        complex(real12)         :: test
+        real(real12), parameter :: nonzero_vals = zero
+        real(real12), parameter :: ratio = real(icoarsetot) / real(ifinetot)
+        real(real12), parameter :: expected = nonzero_vals * ratio
+    
+        testgrid=(zero, zero)
+        
+        test=coarseDispersion(testgrid, icoarsetot, ifinetot)
+        @assertEqual(real(test), expected, tolerance)
+        @assertEqual(aimag(test), expected, tolerance)     
+    end subroutine test_coarse_summation_allzero
+
+    @test
+    subroutine test_coarse_summation_allone()
+        integer, parameter      :: ifinecell = 4
+        integer, parameter      :: ifinetot = ifinecell**3
+        integer, parameter      :: icoarsetot = 8
+        complex(real12)         :: testgrid(ifinecell, ifinecell, ifinecell)
+        complex(real12)         :: test
+        real(real12), parameter :: nonzero_vals = real(ifinetot)
+        real(real12), parameter :: ratio = real(icoarsetot) / real(ifinetot)
+        real(real12), parameter :: expected = nonzero_vals * ratio
+    
+        testgrid=(one, one)
+        
+        
+        test=coarseDispersion(testgrid, icoarsetot, ifinetot)
+        @assertEqual(real(test), expected, tolerance)
+        @assertEqual(aimag(test), expected, tolerance)     
+    end subroutine test_coarse_summation_allone
+
+end module test_dispersions
