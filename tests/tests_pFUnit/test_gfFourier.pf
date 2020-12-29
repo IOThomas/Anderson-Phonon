@@ -184,7 +184,8 @@ contains
                start = cmplx(alpha**real(i+j+k-3,real12),zero,real12)
 
                phase = cmplx(zero, -two*pi*real((i-1),real12)/x_length,real12)
-               if ((real(start,real12).eq.real(exp(-phase),real12)).and.(aimag(start).eq.aimag(exp(-phase))).and.(alpha.eq.one)) then
+               if ((real(start,real12).eq.real(exp(-phase),real12)).and.(aimag(start).eq.aimag(exp(-phase)))&
+                     &.and.(alpha.eq.one)) then
                   intermediate = cmplx(x_length,zero,real12)
                else
                   denom = cmplx(one,zero,real12) - cmplx(alpha, zero,real12)*exp(phase)
@@ -192,7 +193,8 @@ contains
                endif
 
                phase = cmplx(zero, -two*pi*real((j-1),real12)/y_length,real12)
-               if ((real(start,real12).eq.real(exp(-phase),real12)).and.(aimag(start).eq.aimag(exp(-phase))).and.(alpha.eq.one)) then
+               if ((real(start,real12).eq.real(exp(-phase),real12)).and.(aimag(start).eq.aimag(exp(-phase)))&
+                     &.and.(alpha.eq.one)) then
                   intermediate = intermediate*cmplx(y_length,zero,real12)
                else
                   denom = cmplx(one,zero,real12) - cmplx(alpha, zero,real12)*exp(phase)
@@ -200,7 +202,8 @@ contains
                endif
 
                phase = cmplx(zero, -two*pi*real((k-1),real12)/z_length, real12)
-               if ((real(start,real12).eq.real(exp(-phase),real12)).and.(aimag(start).eq.aimag(exp(-phase))).and.(alpha.eq.one)) then
+               if ((real(start,real12).eq.real(exp(-phase),real12)).and.(aimag(start).eq.aimag(exp(-phase)))&
+                     &.and.(alpha.eq.one)) then
                   intermediate = intermediate*cmplx(z_length,zero,real12)
                else
                   denom = cmplx(one,zero,real12) - cmplx(alpha, zero,real12)*exp(phase)

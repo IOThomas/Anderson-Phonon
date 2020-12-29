@@ -11,7 +11,7 @@ make_helper:
 	$(MAKE) -C helper_modules all
 
 FFLAGS += $(PFUNIT_EXTRA_FFLAGS)
-FFLAGS += -I$(SRCDIR) -I./helper_modules
+FFLAGS += -I$(SRCDIR) -I./helper_modules -I/usr/include/
 
 %.o: helper_modules/%.f08   
 	$(FC1) -c $(FFLAGS)  $<
@@ -38,6 +38,11 @@ $(eval $(call make_pfunit_test,test_dispersions))
 test_initialisation_TESTS := test_initHybrid.pf test_initDzero.pf test_initGrid.pf
 test_initialisation_OTHER_SRCS := initialisation dispersions greensroutines definedtypes constants
 $(eval $(call make_pfunit_test,test_initialisation))
+
+test_fastFourier_TESTS := test_gfFourier.pf
+test_fastFourier_OTHER_SRCS := gf_fourier greensroutines constants
+test_fastFourier_OTHER_LIBRARIES := -lfftw3q -lquadmath -lm
+$(eval $(call make_pfunit_test,test_fastFourier))
 
 .PHONY: clean
 clean:
