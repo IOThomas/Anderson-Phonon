@@ -46,13 +46,13 @@ $(eval $(call make_pfunit_test,test_fastFourier))
 
 .PHONY: clean
 clean:
-	$(RM) *.o *.mod *.a *.inc
+	$(RM) *.o *.mod *.smod *.a *.inc
 	$(RM) *.F90
 	$(MAKE) -C helper_modules clean
 
 .PHONY: cleantests
 cleantests:
-	$(RM) test_dispersions test_greensroutines test_helpers test_initialisation
+	$(RM) test_dispersions test_greensroutines test_helpers test_initialisation test_fastFourier
 
 ###########################################################################
 .PHONY: runtests
@@ -61,4 +61,5 @@ runtests:
 	./test_greensroutines
 	./test_dispersions
 	./test_initialisation
+	./test_fastFourier
 	
