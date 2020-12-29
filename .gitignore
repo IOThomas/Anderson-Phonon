@@ -14,3 +14,7 @@ tests/tests_pFUnit/test_greensroutines
 tests/tests_pFUnit/test_initHybrid
 tests/tests_pFUnit/test_initialisation
 tests/tests_pFUnit/test_fastFourier
+*.F90
+*.cproject
+*.project
+*.inc
