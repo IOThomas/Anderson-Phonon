@@ -13,3 +13,4 @@ tests/tests_pFUnit/test_helpers
 tests/tests_pFUnit/test_greensroutines
 tests/tests_pFUnit/test_initHybrid
 tests/tests_pFUnit/test_initialisation
+tests/tests_pFUnit/test_fastFourier
