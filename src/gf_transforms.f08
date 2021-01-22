@@ -156,42 +156,39 @@ contains
 
   end subroutine fft_on_k
 
-  subroutine fft_on_kdash(workreal, direction)
-    type(greensfunc), intent(inout):: workreal(:, :, :, :, :, :)
-    integer, intent(in)            :: direction
-    
-    !routine variables
-    type(greensfunc), allocatable :: workslice(:, :, :)
-    integer                       :: x_size, y_size, z_size, nomega
-    integer                       :: ix, iy, iz
-    integer                       :: ierr1
-    
-    x_size = size(workreal,4)
-    y_size = size(workreal,5)
-    z_size = size(workreal,6)
-    nomega = size(workreal(1, 1, 1, 1, 1, 1)%GF, 1)
+   subroutine fft_on_kdash(workreal, direction)
+      type(greensfunc), intent(inout):: workreal(:, :, :, :, :, :)
+      integer, intent(in)            :: direction
+      
+      !routine variables
+      type(greensfunc), allocatable :: workslice(:, :, :)
+      integer                       :: x_size, y_size, z_size, nomega
+      integer                       :: ix, iy, iz
+      integer                       :: ierr1
+      
+      x_size = size(workreal,4)
+      y_size = size(workreal,5)
+      z_size = size(workreal,6)
+      nomega = size(workreal(1, 1, 1, 1, 1, 1)%GF, 1)
 
-    allocate(workslice(x_size, y_size, z_size)
-    call allocate_gf(workslice, nomega)
-
-    fft_each_slice_in_turn:do ix= 1, x_size
-       do iy = 1, y_size
-          do iz = 1, z_size
-             call copyGF (workslice, workreal(ix, iy, iz, 1:x_size,&
-                  & 1:y_size, 1:z_size))
-             
-             call gf_fft(workslice, direction, ierr1)
-             if (ierr1.ne.0) then
-                write (*, *) "Slice labels (x, y, z): ", ix, iy, iz
-                call fatal_error_from_call(ierr1, "fft_on_kdash", "gf_fft")
-             endif
-             
-             call copyGF(workreal(ix, iy, iz, 1:x_size, 1:y_size,&
-                  & 1:z_size), workslice)
-          enddo
-       enddo
-    enddo fft_each_slice_in_turn
+      allocate(workslice(x_size, y_size, z_size))
+      call allocate_gf(workslice, nomega)
+      fft_each_slice_in_turn:do ix= 1, x_size
+         do iy = 1, y_size
+            do iz = 1, z_size
+               call copyGF (workslice, workreal(ix, iy, iz, 1:x_size, 1:y_size, 1:z_size))
+                  
+               call gf_fft(workslice, direction, ierr1)
+               if (ierr1.ne.0) then
+                  write (*, *) "Slice labels (x, y, z): ", ix, iy, iz
+                  call fatal_error_from_call(ierr1, "fft_on_kdash", "gf_fft")
+               endif
+                  
+               call copyGF(workreal(ix, iy, iz, 1:x_size, 1:y_size, 1:z_size), workslice)
+            enddo
+         enddo
+      enddo fft_each_slice_in_turn
     
-  end subroutine fft_on_kdash   
+   end subroutine fft_on_kdash   
    
 end submodule gf_transforms
