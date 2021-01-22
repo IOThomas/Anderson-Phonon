@@ -1,0 +1,102 @@
+!//TODO prawf ar gyfer momspace_to_realspace
+!//TODO prawf ar gyfer realspace_to_momspace
+!//TODO prawf ar gyfer fft_on_k
+!//TODO prawf ar gyfer fft_on_kdash
+
+module test_gftransforms
+
+    use funit
+    use constants
+    use greensroutines
+    use gf_fourier
+
+    implicit none
+    integer, parameter                :: xsize = 4, ysize = 4, zsize = 4, nomega = 2
+    integer, parameter                :: rspace_size = xsize*ysize*zsize
+    type(greensroutines), allocatable :: test_mom_space, test_rl_space
+    type(greensroutines), allocatable :: expected_mom_space, expected_rl_space
+    real(real12), parameter           :: kx = (two*pi/real(xsize+1,real12), zero)
+    real(real12), parameter           :: ky = (two*pi/real(ysize+1,real12), zero) 
+    real(real12), parameter           :: kz = (two*pi/real(zsize+1,real12), zero)
+
+    ! define forward and backward shifts
+    integer, parameter                :: icount(rspace_size) = [( i, i = 1, rspace_size)]
+    integer, parameter                :: identity(xsize, ysize, zsize) = reshape(icount, [xsize, ysize, zsize])
+    integer, parameter                :: shift_up_1(xsize, ysize, zsize) = cshift(identity, 1, 1)
+    integer, parameter                :: shift_down_1(xsize, ysize, zsize) = cshift(identity, -1, 1)
+    integer, parameter                :: sh_up_1 = reshape(shift_up_1, [rspace_size])
+    integer, parameter                :: sh_down_1 = reshape(shift_down_1, [rspace_size])
+    integer, parameter                :: shift_up_2(xsize, ysize, zsize) = cshift(identity, 1, 2)
+    integer, parameter                :: shift_down_2(xsize, ysize, zsize) = cshift(identity, -1, 2)
+    integer, parameter                :: sh_up_2 = reshape(shift_up_2, [rspace_size])
+    integer, parameter                :: sh_down_2 = reshape(shift_down_2, [rspace_size])
+    integer, parameter                :: shift_up_3(xsize, ysize, zsize) = cshift(identity, 1, 3)
+    integer, parameter                :: shift_down_3(xsize, ysize, zsize) = cshift(identity, -1, 3)
+    integer, parameter                :: sh_up_3 = reshape(shift_up_3, [rspace_size])
+    integer, parameter                :: sh_down_3 = reshape(shift_down_3, [rspace_size])
+
+contains
+
+    @before
+    subroutine set_up()
+        integer :: i, j, k, l
+
+        allocate(test_mom_space(xsize, ysize, zsize), expected_mom_space(xsize, ysize, zsize))
+        call allocate_GF(test_mom_space, nomega)
+        call allocate_GF(expected_mom_space, nomega)
+
+        allocate(test_rl_space(rspace_size, rspace_size), expected_rl_space(rspace_size, rspace_size))
+        call allocate_GF(test_rl_space, nomega)
+        call allocate_GF(expected_mom_space, nomega)
+
+        expected_rl_space = cmplx_zero
+        do i = 1, rspace_size
+            do j = 1, nomega
+                expected_rl_space(sh_up_1(i))%GF(j) = cmplx_one
+                expected_rl_space(sh_down_1(i))%GF(j) = cmplx_one
+                expected_rl_space(sh_up_2(i))%GF(j) = cmplx_one
+                expected_rl_space(sh_down_2(i))%GF(j) = cmplx_one
+                expected_rl_space(sh_up_3(i))%GF(j) = cmplx_one
+                expected_rl_space(sh_down_3(i))%GF(j) = cmplx_one
+            end do
+        end do
+
+        do i = 1, xsize
+            do j = 1, ysize
+                do k = 1, zsize
+                    do l = 1, nomega
+                        expected_mom_space(i,j,k)%GF(l) = cos(kx*real(i,real12)) + cos(ky*real(j,real12)) + cos(kz*real(k,real12))
+                    end do
+                end do
+            end do
+        end do
+
+    end subroutine set_up
+
+    @after
+    subroutine tear_down()
+        if (allocated(test_rl_space)) deallocate(test_rl_space)
+        if (allocated(expected_rl_space)) deallocate(expected_rl_space)
+        if (allocated(test_mom_space)) deallocate(test_mom_space)
+        if (allocated(expected_mom_space)) deallocate(expected_mom_space)
+    end subroutine tear_down
+
+    @test
+    subroutine momentum_to_realspace()
+    end subroutine momentum_to_realspace
+
+    @test
+    subroutine real_to_momentumspace()
+    end subroutine real_to_momentumspace    
+
+    @test
+    subroutine cycle_real_to_real()
+    end subroutine cycle_real_to_real
+
+    @test
+    subroutine cycle_moment_to_moment()
+    end subroutine cycle_moment_to_moment
+
+end module
+
+
