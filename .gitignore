@@ -18,3 +18,5 @@ tests/tests_pFUnit/test_fastFourier
 *.cproject
 *.project
 *.inc
+tests/rough_tests/
+tests/hopping_param.f08
