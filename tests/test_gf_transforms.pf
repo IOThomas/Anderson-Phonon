@@ -13,33 +13,37 @@ module test_gftransforms
     implicit none
     integer, parameter                :: xsize = 4, ysize = 4, zsize = 4, nomega = 2
     integer, parameter                :: rspace_size = xsize*ysize*zsize
-    type(greensroutines), allocatable :: test_mom_space, test_rl_space
-    type(greensroutines), allocatable :: expected_mom_space, expected_rl_space
+    type(greensroutines), allocatable :: test_mom_space(:,:,:), test_rl_space(:,:)
+    type(greensroutines), allocatable :: expected_mom_space(:,:,:), expected_rl_space(:,:)
     real(real12), parameter           :: kx = (two*pi/real(xsize+1,real12), zero)
     real(real12), parameter           :: ky = (two*pi/real(ysize+1,real12), zero) 
     real(real12), parameter           :: kz = (two*pi/real(zsize+1,real12), zero)
 
     ! define forward and backward shifts
-    integer, parameter                :: icount(rspace_size) = [( i, i = 1, rspace_size)]
+    integer                           :: ik
+    integer, parameter                :: icount(rspace_size) = [( ik, ik = 1, rspace_size)]
     integer, parameter                :: identity(xsize, ysize, zsize) = reshape(icount, [xsize, ysize, zsize])
-    integer, parameter                :: shift_up_1(xsize, ysize, zsize) = cshift(identity, 1, 1)
-    integer, parameter                :: shift_down_1(xsize, ysize, zsize) = cshift(identity, -1, 1)
-    integer, parameter                :: sh_up_1 = reshape(shift_up_1, [rspace_size])
-    integer, parameter                :: sh_down_1 = reshape(shift_down_1, [rspace_size])
-    integer, parameter                :: shift_up_2(xsize, ysize, zsize) = cshift(identity, 1, 2)
-    integer, parameter                :: shift_down_2(xsize, ysize, zsize) = cshift(identity, -1, 2)
-    integer, parameter                :: sh_up_2 = reshape(shift_up_2, [rspace_size])
-    integer, parameter                :: sh_down_2 = reshape(shift_down_2, [rspace_size])
-    integer, parameter                :: shift_up_3(xsize, ysize, zsize) = cshift(identity, 1, 3)
-    integer, parameter                :: shift_down_3(xsize, ysize, zsize) = cshift(identity, -1, 3)
-    integer, parameter                :: sh_up_3 = reshape(shift_up_3, [rspace_size])
-    integer, parameter                :: sh_down_3 = reshape(shift_down_3, [rspace_size])
+    integer                           :: sh_up_1(rspace_size)
+    integer                           :: sh_down_1(rspace_size) 
+    integer                           :: sh_up_2(rspace_size) 
+    integer                           :: sh_down_2(rspace_size) 
+    integer                           :: sh_up_3(rspace_size) 
+    integer                           :: sh_down_3(rspace_size) 
 
 contains
 
     @before
     subroutine set_up()
         integer :: i, j, k, l
+
+        sh_up_1  = reshape(cshift(identity, 1, 1), [rspace_size])
+        sh_down_1 = reshape(cshift(identity, -1, 1), [rspace_size])
+
+        sh_up_2  = reshape(cshift(identity, 1, 2), [rspace_size])
+        sh_down_2 = reshape(cshift(identity, -1, 2), [rspace_size])
+
+        sh_up_3  = reshape(cshift(identity, 1, 3), [rspace_size])
+        sh_down_3 = reshape(cshift(identity, -1, 3), [rspace_size])
 
         allocate(test_mom_space(xsize, ysize, zsize), expected_mom_space(xsize, ysize, zsize))
         call allocate_GF(test_mom_space, nomega)
@@ -52,12 +56,12 @@ contains
         expected_rl_space = cmplx_zero
         do i = 1, rspace_size
             do j = 1, nomega
-                expected_rl_space(sh_up_1(i))%GF(j) = cmplx_one
-                expected_rl_space(sh_down_1(i))%GF(j) = cmplx_one
-                expected_rl_space(sh_up_2(i))%GF(j) = cmplx_one
-                expected_rl_space(sh_down_2(i))%GF(j) = cmplx_one
-                expected_rl_space(sh_up_3(i))%GF(j) = cmplx_one
-                expected_rl_space(sh_down_3(i))%GF(j) = cmplx_one
+                expected_rl_space(i,sh_up_1(i))%GF(j) = cmplx_one
+                expected_rl_space(i,sh_down_1(i))%GF(j) = cmplx_one
+                expected_rl_space(i,sh_up_2(i))%GF(j) = cmplx_one
+                expected_rl_space(i, sh_down_2(i))%GF(j) = cmplx_one
+                expected_rl_space(i, sh_up_3(i))%GF(j) = cmplx_one
+                expected_rl_space(i, sh_down_3(i))%GF(j) = cmplx_one
             end do
         end do
 
