@@ -20,3 +20,4 @@ tests/tests_pFUnit/test_fastFourier
 *.inc
 tests/rough_tests/
 tests/hopping_param.f08
+tests/test_helpers
