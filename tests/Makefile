@@ -2,7 +2,7 @@ PFUNIT_DIR = /home/iorwerth/pFUnit/build/installed
 include $(PFUNIT_DIR)/PFUNIT-4.1/include/PFUNIT.mk
 FC1 = gfortran-9
 
-SRCDIR = ../../src
+SRCDIR = ../src
 
 all: make_helper test_helpers test_greensroutines test_dispersions test_initialisation
 .PHONY: all

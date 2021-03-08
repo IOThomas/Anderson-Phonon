@@ -1,7 +1,7 @@
 OBJECTS = greensroutines_helper.o
 
 FC1 = gfortran-9
-SRCDIR = ../../../src
+SRCDIR = ../../src
 FFLAGS += -I$(SRCDIR) -I.
 
 all: $(OBJECTS)
