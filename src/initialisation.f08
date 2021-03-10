@@ -399,26 +399,4 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    end subroutine initHybrid
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   subroutine allocate_3DGF(Gfunc, nx, ny, nz, nomega, ierror)
-      type(greensfunc), intent(out) :: Gfunc(:, :, :)
-      integer, intent(in) :: nx, ny, nz, nomega
-      integer, intent(out) :: ierror
-
-      call check_input(ierror)
-      if (ierror.ne.0) return
-
-      allocate(Gfunc(nx, ny, nz))
-      call allocate_GF(Gfunc, nomega)
-      
-   contains
-
-      subroutine check_input(ierr)
-         integer, intent(out) :: ierr
-
-         ierr = 0
-         if ((nx.le.0).or.(ny.le.0).or.(nz.le.0).or.(nomega.le.0)) ierr = 1
-         if (allocated(Gfunc)) ierr = 2
-      end subroutine check_input
-   
-   end subroutine allocate_3DGF
 end module initialisation

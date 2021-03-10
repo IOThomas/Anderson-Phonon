@@ -16,7 +16,7 @@ contains
       logical                       :: GFsize_prob = .false.
       integer                       :: i, j, k, itest
 
-      call allocateGF(testGF, array_size, array_size, array_size, array_size, ierr)
+      call allocate_3DGF(testGF, array_size, array_size, array_size, array_size, ierr)
 
       @assertEqual(size(testGF, 1), array_size)
       @assertEqual(size(testGF, 2), array_size)
@@ -48,22 +48,22 @@ contains
       type(greensfunc), allocatable :: testGF(:, :, :)
       integer                       :: ierr
 
-      call allocateGF(testGF, array_wrong, array_size, array_size, array_size,&
+      call allocate_3DGF(testGF, array_wrong, array_size, array_size, array_size,&
      	   ierr)
       @assertEqual(ierr, 1)
      
 
-      call allocateGF(testGF, array_size, array_wrong, array_size, array_size,&
+      call allocate_3DGF(testGF, array_size, array_wrong, array_size, array_size,&
      	  ierr)
       @assertEqual(ierr, 1)
      
 
-      call allocateGF(testGF, array_size, array_size, array_wrong, array_size,&
+      call allocate_3DGF(testGF, array_size, array_size, array_wrong, array_size,&
      	   ierr)
       @assertEqual(ierr, 1)
     
 
-      call allocateGF(testGF, array_wrong, array_size, array_size, array_wrong,&
+      call allocate_3DGF(testGF, array_wrong, array_size, array_size, array_wrong,&
      	   ierr)
       @assertEqual(ierr, 1)
      
@@ -76,8 +76,8 @@ contains
       integer                       :: ierr
 
       allocate(testGF(array_size,array_size,array_size))
-      call allocateGF(testGF, array_size, array_size, array_size, array_size,&
-     	  ierr)
+      call allocate_3DGF(testGF, array_size, array_size, array_size, array_size, ierr)
+      
       @assertEqual(ierr, 2)
       deallocate(testGF)
    end subroutine
@@ -208,10 +208,10 @@ contains
       logical                       :: copymap_prob = .false.
       logical                       :: copyGF_prob = .false.
 
-      call allocateGF(original, array_size, array_size, array_size, array_size, ierr)
+      call allocate_3DGF(original, array_size, array_size, array_size, array_size, ierr)
       @assertEqual(ierr, 0)
 
-      call allocateGF(copy, array_size, array_size, array_size, array_size, ierr)
+      call allocate_3DGF(copy, array_size, array_size, array_size, array_size, ierr)
       @assertEqual(ierr, 0)
 
       testmap = tmap
@@ -249,7 +249,7 @@ contains
       integer, allocatable          :: ierr1(:, :, :)
       logical                       :: invertGF_prob = .false.
 
-      call allocateGF(test, array_size, array_size, array_size, array_size,&
+      call allocate_3DGF(test, array_size, array_size, array_size, array_size,&
          ierr)
       @assertEqual(ierr, 0)
 
@@ -286,7 +286,7 @@ contains
       integer                       :: i, j, k, l, ierr
       integer, allocatable          :: ierr_invertGF(:, :, :)
 
-      call allocateGF(test, array_size, array_size, array_size, array_size,&
+      call allocate_3DGF(test, array_size, array_size, array_size, array_size,&
          ierr)
       @assertEqual(ierr, 0)
 
@@ -324,11 +324,11 @@ contains
       integer                       :: ic, jc, kc
       logical                       :: reduce_problem = .false.
 
-      call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
+      call allocate_3DGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
             ierr)
       @assertEqual(ierr, 0)
 
-      call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
+      call allocate_3DGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
       @assertEqual(ierr, 0)
 
       do ic = 1, coarse_size
@@ -374,11 +374,11 @@ contains
       integer, parameter            :: nomega = 2
       integer                       :: ierr
 
-      call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
+      call allocate_3DGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
             ierr)
       @assertEqual(ierr, 0)
 
-      call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
+      call allocate_3DGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
       @assertEqual(ierr, 0)
 
       allocate(test(1, 1, 1))
@@ -401,11 +401,11 @@ contains
       integer, parameter            :: nomega1 = 1
       integer                       :: ierr
 
-      call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
+      call allocate_3DGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
             ierr)
       @assertEqual(ierr, 0)
 
-      call allocateGF(fine, fine_size, fine_size, fine_size, nomega1, ierr)
+      call allocate_3DGF(fine, fine_size, fine_size, fine_size, nomega1, ierr)
       @assertEqual(ierr, 0)
 
       call reduceGF(coarse, fine, ierr)
@@ -422,11 +422,11 @@ contains
       integer, parameter            :: nomega = 2
       integer                       :: ierr
 
-      call allocateGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
+      call allocate_3DGF(coarse, coarse_size, coarse_size, coarse_size, nomega, &
             ierr)
       @assertEqual(ierr, 0)
 
-      call allocateGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
+      call allocate_3DGF(fine, fine_size, fine_size, fine_size, nomega, ierr)
       @assertEqual(ierr, 0)
 
       call reduceGF(coarse, fine, ierr)

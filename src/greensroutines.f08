@@ -8,7 +8,7 @@ module greensroutines
   implicit none
   private
   public allocate_GF, calculateGF, greensfunc, copymap, copyGF, invertGF,&
-       reduceGF, assignment (=), copy_gf_slice, initialise_GF
+    reduceGF, assignment (=), copy_gf_slice, initialise_GF, allocate_3DGF
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   type, public :: greensfunc
@@ -352,4 +352,44 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
   end subroutine copy_slice_from_complex
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  subroutine allocate_3DGF(Gfunc, nx, ny, nz, nomega, ierror)
+    type(greensfunc), allocatable, intent(inout) :: Gfunc(:, :, :)
+    integer, intent(in) :: nx, ny, nz, nomega
+    integer, intent(out) :: ierror
+
+    ierror = 0
+    ! test inputs
+    if ((nx.le.0).or.(ny.le.0).or.(nz.le.0).or.(nomega.le.0)) ierror = 1
+    if (allocated(Gfunc)) ierror = 2
+    if (ierror.ne.0) return
+
+    allocate(Gfunc(nx, ny, nz))
+    if (.not.allocated(Gfunc)) then
+      ierror = 3
+      return
+    end if  
+    call allocate_GF(Gfunc, nomega)
+  
+    if (any(test_not_allocated(Gfunc))) then
+      ierror = 4
+      return
+    end if
+        
+  contains
+
+    subroutine check_input(ierr)
+       integer, intent(inout) :: ierr
+
+       if ((nx.le.0).or.(ny.le.0).or.(nz.le.0).or.(nomega.le.0)) ierr = 1
+       if (allocated(Gfunc)) ierr = 2
+    end subroutine check_input
+
+    elemental function test_not_allocated(Gtest)
+      logical :: test_not_allocated
+      type(greensfunc), intent(in) :: Gtest
+      
+      test_not_allocated = .not.allocated(Gtest%GF)
+    end function
+
+   end subroutine allocate_3DGF
 end module greensroutines
