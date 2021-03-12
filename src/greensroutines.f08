@@ -3,7 +3,7 @@ module greensroutines
 !# Contains type definitions and functions associated with manipulating
 !# the greensfunc type
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  use constants, only: real12, one, cmplx_zero, tolerance
+  use constants, only: real12, one, cmplx_zero, tolerance, fatal_error_from_call
   use definedtypes, only: kappagrid
   implicit none
   private
@@ -12,33 +12,36 @@ module greensroutines
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   type, public :: greensfunc
-     !# Green's function type
-     complex(real12),allocatable :: GF(:)
-     !# value of Green's function wrt omega
-     integer                     :: map = -1
-     !# labels the associated coarse grid point (-1 means unassigned)
-     integer, private            :: nGF_points = 0
-     !# size the size of GF (0 means not yet allocated)
+    !# Green's function type
+    complex(real12),allocatable :: GF(:)
+    !# value of Green's function wrt omega
+    integer                     :: map = -1
+    !# labels the associated coarse grid point (-1 means unassigned)
+    integer, private            :: nGF_points = 0
+    !# size the size of GF (0 means not yet allocated)
    contains
-     procedure, public  :: get_size
-     !# fetches the number of nGF_points
-     !# by design, nGF_points should be identical for all members of same array
+    procedure, public  :: get_size
+    !# fetches the number of nGF_points
+    !# by design, nGF_points should be identical for all members of same array
   end type greensfunc
   interface assignment (=)
-     module procedure copy_all_gf
+    module procedure copy_all_gf
   end interface assignment (=)
   interface copy_gf_slice
-     module procedure copy_slice_to_complex
-     module procedure copy_slice_from_complex
+    module procedure copy_slice_to_complex
+    module procedure copy_slice_from_complex
   end interface copy_gf_slice
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contains
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   elemental subroutine allocate_GF(GF_array, n_points)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# allocates GF_array%GF array
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(greensfunc), intent(inout) :: GF_array
     integer, intent(in)             :: n_points
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     GF_array%nGF_points = n_points
     allocate(GF_array%GF(n_points))
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -47,9 +50,14 @@ contains
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   function get_size(this)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# fetches size of greensfunc%GF array (part of greensfunc object defn)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     integer           :: get_size
+    !# get_size returns an integer
     class(greensfunc) :: this
-    
+    !# object whose GF array size is to be returned
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
     get_size = this%nGF_points
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   end function get_size
@@ -57,11 +65,17 @@ contains
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   elemental subroutine initialise_GF(GF_array, GF_init)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Initialise all elements of GF_array%GF with a single value
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(greensfunc), intent(inout) :: GF_array
+    !# array to be initialised
     complex(real12), intent(in)     :: GF_init
-
+    !# value with which to initialise
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! routine variables
     integer :: nGF_points, i
-
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     nGF_points = size(GF_array%GF, 1)
     do i = 1, nGF_points
        GF_array%GF(i)=GF_init
@@ -352,11 +366,26 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
   end subroutine copy_slice_from_complex
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine allocate_3DGF(Gfunc, nx, ny, nz, nomega, ierror)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Wrapper function that allocates greensfunc type Gfunc for a 3D grid
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Error codes: ierr = 0 -- Routine completed successfully;
+!#              ierr = 1 -- Dimension of nx, ny, nz or nomega is <= 0
+!#              ierr = 2 -- Gfunc is already allocated
+!#              ierr = 3 -- Gfunc could not be allocated (triggers fatal error)
+!#              ierr = 4 -- Gfunc%GF could not be allocated 
+!#                          (triggers fatal error)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type(greensfunc), allocatable, intent(inout) :: Gfunc(:, :, :)
+    !# 3D greensfunc array to be allocated
     integer, intent(in) :: nx, ny, nz, nomega
+    !# number of points in x, y and z directions and size of Gfunc%GF respectively
     integer, intent(out) :: ierror
-
+    !# error code
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ierror = 0
     ! test inputs
     if ((nx.le.0).or.(ny.le.0).or.(nz.le.0).or.(nomega.le.0)) ierror = 1
@@ -364,32 +393,29 @@ contains
     if (ierror.ne.0) return
 
     allocate(Gfunc(nx, ny, nz))
-    if (.not.allocated(Gfunc)) then
-      ierror = 3
-      return
-    end if  
+    if (.not.allocated(Gfunc)) call fatal_error_from_call(3, 'allocate_3DGF', 'allocate')
+      
     call allocate_GF(Gfunc, nomega)
-  
-    if (any(test_not_allocated(Gfunc))) then
-      ierror = 4
-      return
-    end if
+    if (any(test_not_allocated(Gfunc))) call fatal_error_from_call(4, 'allocate_3DGF', 'allocate_GF')
         
   contains
-
+!------------------------------------------------------------------------------ 
     subroutine check_input(ierr)
-       integer, intent(inout) :: ierr
-
-       if ((nx.le.0).or.(ny.le.0).or.(nz.le.0).or.(nomega.le.0)) ierr = 1
-       if (allocated(Gfunc)) ierr = 2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
+      integer, intent(inout) :: ierr
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      if ((nx.le.0).or.(ny.le.0).or.(nz.le.0).or.(nomega.le.0)) ierr = 1
+      if (allocated(Gfunc)) ierr = 2
     end subroutine check_input
-
+!------------------------------------------------------------------------------ 
     elemental function test_not_allocated(Gtest)
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
       logical :: test_not_allocated
       type(greensfunc), intent(in) :: Gtest
-      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
       test_not_allocated = .not.allocated(Gtest%GF)
     end function
-
+!------------------------------------------------------------------------------ 
    end subroutine allocate_3DGF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module greensroutines
