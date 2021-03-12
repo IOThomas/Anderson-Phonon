@@ -46,7 +46,7 @@ contains
          enddo
       enddo
 
-      call allocateGF(Dzero, fine_points, fine_points, fine_points, &
+      call allocate_3DGF(Dzero, fine_points, fine_points, fine_points, &
          nomega_points, ierr)
    end subroutine set_up
 
@@ -135,7 +135,7 @@ contains
    @test
    subroutine test_Gzero_allocated_ierr3()
 
-      call allocateGF(Hybrid, ncoarse_cells, ncoarse_cells, ncoarse_cells, nomega_points, ierr)
+      call allocate_3DGF(Hybrid, ncoarse_cells, ncoarse_cells, ncoarse_cells, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertEqual(ierr, 3)
 
@@ -146,78 +146,78 @@ contains
 
       deallocate(Dzero, kgridCoarse)
       allocate(kgridCoarse(ncoarse_cells, ncoarse_cells, ncoarse_cells))
-      call allocateGF(Dzero, fine_points, fine_points, ncoarse_cells, nomega_points, ierr)
+      call allocate_3DGF(Dzero, fine_points, fine_points, ncoarse_cells, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
       
       deallocate(Dzero)
-      call allocateGF(Dzero, fine_points, fine_points, ncoarse_cells-1, nomega_points, ierr)
+      call allocate_3DGF(Dzero, fine_points, fine_points, ncoarse_cells-1, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
 
       deallocate(Dzero, kgridCoarse)
       allocate(kgridCoarse(ncoarse_cells, ncoarse_cells, ncoarse_cells))
-      call allocateGF(Dzero, fine_points, ncoarse_cells, fine_points, nomega_points, ierr)
+      call allocate_3DGF(Dzero, fine_points, ncoarse_cells, fine_points, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
       
       deallocate(Dzero)
-      call allocateGF(Dzero, fine_points, ncoarse_cells-1, fine_points, nomega_points, ierr)
+      call allocate_3DGF(Dzero, fine_points, ncoarse_cells-1, fine_points, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
 
       deallocate(Dzero, kgridCoarse)
       allocate(kgridCoarse(ncoarse_cells, ncoarse_cells, ncoarse_cells))
-      call allocateGF(Dzero, ncoarse_cells, fine_points, fine_points, nomega_points, ierr)
+      call allocate_3DGF(Dzero, ncoarse_cells, fine_points, fine_points, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
       
       deallocate(Dzero)
-      call allocateGF(Dzero, ncoarse_cells-1, fine_points, fine_points, nomega_points, ierr)
+      call allocate_3DGF(Dzero, ncoarse_cells-1, fine_points, fine_points, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
 
       deallocate(Dzero, kgridCoarse)
       allocate(kgridCoarse(ncoarse_cells, ncoarse_cells, ncoarse_cells))
-      call allocateGF(Dzero, ncoarse_cells, ncoarse_cells, fine_points, nomega_points, ierr)
+      call allocate_3DGF(Dzero, ncoarse_cells, ncoarse_cells, fine_points, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
       
       deallocate(Dzero)
-      call allocateGF(Dzero, ncoarse_cells-1, ncoarse_cells-1, fine_points, nomega_points, ierr)
+      call allocate_3DGF(Dzero, ncoarse_cells-1, ncoarse_cells-1, fine_points, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
 
       deallocate(Dzero, kgridCoarse)
       allocate(kgridCoarse(ncoarse_cells, ncoarse_cells, ncoarse_cells))
-      call allocateGF(Dzero, ncoarse_cells, fine_points, ncoarse_cells, nomega_points, ierr)
+      call allocate_3DGF(Dzero, ncoarse_cells, fine_points, ncoarse_cells, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
       
       deallocate(Dzero)
-      call allocateGF(Dzero, ncoarse_cells-1, fine_points, ncoarse_cells-1, nomega_points, ierr)
+      call allocate_3DGF(Dzero, ncoarse_cells-1, fine_points, ncoarse_cells-1, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
 
       deallocate(Dzero, kgridCoarse)
       allocate(kgridCoarse(ncoarse_cells, ncoarse_cells, ncoarse_cells))
-      call allocateGF(Dzero, fine_points, ncoarse_cells, ncoarse_cells, nomega_points, ierr)
+      call allocate_3DGF(Dzero, fine_points, ncoarse_cells, ncoarse_cells, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
 
       deallocate(Dzero)
-      call allocateGF(Dzero, fine_points, ncoarse_cells-1, ncoarse_cells-1, nomega_points, ierr)
+      call allocate_3DGF(Dzero, fine_points, ncoarse_cells-1, ncoarse_cells-1, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
 
       deallocate(Dzero, kgridCoarse)
       allocate(kgridCoarse(ncoarse_cells, ncoarse_cells, ncoarse_cells))
-      call allocateGF(Dzero, ncoarse_cells, ncoarse_cells, ncoarse_cells, nomega_points, ierr)
+      call allocate_3DGF(Dzero, ncoarse_cells, ncoarse_cells, ncoarse_cells, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
 
       deallocate(Dzero)
-      call allocateGF(Dzero, ncoarse_cells-1, ncoarse_cells-1, ncoarse_cells-1, nomega_points, ierr)
+      call allocate_3DGF(Dzero, ncoarse_cells-1, ncoarse_cells-1, ncoarse_cells-1, nomega_points, ierr)
       call initHybrid(stored, kgridCoarse, Dzero, Hybrid, ierr)
       @assertTrue(ierr == 4)
    end subroutine test_fnpts_le_cpts_ierr4

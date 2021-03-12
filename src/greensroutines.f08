@@ -266,7 +266,7 @@ contains
 !# Inverts greensfunction%GF component
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !# Error codes : ierr = 0 -- no problems;
-!#               ierr = 0 -- division by zero.
+!#               ierr = 1 -- division by zero.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     type(greensfunc), intent(inout) :: GF
     !# Greensfunction to be inverted (output in same array)

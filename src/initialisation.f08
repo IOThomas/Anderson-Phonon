@@ -2,10 +2,10 @@ module initialisation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !# Contains initialisation subroutines for the calculation.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   use constants, only: real12, pi, half, two, zero, one, cmplx_zero
+   use constants, only: real12, pi, half, two, zero, one, cmplx_zero, fatal_error_from_call
    use dispersions, only: finedispersion, coarseDispersion
    use definedtypes, only: settingparam, kappagrid, storedparam
-   use greensroutines, only: allocate_GF,  calculateGF, greensfunc, reduceGF, invertGF
+   use greensroutines, only: allocate_3DGF,  calculateGF, greensfunc, reduceGF, invertGF
    implicit none
    private
    public initGrid, initDzero, initHybrid
@@ -203,7 +203,7 @@ contains
 !#              ierr = 2 -- settings%omegamax less than settings%omegamin;
 !#              ierr = 3 -- kgridFine not allocated;
 !#              ierr = 4 -- Dzero already allocated;
-!#              ierr = 5 -- Division by zero when calculating Dzero%GF.    
+!#              ierr = 5 -- Division by zero when calculating Dzero%GF (program calls fatal error)    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       type(settingparam), intent(inout)           :: settings
       !# contains required settings information
@@ -253,30 +253,11 @@ contains
       omega_diff = (settings%omegaMax - settings%omegaMin) / real(nomega, real12)
       stored%omega_diff=omega_diff
     
-      call allocateGF(Dzero, nfpoints(1), nfpoints(2), nfpoints(3), nomega, ier1)
-      allocation_error: select case(ier1)
-      case(1)
-         write(*, *) "Error in allocateGF in initDzero: array dimension < 1."
-         ierr = 1
-         return
-      case(2)
-         write(*, *) "Error in allocateDF in initDzero: Dzero already allocated."
-         ierr = 2
-         return
-      case default
-         continue
-      end select allocation_error
+      call allocate_3DGF(Dzero, nfpoints(1), nfpoints(2), nfpoints(3), nomega, ier1)
+      if (ier1.ne.0) call fatal_error_from_call(ier1, 'initDzero', 'allocate_3DGF')
 
-      call calculateGF(GFval = Dzero, deltaw = omega_diff, &
-           dispersion = kgridFine, ierr = ier1)
-      divbyzero_error: select case(ier1)
-      case(1)
-         write(*,*) "Error in calculateGF in initDzero: division by zero."
-         ierr = 5
-         return
-      case default
-         continue
-      end select divbyzero_error
+      call calculateGF(GFval = Dzero, deltaw = omega_diff, dispersion = kgridFine, ierr = ier1)
+      if (ier1.ne.0) call fatal_error_from_call(ier1, 'initDzero', 'calculateGF')
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    end subroutine initDzero
@@ -349,18 +330,10 @@ contains
          return
       end if check_grid_sizes
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-      call allocateGF(Gzero, nx, ny, nz, nw2, ier1)
-      call allocateGF(work, nx, ny, nz, nw2, ier1)
-      allocation_error: if (ier1.ne.0) then
-        ! something has gone disastrously wrong!
-         write (*, *) "Fatal error code ", ier1 ,"in module initialisation,&
-              & subroutine initHybrid"
-         write (*, *) "Unable to allocate either or both of the Gzero and work&
-              & arrays."
-         write (*, *) "Need to examine source code, correct and recompile."
-         write (*, *) "Halting execution."
-         stop
-      end if allocation_error  
+      call allocate_3DGF(Gzero, nx, ny, nz, nw2, ier1)
+      if (ier1.ne.0) call fatal_error_from_call(ier1, 'initHybrid', 'allocate_3DGF')
+      call allocate_3DGF(work, nx, ny, nz, nw2, ier1)
+      if (ier1.ne.0) call fatal_error_from_call(ier1, 'initHybrid', 'allocate_3DGF')
 
       Gzero(1:nx, 1:ny, 1:nz)%map=kgridCoarse(1:nx, 1:ny, 1:nz)%map
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -368,27 +341,13 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
       ier1=0 !set error flags to zero
       ier2=0 
-    ier2=0 
-      ier2=0 
+
       call reduceGF(work, Dzero, ier1)
-      reduce_error: if (ier1.ne.0) then
-        ! something has gone disastrously wrong!
-         write (*, *) "Fatal error code ", ier1 ,"in module initialisation,&
-              & subroutine initHybrid"
-         write (*, *) "reduceGF call failed"
-         write (*, *) "Need to examine source code, correct and recompile."
-         write (*, *) "Halting execution."
-         stop
-      end if reduce_error
+      if (ier1.ne.0) call fatal_error_from_call(ier1, 'initHybrid', 'reduceGF')
+        
       call invertGF(work, ier2)
-      div_by_zero: if (any(ier2.ne.0)) then
-         write (*, *) "Fatal error in module initialisation,&
-              & subroutine initHybrid"
-         write (*, *) "at least one component of invertGF call signals &
-              & a division by zero"
-         write (*, *) "Halting execution."
-         stop
-      end if div_by_zero
+      ! only one possible error code from this
+      if (any(ier2.eq.1)) call fatal_error_from_call(1, 'initHybrid', 'invertGF')
 
       !may have to rewrite for matrix form...
       forall (i=1:nx, j=1:ny, k=1:nz, l=1:nw2)
