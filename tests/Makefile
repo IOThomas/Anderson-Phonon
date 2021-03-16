@@ -4,7 +4,7 @@ FC1 = gfortran-9
 
 SRCDIR = ../src
 
-all: make_helper test_helpers test_greensroutines test_dispersions test_initialisation
+all: make_helper test_helpers test_greensroutines test_dispersions test_initialisation test_fastFourier_
 .PHONY: all
 
 make_helper:
