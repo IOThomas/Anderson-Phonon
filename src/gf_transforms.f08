@@ -20,6 +20,7 @@ contains
       nomega = size(momentum(1, 1, 1)%GF, 1)
 
       call error_check()
+      if (ierr.ne.0) return
 
       allocate(workreal(x_size, y_size, z_size,x_size, y_size, z_size))
       call allocate_gf(workreal, nomega)
@@ -77,6 +78,7 @@ contains
       z_size = size(momentum,3)
       nomega = size(momentum(1, 1, 1)%GF, 1)
       call error_check()
+      if (ierr.ne.0) return
 
       allocate(workreal(x_size, y_size, z_size,x_size, y_size, z_size))
       call allocate_gf(workreal, nomega)
@@ -133,8 +135,8 @@ contains
       z_size = size(workreal,3)
       nomega = size(workreal(1, 1, 1, 1, 1, 1)%GF, 1)
       
-      call allocateGF(workslice, x_size, y_size, z_size, nomega, ierr1)
-      if (ierr1.ne.0) call fatal_error_from_call(ierr1, "fft_on_k", "allocateGF")
+      call allocate_3DGF(workslice, x_size, y_size, z_size, nomega, ierr1)
+      if (ierr1.ne.0) call fatal_error_from_call(ierr1, "fft_on_k", "allocate_3DGF")
 
       fft_each_slice_in_turn:do ix= 1, x_size
          do iy = 1, y_size
@@ -171,8 +173,9 @@ contains
       z_size = size(workreal,6)
       nomega = size(workreal(1, 1, 1, 1, 1, 1)%GF, 1)
 
-      allocate(workslice(x_size, y_size, z_size))
-      call allocate_gf(workslice, nomega)
+      call allocate_3DGF(workslice, x_size, y_size, z_size, nomega, ierr1)
+      if (ierr1.ne.0) call fatal_error_from_call(ierr1, "fft_on_k", "allocate_3DGF")
+
       fft_each_slice_in_turn:do ix= 1, x_size
          do iy = 1, y_size
             do iz = 1, z_size

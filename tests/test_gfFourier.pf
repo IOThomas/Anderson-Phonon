@@ -24,7 +24,7 @@ contains
 
    @before
    subroutine set_up()
-      call allocateGF(greens_function, x_size, y_size, z_size, n_omega, ierr)
+      call allocate_3DGF(greens_function, x_size, y_size, z_size, n_omega, ierr)
       ierr=0
    end subroutine set_up
 
@@ -114,17 +114,17 @@ contains
       call greensfunc_initplan(greens_function, ierr)
       @assertEqual(ierr,0)
 
-      call allocateGF(test, too_big, y_size, z_size, n_omega, ierr)
+      call allocate_3DGF(test, too_big, y_size, z_size, n_omega, ierr)
       call gf_fft(test, forward_fft, ierr)
       @assertEqual(ierr,3)
       deallocate(test)
 
-      call allocateGF(test, x_size, too_big, z_size, n_omega, ierr)
+      call allocate_3DGF(test, x_size, too_big, z_size, n_omega, ierr)
       call gf_fft(test, forward_fft, ierr)
       @assertEqual(ierr,4)
       deallocate(test)
 
-      call allocateGF(test, x_size, y_size, too_big, n_omega, ierr)
+      call allocate_3DGF(test, x_size, y_size, too_big, n_omega, ierr)
       call gf_fft(test, forward_fft, ierr)
       @assertEqual(ierr,5)
       deallocate(test)
@@ -141,17 +141,17 @@ contains
       call greensfunc_initplan(greens_function, ierr)
       @assertEqual(ierr,0)
 
-      call allocateGF(test, too_small, y_size, z_size, n_omega, ierr)
+      call allocate_3DGF(test, too_small, y_size, z_size, n_omega, ierr)
       call gf_fft(test, forward_fft, ierr)
       @assertEqual(ierr,3)
       deallocate(test)
 
-      call allocateGF(test, x_size, too_small, z_size, n_omega, ierr)
+      call allocate_3DGF(test, x_size, too_small, z_size, n_omega, ierr)
       call gf_fft(test, forward_fft, ierr)
       @assertEqual(ierr,4)
       deallocate(test)
 
-      call allocateGF(test, x_size, y_size, too_small, n_omega, ierr)
+      call allocate_3DGF(test, x_size, y_size, too_small, n_omega, ierr)
       call gf_fft(test, forward_fft, ierr)
       @assertEqual(ierr,5)
       deallocate(test)

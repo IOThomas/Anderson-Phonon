@@ -2,7 +2,7 @@ module dynamicalLoop
   
   use constants, only: real12
   use definedtypes, only: settingparam, storedparam, kappagrid
-  use greensroutines, only: greensfunc, allocateGF, calculateGF
+  use greensroutines, only: greensfunc, allocate_3DGF, calculateGF
   use gf_fourier, only: greensfunc_initplan, greensfunc_killplan
   implicit none
 
@@ -41,10 +41,10 @@ contains
        enddo
     enddo
     
-    call allocateGF(new_hybrid, settings%ncell(1), settings%ncell(2),&
+    call allocate_3DGF(new_hybrid, settings%ncell(1), settings%ncell(2),&
          & settings%ncell(3), settings%nomega, ierr1)
     ! error handling
-    call allocateGF(GF_typ, settings%ncell(1), settings%ncell(2),&
+    call allocate_3DGF(GF_typ, settings%ncell(1), settings%ncell(2),&
          & settings%ncell(3), settings%nomega, ierr1)
     ! error handling
 
