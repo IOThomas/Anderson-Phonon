@@ -413,7 +413,7 @@ contains
    end subroutine
 
    @test
-   subroutine test_reduceGF_ierr3
+   subroutine test_reduceGF_ierr3()
       type(greensfunc), allocatable :: coarse(:, :, :)
       type(greensfunc), allocatable :: fine(:, :, :)
       type(greensfunc), allocatable :: test(:, :, :)
@@ -432,5 +432,118 @@ contains
       call reduceGF(coarse, fine, ierr)
       @assertEqual(ierr, 3)
    end subroutine
+
+   @test
+   subroutine test_GF1_eq_GF2_2D()
+      type(greensfunc) :: GF1(2,2), GF2(2,2)
+      complex(real12) :: test(2,2)
+
+      @assertTrue((GF1.eq.GF2))
+      @assertFalse(GF1.ne.GF2)
+
+      call allocate_GF(GF1, 2)
+      call allocate_GF(GF2, 2)
+      test = cmplx(1.0, 1.0, real12)
+      call initialise_GF(GF1, test)
+      call initialise_GF(GF2, test)
+
+      @assertTrue((GF1.eq.GF2))
+      @assertFalse(GF1.ne.GF2)
+   end subroutine test_GF1_eq_GF2_2D
+
+   @test
+   subroutine test_GF1_ne_GF2_2D()
+      type(greensfunc) :: GF1(2,2), GF2(2,2)
+      complex(real12) :: test(2,2)
+      integer :: i
+
+      do i = 1, 2
+         GF1(i,1)%map = 1
+      enddo
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+
+      do i = 1, 2
+         GF2(i,1)%map = GF1(i,1)%map
+      enddo
+      call allocate_GF(GF1, 2)
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+
+      call allocate_GF(GF2, 2)
+      test = cmplx(0.0_real12, 0.0_real12, real12)
+      call initialise_GF(GF1, test)
+      test = cmplx(1.0_real12, 0.0_real12, real12)
+      call initialise_GF(GF1, test)
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+
+      test = cmplx(0.0_real12, 1.0_real12, real12)
+      call initialise_GF(GF1, test)
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+
+      test = cmplx(1.0_real12, 1.0_real12, real12)
+      call initialise_GF(GF1, test)
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+   end subroutine test_GF1_ne_GF2_2D
+
+   @test
+   subroutine test_GF1_eq_GF2_3D()
+      type(greensfunc) :: GF1(2,2,2), GF2(2,2,2)
+      complex(real12) :: test(2,2,2)
+
+      @assertTrue((GF1.eq.GF2))
+      @assertFalse(GF1.ne.GF2)
+
+      call allocate_GF(GF1, 2)
+      call allocate_GF(GF2, 2)
+      test = cmplx(1.0, 1.0, real12)
+      call initialise_GF(GF1, test)
+      call initialise_GF(GF2, test)
+
+      @assertTrue((GF1.eq.GF2))
+      @assertFalse(GF1.ne.GF2)
+   end subroutine test_GF1_eq_GF2_3D
+
+   @test
+   subroutine test_GF1_ne_GF2_3D()
+      type(greensfunc) :: GF1(2,2,2), GF2(2,2,2)
+      complex(real12) :: test(2,2,2)
+      integer :: i
+
+      do i = 1, 2
+         GF1(i,1,1)%map = 1
+      enddo
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+
+      do i = 1, 2
+         GF2(i,1,1)%map = GF1(i,1,1)%map
+      enddo
+      call allocate_GF(GF1, 2)
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+
+      call allocate_GF(GF2, 2)
+      test = cmplx(0.0_real12, 0.0_real12, real12)
+      call initialise_GF(GF1, test)
+      test = cmplx(1.0_real12, 0.0_real12, real12)
+      call initialise_GF(GF1, test)
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+
+      test = cmplx(0.0_real12, 1.0_real12, real12)
+      call initialise_GF(GF1, test)
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+
+      test = cmplx(1.0_real12, 1.0_real12, real12)
+      call initialise_GF(GF1, test)
+      @assertFalse((GF1.eq.GF2))
+      @assertTrue(GF1.ne.GF2)
+   end subroutine test_GF1_ne_GF2_3D
+   
 
 end module

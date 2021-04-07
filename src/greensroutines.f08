@@ -8,7 +8,8 @@ module greensroutines
   implicit none
   private
   public allocate_GF, calculateGF, greensfunc, copymap, copyGF, invertGF,&
-    reduceGF, assignment (=), copy_gf_slice, initialise_GF, allocate_3DGF
+    reduceGF, assignment (=), copy_gf_slice, initialise_GF, allocate_3DGF,&
+    operator (.eq.), operator (.ne.)
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   type, public :: greensfunc
@@ -27,6 +28,14 @@ module greensroutines
   interface assignment (=)
     module procedure copy_all_gf
   end interface assignment (=)
+  interface operator (.eq.)
+    module procedure are_2Dgf_equal
+    module procedure are_3Dgf_equal
+  end interface operator (.eq.)
+  interface operator(.ne.)
+    module procedure are_2Dgf_unequal
+    module procedure are_3Dgf_unequal
+  end interface operator (.ne.)
   interface copy_gf_slice
     module procedure copy_slice_to_complex
     module procedure copy_slice_from_complex
@@ -49,13 +58,13 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  function get_size(this)
+  pure function get_size(this)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !# fetches size of greensfunc%GF array (part of greensfunc object defn)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     integer           :: get_size
     !# get_size returns an integer
-    class(greensfunc) :: this
+    class(greensfunc), intent(in) :: this
     !# object whose GF array size is to be returned
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
     get_size = this%nGF_points
@@ -416,6 +425,66 @@ contains
       test_not_allocated = .not.allocated(Gtest%GF)
     end function
 !------------------------------------------------------------------------------ 
-   end subroutine allocate_3DGF
+  end subroutine allocate_3DGF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  pure function are_2Dgf_equal(G1, G2)
+    logical :: are_2Dgf_equal
+    type(greensfunc), intent(in) :: G1(:,:), G2(:,:)
+
+    are_2Dgf_equal=all(is_each_element_equal(G1,G2))
+
+  end function are_2Dgf_equal
+
+  pure function are_3Dgf_equal(G1, G2)
+    logical :: are_3Dgf_equal
+    type(greensfunc), intent(in) :: G1(:,:,:), G2(:,:,:)
+
+    are_3Dgf_equal=all(is_each_element_equal(G1,G2))
+
+  end function are_3Dgf_equal
+
+  pure function are_3Dgf_unequal(G1, G2)
+    logical :: are_3Dgf_unequal
+    type(greensfunc), intent(in) :: G1(:,:,:), G2(:,:,:)
+
+    are_3Dgf_unequal = (.not.(are_3Dgf_equal(G1, G2)))
+  end function are_3Dgf_unequal
+
+  pure function are_2Dgf_unequal(G1, G2)
+    logical :: are_2Dgf_unequal
+    type(greensfunc), intent(in) :: G1(:,:), G2(:,:)
+
+    are_2Dgf_unequal = (.not.(are_2Dgf_equal(G1, G2)))
+  end function are_2Dgf_unequal
+
+  elemental function is_each_element_equal(gf1, gf2)
+    logical :: is_each_element_equal
+    type(greensfunc), intent(in) :: gf1, gf2
+    logical :: both_GF_alloc, no_GF_alloc, same_alloc
+    integer :: i
+
+    is_each_element_equal = .false.
+    both_GF_alloc = .false.
+    no_GF_alloc = .false.
+
+    if (gf1%map /= gf2%map) return
+
+    if (gf1%get_size() /= gf2%get_size()) return
+
+    if (allocated(gf1%GF).and.allocated(gf2%GF)) both_GF_alloc = .true.
+    if ((.not.allocated(gf1%GF)).and.(.not.allocated(gf2%GF))) no_GF_alloc = .true.
+    same_alloc = (both_GF_alloc.or.no_GF_alloc)
+    if (.not.same_alloc) return
+
+    if (no_GF_alloc) then
+      is_each_element_equal = .true.
+      return
+    end if
+
+    do i = 1, gf1%get_size()
+      if (gf1%GF(i) /= gf2%GF(i)) return
+    enddo
+
+    is_each_element_equal = .true.
+  end function is_each_element_equal
 end module greensroutines
