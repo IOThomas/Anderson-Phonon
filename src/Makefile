@@ -21,9 +21,10 @@ xtest:
 
 	$(compiler) $(opt) -O3 $(inc) $(obj) $(lib)  TMDCmain.f08 -o ../../C-Rhediadau-Anderson/xtest
 
-debug:
+test:
 
-	$(compiler) $(opt) $(warn) $(trap) $(prec) -O3 -g  $(inc) $(obj) $(lib) TMDCmain.f08 -o ../../C-Rhediadau-Anderson/debug
+	$(compiler) $(opt) $(warn) $(trap) $(prec) -c -g  $(inc) $(obj) $(lib) 
+	mv *.o ../tests
 
 clean:
 	rm *mod
