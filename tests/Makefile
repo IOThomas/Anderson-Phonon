@@ -4,7 +4,7 @@ FC1 = gfortran-9
 
 SRCDIR = ../src
 
-all: make_helper test_helpers test_greensroutines test_dispersions test_initialisation test_fastFourier_
+all: make_helper test_helpers test_greensroutines test_dispersions test_initialisation test_fastFourier
 .PHONY: all
 
 make_helper:
@@ -39,8 +39,8 @@ test_initialisation_TESTS := test_initHybrid.pf test_initDzero.pf test_initGrid.
 test_initialisation_OTHER_SRCS := initialisation dispersions greensroutines definedtypes constants
 $(eval $(call make_pfunit_test,test_initialisation))
 
-test_fastFourier_TESTS := test_gfFourier.pf
-test_fastFourier_OTHER_SRCS := gf_fourier greensroutines constants
+test_fastFourier_TESTS := test_gfFourier.pf test_gf_transforms.pf
+test_fastFourier_OTHER_SRCS := gf_transforms gf_fourier greensroutines_helper greensroutines constants
 test_fastFourier_OTHER_LIBRARIES := -lfftw3q -lquadmath -lm
 $(eval $(call make_pfunit_test,test_fastFourier))
 

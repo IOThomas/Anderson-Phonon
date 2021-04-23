@@ -1,11 +1,13 @@
 submodule (gf_fourier) gf_transforms
+   use greensroutines
+   implicit none
 
 contains
 
    subroutine momspace_to_realspace(momentum, rlspace, ierr)
       type(greensfunc), intent(in) :: momentum(:, :, :)
-      type(greensfunc), intent(out) :: rlspace(:, :)
-      integer :: ierr
+      type(greensfunc), intent(inout) :: rlspace(:, :)
+      integer, intent(out) :: ierr
 
       !routine variables
       type(greensfunc), allocatable :: workreal(:, :, :, :, :, :)
@@ -18,10 +20,11 @@ contains
       y_size = size(momentum,2)
       z_size = size(momentum,3)
       nomega = size(momentum(1, 1, 1)%GF, 1)
+      npoints = x_size*y_size*z_size
 
       call error_check()
       if (ierr.ne.0) return
-
+   
       allocate(workreal(x_size, y_size, z_size,x_size, y_size, z_size))
       call allocate_gf(workreal, nomega)
       call initialise_gf(workreal,cmplx_zero)
@@ -62,9 +65,9 @@ contains
    end subroutine momspace_to_realspace
 
    subroutine realspace_to_momspace(rlspace, momentum, ierr)
-      type(greensfunc), intent(out) :: momentum(:, :, :)
+      type(greensfunc), intent(inout) :: momentum(:, :, :)
       type(greensfunc), intent(in) :: rlspace(:, :)
-      integer :: ierr
+      integer, intent(out) :: ierr
 
       !routine variables
       type(greensfunc), allocatable :: workreal(:, :, :, :, :, :)
@@ -79,6 +82,7 @@ contains
       nomega = size(momentum(1, 1, 1)%GF, 1)
       call error_check()
       if (ierr.ne.0) return
+      
 
       allocate(workreal(x_size, y_size, z_size,x_size, y_size, z_size))
       call allocate_gf(workreal, nomega)
@@ -86,9 +90,11 @@ contains
       workreal = reshape(rlspace, [x_size, y_size, z_size, x_size,&
          & y_size, z_size])
 
+
       call fft_on_k(workreal,forward_fft)
 
       call fft_on_kdash(workreal,backward_fft)
+   
 
       copy_diagonal_to_momspace:do ix= 1, x_size
          do iy = 1, y_size
@@ -100,7 +106,7 @@ contains
             enddo
          enddo
       enddo copy_diagonal_to_momspace
-
+            
    contains
 
       subroutine error_check()

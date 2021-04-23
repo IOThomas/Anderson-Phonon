@@ -15,7 +15,7 @@ module gf_fourier
   include 'fftw3q.f03'
   private
   public greensfunc_initplan, greensfunc_killplan, get_gf_plan_status, &
-       gf_fft, forward_fft, backward_fft
+       gf_fft, forward_fft, backward_fft, momspace_to_realspace, realspace_to_momspace
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! useful public constants defining FFT direction
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -40,13 +40,13 @@ module gf_fourier
   interface
      module subroutine momspace_to_realspace(momentum, rlspace, ierr)
        type(greensfunc), intent(in) :: momentum(:, :, :)
-       type(greensfunc), intent(out) :: rlspace(:, :)
-       integer :: ierr
+       type(greensfunc), intent(inout) :: rlspace(:, :)
+       integer, intent(out) :: ierr
      end subroutine
      module subroutine realspace_to_momspace(rlspace, momentum, ierr)
-       type(greensfunc), intent(out) :: momentum(:, :, :)
+       type(greensfunc), intent(inout) :: momentum(:, :, :)
        type(greensfunc), intent(in) :: rlspace(:, :)
-       integer :: ierr
+       integer,intent(out) :: ierr
      end subroutine
   end interface
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
