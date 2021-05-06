@@ -20,5 +20,6 @@ tests/test_fastFourier
 *.inc
 tests/rough_tests/
 tests/hopping_param.f08
+tests/test_kramers_kronig
 
 
