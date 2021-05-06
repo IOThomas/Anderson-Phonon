@@ -5,7 +5,7 @@ module test_kramers_kronig
     use greensroutines
     use kramers_kronig, only: hilbert_transform
 
-    implicit none 
+    implicit none
 
 contains
 
@@ -20,8 +20,8 @@ contains
     @test
     subroutine test_hilbert_transform()
         logical :: is_problem = .true.
-        integer :: i, ierr=-1
-        real(real12), parameter :: frequency(10) = [(0.1*i, i=1,10)]
+        integer :: i, ierr = -1
+        real(real12), parameter :: frequency(10) = [(0.1*i, i=1, 10)]
         real(real12) :: test(size(frequency))
         real(real12) :: expected(size(frequency))
         real(real12) :: result(size(frequency))
@@ -30,13 +30,13 @@ contains
         expected = output(frequency)
 
         call hilbert_transform(test, result, ierr)
-        @assertEqual(0,ierr)
+        @assertEqual(0, ierr)
 
-        if (all(result.eq.expected)) is_problem = .false.
+        if (all(result == expected)) is_problem = .false.
 
         @assertFalse(is_problem)
 
-    contains 
+    contains
 
         elemental function input(value)
             real(real12) :: input
@@ -47,12 +47,12 @@ contains
         elemental function output(value)
             real(real12) :: output
             real(real12), intent(in) :: value
-            output = value/(one + value*value)       
+            output = value/(one + value*value)
         end function output
 
     end subroutine test_hilbert_transform
 
-    @test 
+    @test
     subroutine hilbert_trans_array_match()
         real(real12) :: input(3)
         real(real12) :: output(2)
@@ -65,4 +65,3 @@ contains
     end subroutine hilbert_trans_array_match
 
 end module
-

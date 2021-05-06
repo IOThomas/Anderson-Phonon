@@ -18,6 +18,7 @@ module constants
   real(real12), parameter, public :: pi = two*acos(zero)
   complex(real12), parameter, public :: cmplx_zero = (zero, zero)
   complex(real12), parameter, public :: cmplx_one = (one, zero)
+  complex(real12), parameter, public :: cmplx_i = (zero, one)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! tolerances 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

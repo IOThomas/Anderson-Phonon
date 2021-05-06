@@ -3,6 +3,7 @@ obj =   constants.f08 \
 	greensroutines.f08 \
 	gf_fourier.f08 \
 	gf_transforms.f08 \
+	kramers_kronig.f08 \
 	readin.f08 \
 	dispersions.f08 \
 	initialisation.f08
@@ -25,6 +26,7 @@ test:
 
 	$(compiler) $(opt) $(warn) $(trap) $(prec) -c -g  $(inc) $(obj) $(lib) 
 	mv *.o ../tests
+	mv *.mod ../tests
 
 clean:
 	rm *mod
