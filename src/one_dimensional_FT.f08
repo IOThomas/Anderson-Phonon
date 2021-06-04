@@ -1,10 +1,12 @@
 module one_dimensional_FT
     use constants, only: real12, zero, cmplx_zero, fatal_error_from_call
+    use, intrinsic :: iso_c_binding
     implicit none
     include 'fftw3.f03'
     include 'fftw3q.f03'
     private
-    public
+    public oneD_FT_initplan, oneD_FT_killplan, oneD_fft, forward_fft, backward_fft, &
+        & init_oneDplan, oneDwork_in, oneDwork_out, oneD_plan_forward, oneD_plan_backward
     protected init_oneDplan, oneDwork_in, oneDwork_out, oneD_plan_forward, oneD_plan_backward
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !   useful public constants defining FFT direction
@@ -26,8 +28,8 @@ module one_dimensional_FT
 
 contains
 
-    subroutine oneD_FT_initplan(dimension, ierr)
-        integer, intent(in) :: dimension
+    subroutine oneD_FT_initplan(line, ierr)
+        complex(real12), intent(in) :: line(:)
         integer, intent(out) :: ierr
 
         ierr = -1
@@ -40,7 +42,7 @@ contains
     end subroutine oneD_FT_killplan
 
     subroutine oneD_fft(transform, type_flag, ierr)
-        complex(real12), intent(inout) :: transform
+        complex(real12), intent(inout) :: transform(:)
         integer :: type_flag
         integer :: ierr
 

@@ -3,6 +3,7 @@ obj =   constants.f08 \
 	greensroutines.f08 \
 	gf_fourier.f08 \
 	gf_transforms.f08 \
+	one_dimensional_FT.f08 \
 	kramers_kronig.f08 \
 	readin.f08 \
 	dispersions.f08 \

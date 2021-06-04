@@ -16,10 +16,11 @@ contains
         integer, intent(out) :: ierr
 
         complex(real12) :: full_freq(2*size(input)), positive_only(size(input))
+        integer :: ierr1
 
         ierr = 0
-        if (size(input) .ne. size(result)) ierr = 1
-        if (ierr .ne. 0) return
+        if (size(input) /= size(result)) ierr = 1
+        if (ierr /= 0) return
 
         positive_only = cmplx_zero
         positive_only(1:size(input))%re = input(1:size(input))

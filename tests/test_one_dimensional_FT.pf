@@ -1,17 +1,21 @@
 module test_one_dimensional_FT
 
-    use constants, only: real12
-    use one_dimensional_FT, only: oneD_FT_initplan, oneD_FT_killplan, oneD_fft, forward_fft, backward_fft &
+    use funit
+    use constants, only: real12, cmplx_zero, pi, two, one
+    use, intrinsic :: iso_c_binding
+    use one_dimensional_FT, only: oneD_FT_initplan, oneD_FT_killplan, oneD_fft, forward_fft, backward_fft, &
         & init_oneDplan, oneDwork_in, oneDwork_out, oneD_plan_forward, oneD_plan_backward
 
     implicit none
-    integer, parameter :: size = 20
-    complex(real12) :: test(size)
+    integer, parameter :: max_n = 20
+    complex(real12) :: input_test(max_n)
 
 contains
 
     @before
     subroutine set_up()
+        write (*, *) "hello"
+        input_test = cmplx_zero
     end subroutine set_up
 
     @after
@@ -19,6 +23,7 @@ contains
         integer :: ierr
 
         if (init_oneDplan) call oneD_FT_killplan(ierr)
+        input_test = cmplx_zero
 
     end subroutine tear_down
 
@@ -33,7 +38,7 @@ contains
         @assertFalse(c_associated(oneD_plan_forward, c_null_ptr))
         @assertFalse(c_associated(oneD_plan_backward, c_null_ptr))
 
-        call oneD_FT_initplan(test, ierr)
+        call oneD_FT_initplan(input_test, ierr)
         @assertEqual(0, ierr)
         @assertTrue(init_oneDplan)
         @assertTrue((allocated(oneDwork_in)) .and. (allocated(oneDwork_out)))
@@ -67,9 +72,9 @@ contains
     subroutine test_init_twice()
         integer :: ierr = -1
 
-        call oneD_FT_initplan(test, ierr)
+        call oneD_FT_initplan(input_test, ierr)
         @assertEqual(0, ierr)
-        call oneD_FT_initplan(test, ierr)
+        call oneD_FT_initplan(input_test, ierr)
         @assertEqual(1, ierr)
 
     end subroutine test_init_twice
@@ -78,7 +83,7 @@ contains
     subroutine test_fft_without_init()
         integer :: ierr = -1
 
-        call oneD_fft(test, forward_fft, ierr)
+        call oneD_fft(input_test, forward_fft, ierr)
         @assertEqual(1, ierr)
 
     end subroutine test_fft_without_init
@@ -87,10 +92,10 @@ contains
     subroutine test_fft_wrong_trans_flag()
         integer :: ierr = -1
 
-        call oneD_FT_initplan(test, ierr)
+        call oneD_FT_initplan(input_test, ierr)
         @assertEqual(0, ierr)
 
-        call oneD_fft(test, 0, ierr)
+        call oneD_fft(input_test, 0, ierr)
         @assertEqual(2, ierr)
     end subroutine test_fft_wrong_trans_flag
 
@@ -99,11 +104,11 @@ contains
         integer :: ierr = -1
         complex(real12) :: test_big(100)
 
-        call oneD_FT_initplan(test, ierr)
+        call oneD_FT_initplan(input_test, ierr)
         @assertEqual(0, ierr)
 
         ierr = -1
-        call oneD_fft(test_big, 0, ierr)
+        call oneD_fft(test_big, forward_fft, ierr)
         @assertEqual(3, ierr)
 
     end subroutine test_fft_array_too_big
@@ -113,14 +118,73 @@ contains
         integer :: ierr = -1
         complex(real12) :: test_small(5)
 
-        call oneD_FT_initplan(test, ierr)
+        call oneD_FT_initplan(input_test, ierr)
         @assertEqual(0, ierr)
 
-        call oneD_fft(test_small, 0, ierr)
+        call oneD_fft(test_small, forward_fft, ierr)
         @assertEqual(4, ierr)
     end subroutine test_fft_array_too_small
 
+    @test
     subroutine test_fft_forward_then_back()
+        complex(real12) :: expected_real_sp(max_n)
+        complex(real12) :: expected_mom_sp(max_n)
+        complex(real12), parameter :: a_const(max_n) = cmplx(0.2, 0.1, real12)
+        integer :: i
+        integer, parameter :: nmax_array(max_n) = max_n
+        integer, parameter :: n_array(max_n) = [(i, i=1, max_n)]
+        integer :: ierr = -1
+
+        expected_real_sp = real_space_function(a_const, n_array)
+        expected_mom_sp = momentum_space_function(a_const, n_array, nmax_array)
+
+        input_test = expected_real_sp
+
+        call oneD_FT_initplan(input_test, ierr)
+        @assertEqual(0, ierr)
+
+        ierr = -1
+        call oneD_fft(input_test, forward_fft, ierr)
+        @assertEqual(0, ierr)
+        @assertEqual(expected_mom_sp, input_test)
+
+        ierr = -1
+        call oneD_fft(input_test, backward_fft, ierr)
+        @assertEqual(0, ierr)
+        @assertEqual(expected_real_sp, input_test)
+
+    contains
+
+        elemental function real_space_function(a, n)
+            complex(real12) :: real_space_function
+            complex(real12), intent(in) :: a
+            integer, intent(in):: n
+
+            real_space_function = a**n
+        end function real_space_function
+
+        elemental function momentum_space_function(a, n, nmax)
+            complex(real12) :: momentum_space_function
+            complex(real12), intent(in) :: a
+            integer, intent(in) :: n, nmax
+
+            complex(real12) :: testval
+            complex(real12) :: numerator, denominator
+            real(real12) :: ratio
+
+            ratio = real(n, real12)/real(nmax, real12)
+            testval = cmplx(0, two*pi*ratio, real12)
+
+            if (a == exp(testval)) then
+                momentum_space_function = nmax
+            else
+                numerator = one - a**nmax
+                denominator = one - a*exp(-testval)
+                momentum_space_function = numerator/denominator
+            end if
+
+        end function momentum_space_function
+
     end subroutine test_fft_forward_then_back
 
 end module test_one_dimensional_FT
