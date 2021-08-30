@@ -14,7 +14,6 @@ contains
 
     @before
     subroutine set_up()
-        write (*, *) "hello"
         input_test = cmplx_zero
     end subroutine set_up
 

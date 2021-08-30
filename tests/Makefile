@@ -45,13 +45,13 @@ test_initialisation_TESTS := test_initHybrid.pf test_initDzero.pf test_initGrid.
 test_initialisation_OTHER_SRCS := initialisation dispersions greensroutines definedtypes constants
 $(eval $(call make_pfunit_test,test_initialisation))
 
-test_fastFourier_TESTS := test_gfFourier.pf test_gf_transforms.pf test_one_dimensional_FT.pf
+test_fastFourier_TESTS := test_one_dimensional_FT.pf test_gfFourier.pf test_gf_transforms.pf 
 test_fastFourier_OTHER_SRCS := one_dimensional_FT gf_transforms gf_fourier greensroutines_helper greensroutines constants
 test_fastFourier_OTHER_LIBRARIES := -lfftw3q -lquadmath -lm
 $(eval $(call make_pfunit_test,test_fastFourier))
 
 test_kramers_kronig_TESTS := test_kramers_kronig.pf 
-test_kramers_kronig_OTHER_SRCS := kramers_kronig greensroutines definedtypes constants
+test_kramers_kronig_OTHER_SRCS := kramers_kronig  greensroutines definedtypes constants
 $(eval $(call make_pfunit_test,test_kramers_kronig))
 
 .PHONY: clean
