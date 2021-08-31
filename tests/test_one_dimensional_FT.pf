@@ -121,7 +121,7 @@ contains
         @assertEqual(0, ierr)
 
         call oneD_fft(test_small, forward_fft, ierr)
-        @assertEqual(4, ierr)
+        @assertEqual(3, ierr)
     end subroutine test_fft_array_too_small
 
     @test

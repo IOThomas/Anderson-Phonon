@@ -1,5 +1,6 @@
 module one_dimensional_FT
     use constants, only: real12, zero, cmplx_zero, fatal_error_from_call
+    use greensroutines, only: greensfunc, copy_gf_slice
     use, intrinsic :: iso_c_binding
     implicit none
     include 'fftw3.f03'
@@ -118,11 +119,77 @@ contains
     end subroutine oneD_FT_killplan
 
     subroutine oneD_fft(transform, type_flag, ierr)
-        complex(real12), intent(inout) :: transform(:)
-        integer :: type_flag
-        integer :: ierr
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# FFT of the array transform, output to transform
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!# Error codes : ierr = 0 -- no problems;
+!#               ierr = 1 -- FFT plan not initialised;
+!#               ierr = 2 -- type_flag has invalid value;
+!#               ierr = 3 -- array size doesn't match initialised settings.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        type(greensfunc), intent(inout) :: transform(:)
+        !# Green's function to be FFTed
+        integer, intent(in) :: type_flag !must be -1 or +1
+        !# set to **forward_fft** or **backward_fft** when calling subroutine
+        integer, intent(out) :: ierr
+        !# error code
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! routine variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        integer, parameter :: forward_trans = 1, backward_trans = -1
+        integer :: x_size, n_omega
+        integer :: ix, iom
+        real(real12) :: volume
+        type(c_ptr) :: transform_type
 
-        ierr = -1
+        ierr = 0
+        call check_input()
+        if (ierr /= 0) return
+
+        x_size = size(transform, 1)
+        volume = real(x_size, real12)
+        n_omega = size(transform(1)%GF, 1)
+        call check_work_array_bounds()
+        if (ierr /= 0) return
+
+        if (type_flag == backward_trans) then
+            transform_type = oneD_plan_backward
+        else if (type_flag == forward_trans) then
+            transform_type = oneD_plan_forward
+        end if
+
+        do iom = 1, n_omega
+            call copy_gf_slice(oneDwork_in, transform, iom)
+            call fftwq_execute_dft(transform_type, oneDwork_in, oneDwork_out)
+            !scale backwards transformation
+            if (type_flag == backward_trans) oneDwork_out = oneDwork_out/volume
+            call copy_gf_slice(transform, oneDwork_out, iom)
+        end do
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    contains
+!------------------------------------------------------------------------------
+        subroutine check_input()
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if (.not. (init_oneDplan)) then
+                ierr = 1
+            else if ((type_flag /= backward_trans) &
+                     .and. (type_flag /= forward_trans)) then
+                ierr = 2
+            end if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        end subroutine check_input
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+        subroutine check_work_array_bounds()
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if ((x_size /= size(oneDwork_in, 1)) .or. (x_size /= size(oneDwork_out, 1))) &
+                then
+                ierr = 3
+            end if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        end subroutine check_work_array_bounds
+!------------------------------------------------------------------------------
     end subroutine oneD_fft
 
 end module one_dimensional_FT
