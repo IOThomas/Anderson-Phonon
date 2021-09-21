@@ -1,6 +1,8 @@
+#call make $target MODE=debug to turn on gdb flag in compiler
 PFUNIT_DIR = /home/iorwerth/pFUnit/build/installed
 include $(PFUNIT_DIR)/PFUNIT-4.1/include/PFUNIT.mk
 FC1 = gfortran-9
+MODE = production
 
 SRCDIR = ../src
 
@@ -16,8 +18,11 @@ all: make_helper \
 make_helper:
 	$(MAKE) -C helper_modules all
 
+ifeq ($(MODE), debug)
+FFLAGS += -g
+endif	
 FFLAGS += $(PFUNIT_EXTRA_FFLAGS)
-FFLAGS += -I$(SRCDIR) -I./helper_modules -I/usr/include/
+FFLAGS += -I$(SRCDIR) -I./helper_modules -I/usr/include/ 
 
 %.o: helper_modules/%.f08   
 	$(FC1) -c $(FFLAGS)  $<

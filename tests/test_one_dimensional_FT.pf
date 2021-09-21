@@ -1,7 +1,7 @@
 module test_one_dimensional_FT
 
     use funit
-    use constants, only: real12, cmplx_zero, pi, two, one
+    use constants, only: real12, cmplx_zero, pi, two, one, tolerance
     use, intrinsic :: iso_c_binding
     use greensroutines, only: greensfunc, allocate_GF
     use one_dimensional_FT, only: oneD_FT_initplan, oneD_FT_killplan, oneD_fft, forward_fft, backward_fft, &
@@ -166,7 +166,7 @@ contains
         end do
 
         @assertEqual(0, ierr)
-        @assertEqual(expected_mom_sp, input_test)
+        @assertEqual(expected_mom_sp, input_test, tolerance)
 
         ierr = -1
         call oneD_fft(gf_input, backward_fft, ierr)
@@ -175,7 +175,7 @@ contains
         end do
 
         @assertEqual(0, ierr)
-        @assertEqual(expected_real_sp, input_test)
+        @assertEqual(expected_real_sp, input_test, tolerance)
 
     contains
 
@@ -184,7 +184,7 @@ contains
             complex(real12), intent(in) :: a
             integer, intent(in):: n
 
-            real_space_function = a**n
+            real_space_function = a**(n - 1)
         end function real_space_function
 
         elemental function momentum_space_function(a, n, nmax)
@@ -196,7 +196,7 @@ contains
             complex(real12) :: numerator, denominator
             real(real12) :: ratio
 
-            ratio = real(n, real12)/real(nmax, real12)
+            ratio = real(n - 1, real12)/real(nmax, real12)
             testval = cmplx(0, two*pi*ratio, real12)
 
             if (a == exp(testval)) then
