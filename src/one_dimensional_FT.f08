@@ -1,6 +1,6 @@
 module one_dimensional_FT
     use constants, only: real12, zero, cmplx_zero, fatal_error_from_call
-    use greensroutines, only: greensfunc, copy_gf_slice
+    !use greensroutines, only: greensfunc, copy_gf_slice
     use, intrinsic :: iso_c_binding
     implicit none
     include 'fftw3.f03'
@@ -128,7 +128,7 @@ contains
 !#               ierr = 2 -- type_flag has invalid value;
 !#               ierr = 3 -- array size doesn't match initialised settings.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        type(greensfunc), intent(inout) :: transform(:)
+        complex(real12), intent(inout) :: transform(:)
         !# Green's function to be FFTed
         integer, intent(in) :: type_flag !must be -1 or +1
         !# set to **forward_fft** or **backward_fft** when calling subroutine
@@ -149,7 +149,7 @@ contains
 
         x_size = size(transform, 1)
         volume = real(x_size, real12)
-        n_omega = size(transform(1)%GF, 1)
+
         call check_work_array_bounds()
         if (ierr /= 0) return
 
@@ -159,13 +159,11 @@ contains
             transform_type = oneD_plan_forward
         end if
 
-        do iom = 1, n_omega
-            call copy_gf_slice(oneDwork_in, transform, iom)
-            call fftwq_execute_dft(transform_type, oneDwork_in, oneDwork_out)
-            !scale backwards transformation
-            if (type_flag == backward_trans) oneDwork_out = oneDwork_out/volume
-            call copy_gf_slice(transform, oneDwork_out, iom)
-        end do
+        call fftwq_execute_dft(transform_type, transform, oneDwork_out)
+        !scale backwards transformation
+        if (type_flag == backward_trans) oneDwork_out = oneDwork_out/volume
+        transform = oneDwork_out
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     contains
 !------------------------------------------------------------------------------
