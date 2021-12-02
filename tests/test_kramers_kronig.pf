@@ -1,9 +1,9 @@
 module test_kramers_kronig
     use funit
-    use constants, only: zero, one, real12
+    use constants, only: zero, one, real12, tolerance, pi, two
     use definedtypes
     use greensroutines
-    use kramers_kronig, only: hilbert_transform
+    use kramers_kronig_relations, only: hilbert_transform
 
     implicit none
 
@@ -18,10 +18,10 @@ contains
     end subroutine tear_down
 
     @test
-    subroutine test_hilbert_transform()
+    subroutine test_hilbert_transform_even()
         logical :: is_problem = .true.
         integer :: i, ierr = -1
-        real(real12), parameter :: frequency(10) = [(0.1*i, i=1, 10)]
+        real(real12) :: frequency(10) = [(two*pi*real(i-1,real12)/10.0_real12, i=1, 10)]
         real(real12) :: test(size(frequency))
         real(real12) :: expected(size(frequency))
         real(real12) :: result(size(frequency))
@@ -32,7 +32,11 @@ contains
         call hilbert_transform(test, result, ierr)
         @assertEqual(0, ierr)
 
-        if (all(result == expected)) is_problem = .false.
+        if (all(abs(result - expected) <= tolerance)) is_problem = .false.
+
+        do i = 1, size(frequency)
+            write (666, *) frequency(i), test(i), result(i), expected(i)
+        end do
 
         @assertFalse(is_problem)
 
@@ -41,16 +45,16 @@ contains
         elemental function input(value)
             real(real12) :: input
             real(real12), intent(in) :: value
-            input = one/(one + value*value)
+            input = sin(value)
         end function input
 
         elemental function output(value)
             real(real12) :: output
             real(real12), intent(in) :: value
-            output = value/(one + value*value)
+            output = sin(value - pi/two)
         end function output
 
-    end subroutine test_hilbert_transform
+    end subroutine test_hilbert_transform_even
 
     @test
     subroutine hilbert_trans_array_match()

@@ -56,7 +56,8 @@ test_fastFourier_OTHER_LIBRARIES := -lfftw3q -lquadmath -lm
 $(eval $(call make_pfunit_test,test_fastFourier))
 
 test_kramers_kronig_TESTS := test_kramers_kronig.pf 
-test_kramers_kronig_OTHER_SRCS := kramers_kronig  greensroutines definedtypes constants
+test_kramers_kronig_OTHER_SRCS := kramers_kronig one_dimensional_FT greensroutines definedtypes constants
+test_kramers_kronig_OTHER_LIBRARIES := -lfftw3q -lquadmath -lm
 $(eval $(call make_pfunit_test,test_kramers_kronig))
 
 .PHONY: clean
