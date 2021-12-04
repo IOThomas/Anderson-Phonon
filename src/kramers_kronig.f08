@@ -41,13 +41,9 @@ contains
         end do
 
         if (mod(size(input),2) == 0) then
-            full_freq(1)=cmplx_zero
-            full_freq(1:size(input)/2) = -cmplx_i*full_freq(1:size(input)/2)
-            full_freq(size(input)/2+1:size(input))= cmplx_i*full_freq(size(input)/2+1:size(input))
+            call hilbert_even(full_freq)
         elseif (mod(size(input),2) == 1) then
-            full_freq(1)=cmplx_zero
-            full_freq(1:(size(input)+1)/2) = -cmplx_i*full_freq(1:(size(input)+1)/2)
-            full_freq((size(input)+1)/2+1:size(input))= cmplx_i*full_freq((size(input)+1)/2+1:size(input))
+            call hilbert_odd(full_freq)
         else
             call fatal_error_from_call(3, 'hilbert_transform in kramers_kronig.f90', 'size(input) neither even nor odd')
         end if
@@ -63,6 +59,28 @@ contains
         end do
 
         result(1:size(input)) = full_freq(1:size(input))%re
+
+        contains
+
+            pure subroutine hilbert_even(full_freq)
+                complex(real12), intent(inout) :: full_freq(:)
+                integer :: length
+
+                length = size(full_freq)
+                full_freq(1) = cmplx_zero
+                full_freq(1:length/2) = -cmplx_i*full_freq(1:length/2)
+                full_freq(length/2+1:length) = cmplx_i*full_freq(length/2+1:length)
+            end subroutine hilbert_even
+
+            pure subroutine hilbert_odd(full_freq)
+                complex(real12), intent(inout) :: full_freq(:)
+                integer :: length
+
+                length = size(full_freq)
+                full_freq(1) = cmplx_zero
+                full_freq(1:(length+1)/2) = -cmplx_i*full_freq(1:(length+1)/2)
+                full_freq((length+1)/2+1:length) = cmplx_i*full_freq((length+1)/2+1:length)
+            end subroutine hilbert_odd
 
     end subroutine hilbert_transform
 
