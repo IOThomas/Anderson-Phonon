@@ -57,6 +57,45 @@ contains
     end subroutine test_hilbert_transform_even
 
     @test
+    subroutine test_hilbert_transform_odd()
+        logical :: is_problem = .true.
+        integer :: i, ierr = -1
+        real(real12) :: frequency(11) = [(two*pi*real(i-1,real12)/11.0_real12, i=1, 11)]
+        real(real12) :: test(size(frequency))
+        real(real12) :: expected(size(frequency))
+        real(real12) :: result(size(frequency))
+
+        test = input(frequency)
+        expected = output(frequency)
+
+        call hilbert_transform(test, result, ierr)
+        @assertEqual(0, ierr)
+
+        if (all(abs(result - expected) <= tolerance)) is_problem = .false.
+
+        do i = 1, size(frequency)
+            write (666, *) frequency(i), test(i), result(i), expected(i)
+        end do
+
+        @assertFalse(is_problem)
+
+    contains
+
+        elemental function input(value)
+            real(real12) :: input
+            real(real12), intent(in) :: value
+            input = sin(value)
+        end function input
+
+        elemental function output(value)
+            real(real12) :: output
+            real(real12), intent(in) :: value
+            output = sin(value - pi/two)
+        end function output
+
+    end subroutine test_hilbert_transform_odd
+
+    @test
     subroutine hilbert_trans_array_match()
         real(real12) :: input(3)
         real(real12) :: output(2)

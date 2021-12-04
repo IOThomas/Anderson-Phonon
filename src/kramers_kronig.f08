@@ -40,9 +40,17 @@ contains
             write (664, *) full_freq(i)
         end do
 
-        full_freq(1)=cmplx_zero
-        full_freq(1:size(input)/2) = -cmplx_i*full_freq(1:size(input)/2)
-        full_freq(size(input)/2+1:size(input))= cmplx_i*full_freq(size(input)/2+1:size(input))
+        if (mod(size(input),2) == 0) then
+            full_freq(1)=cmplx_zero
+            full_freq(1:size(input)/2) = -cmplx_i*full_freq(1:size(input)/2)
+            full_freq(size(input)/2+1:size(input))= cmplx_i*full_freq(size(input)/2+1:size(input))
+        elseif (mod(size(input),2) == 1) then
+            full_freq(1)=cmplx_zero
+            full_freq(1:(size(input)+1)/2) = -cmplx_i*full_freq(1:(size(input)+1)/2)
+            full_freq((size(input)+1)/2+1:size(input))= cmplx_i*full_freq((size(input)+1)/2+1:size(input))
+        else
+            call fatal_error_from_call(3, 'hilbert_transform in kramers_kronig.f90', 'size(input) neither even nor odd')
+        end if
 
         call oneD_fft(full_freq, backward_fft, ierr1)
         if (ierr1 /= 0) call fatal_error_from_call(ierr1, 'hilbert_transform in kramers_kronig.f90', 'oneD_fft')
