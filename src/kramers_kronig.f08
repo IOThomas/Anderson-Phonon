@@ -84,28 +84,35 @@ contains
 
     end subroutine hilbert_transform
 
-    impure elemental subroutine Kramers_Kronig(input, output, ierr)
-        type(greensfunc), intent(in) :: input
-        type(greensfunc), intent(out) :: output
+    impure elemental subroutine KK_Greensfunction(density, greensfunction, delta_w, ierr)
+        real(real12), intent(in) :: density
+        type(greensfunc), intent(out) :: greensfunction
+        real(real12), intent(in) :: delta_w
         integer, intent(out) :: ierr
 
-        integer :: no_GF_points, i, ierr1
-        real(real12), allocatable :: work_array_in(:), work_array_out(:)
+        integer :: no_GF_points, i, ierr1, idiv0
+        real(real12), allocatable :: work_array_out(:)
+        real(real12) :: temp
 
         ierr = 0
+        idiv0 = 0
 
         call check_points(no_GF_points, ierr)
         if (ierr /= 0) return
 
-        allocate (work_array_in(no_GF_points), work_array_out(no_GF_points))
+        allocate (work_array_out(no_GF_points))
 
-        do i = 1, no_GF_points
-            work_array_in = input%GF(i)%re
-        end do
 
-        call hilbert_transform(work_array_in, work_array_out, ierr1)
+        call hilbert_transform(density, work_array_out, ierr1)
 
-        !work_array_out%im = -pi !needs some stuff on the frequency here
+        do i =1, no_GF_points
+            ! eqn (21) of PRB 96, 014203 (2017) lacks the frequency factor
+            ! but it should be there for dimensional reasons
+            output%GF(i)%re = real(i)*delta_w*work_array_out(i)
+            call density_convert(density(i), temp, i, delta_w, idiv0)
+            if (idiv0 /= 0 ) call fatal_error_from_call(idiv0, "KKGreensfunction in kramers_kronig.f90", "division by zero in density_convert")
+            output%GF(i)%im = temp
+        enddo
 
     contains
 
@@ -116,8 +123,8 @@ contains
             integer :: input_size, output_size
 
             number_of_points = 0
-            input_size = size(input%GF, 1)
-            output_size = size(output%GF, 1)
+            input_size = size(density, 1)
+            output_size = size(greensfunction%GF, 1)
 
             if (input_size /= output_size) then
                 ierr1 = 1
@@ -126,6 +133,20 @@ contains
             end if
         end subroutine check_points
 
-    end subroutine Kramers_Kronig
+        subroutine density_convert(density, output, i, delta_w, ierr)
+            type(real12), intent(out) :: output
+            real(real12), intent(in) :: density, delta_w
+            integer, intent(in) :: i
+            integer, intent(out) :: ierr
+
+            ierr = 0
+            if (abs(i*delta_w) < tolerance) then
+                ierr = 1
+                return
+            endif
+            output = -pi*density(i)/(two*real(i,real12)*delta_w)
+        end subroutine density_convert
+
+    end subroutine KK_Greensfunction
 
 end module
