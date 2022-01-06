@@ -6,7 +6,7 @@ module kramers_kronig_relations
 
     implicit none
     private
-    public hilbert_transform, hipass_window, reset_freq_pointer
+    public hilbert_transform, hipass_window
 
     integer :: freq_pointer = 0
 
