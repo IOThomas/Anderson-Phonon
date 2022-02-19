@@ -73,10 +73,6 @@ contains
 
         if (all(abs(result - expected) <= tolerance)) is_problem = .false.
 
-        do i = 1, size(frequency)
-            write (666, *) frequency(i), test(i), result(i), expected(i)
-        end do
-
         @assertFalse(is_problem)
 
     contains
@@ -106,5 +102,73 @@ contains
         call hilbert_transform(input, output, ierr)
         @assertEqual(1, ierr)
     end subroutine hilbert_trans_array_match
+
+    @test
+    subroutine hilbert_trans_nonperiodic()
+        integer :: i, ierr
+        integer, parameter :: npoints = 20
+        real(real12) :: test(npoints)
+        real(real12) :: result(npoints), expected(npoints)
+        real(real12) :: timegrid(npoints) = [(real(i-1,real12), i=1, npoints)]
+        logical :: is_problem = .true.
+
+        test = real_values(timegrid)
+        expected = hilbert_values(timegrid)
+
+        call hilbert_transform(test, result, ierr)
+        @assertEqual(0, ierr)
+
+        if (all(abs(result - expected) <= tolerance)) is_problem = .false.
+
+        @assertFalse(is_problem)
+
+    contains
+
+        elemental function real_values(time)
+            real(real12) :: real_values
+            real(real12), intent(in) :: time
+
+            real_values = one/(time*time + one)
+        end function real_values    
+
+        elemental function hilbert_values(time)
+            real(real12) :: hilbert_values
+            real(real12), intent(in) :: time
+
+            hilbert_values = time/(time*time + one)
+        end function hilbert_values
+
+    end subroutine hilbert_trans_nonperiodic
+
+    ! @test
+    ! subroutine kramers_kronig_greensfunction()
+    !     integer, parameter :: kpoints=5, n_omega=10
+    !     integer :: i, ierr
+    !     real(real12) :: density(kpoints, kpoints, kpoints, n_omega)
+    !     real(real12), parameter :: frequency(n_omega) = [(two*pi*real(i-1,real12)/real(n_omega, real12), i=1, nomega)]
+    !     type(greensfunc) :: calculation(kpoints,kpoints,kpoints)
+    !     type(greensfunc) :: expected(kpoints,kpoints,kpoints)
+
+    !     call GF_allocate(calculation, n_omega)
+    !     call GF_allocate(expected, n_omega)
+
+
+
+    !     contains
+
+    !         function initialise_density(input)
+    !             real(real12) :: initialise_density
+    !             real(real12) :: input
+
+    !         end function initialise_density
+
+    !         function expected_value(input)
+    !             complex(real12) :: expected_value
+    !             real(real12) :: input
+
+    !         end function expected_value
+
+    ! end subroutine kramers_kronig_greensfunction
+
 
 end module
