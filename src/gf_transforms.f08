@@ -13,8 +13,7 @@ contains
       type(greensfunc), allocatable :: workreal(:, :, :, :, :, :)
       integer :: x_size, y_size, z_size, nomega
       integer :: npoints
-      integer :: ierr1
-      integer :: ix, iy, iz, jx, jy, jz, io
+      integer :: ix, iy, iz, io
 
       x_size = size(momentum,1)
       y_size = size(momentum,2)
@@ -72,9 +71,7 @@ contains
       !routine variables
       type(greensfunc), allocatable :: workreal(:, :, :, :, :, :)
       integer :: x_size, y_size, z_size, nomega
-      integer :: npoints
-      integer :: ierr1
-      integer :: ix, iy, iz, jx, jy, jz, io
+      integer :: ix, iy, iz, io
 
       x_size = size(momentum,1)
       y_size = size(momentum,2)
