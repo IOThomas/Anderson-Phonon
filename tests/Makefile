@@ -1,6 +1,6 @@
 #call make $target MODE=debug to turn on gdb flag in compiler
-PFUNIT_DIR = /home/iorwerth/pFUnit/build/installed
-include $(PFUNIT_DIR)/PFUNIT-4.1/include/PFUNIT.mk
+include .MakeEnv #makeEnv has definition of PFUNIT_DIR
+include $(PFUNIT_DIR)/PFUNIT-4.2/include/PFUNIT.mk
 FC1 = gfortran-9
 MODE = production
 
@@ -11,8 +11,8 @@ all: make_helper \
 	test_greensroutines \
 	test_dispersions \
 	test_initialisation \
-	test_fastFourier \
-	test_kramers_kronig
+	test_fastFourier #\
+	#test_kramers_kronig
 .PHONY: all
 
 make_helper:
