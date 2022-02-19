@@ -22,3 +22,4 @@ tests/rough_tests/
 tests/hopping_param.f08
 tests/test_kramers_kronig
 tests/*.mod0
+tests/.MakeEnv
