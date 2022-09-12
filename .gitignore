@@ -21,5 +21,6 @@ tests/test_fastFourier
 tests/rough_tests/
 tests/hopping_param.f08
 tests/test_kramers_kronig
+.MakeEnv
 
 
