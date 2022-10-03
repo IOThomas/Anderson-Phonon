@@ -16,7 +16,6 @@
 !------------------------------------------------------------------------------
 module random_config
     use constants, only: real12, one, cmplx_zero, zero, two
-    use definedtypes
 
     implicit none
     private

@@ -24,3 +24,4 @@ tests/test_kramers_kronig
 .MakeEnv
 
 
+tests/test_config

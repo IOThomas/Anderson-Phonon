@@ -1,0 +1,41 @@
+module test_random_config
+    use funit
+    use constants
+    use random_config
+
+    implicit none
+
+contains
+
+    @before
+    subroutine set_up()
+    end subroutine set_up
+
+    @after
+    subroutine tear_down()
+    end subroutine tear_down
+
+    @test
+    subroutine initialise_binary()
+        type(random_config_settings) :: settings
+        class(random_config_base), allocatable :: generator
+        integer :: ierr = 1
+        logical :: is_type = .false.
+
+        settings%generator_name = 'BINARY_ISOTOPIC'
+
+        call initialise_random_config(settings, generator, ierr)
+
+        select type (generator)
+        type is (binary_isotopic_disorder)
+            is_type = .true.
+        class default
+            is_type = .false.
+        end select
+
+        @assertEqual(ierr, 0)
+        @assertTrue(is_type)
+
+    end subroutine initialise_binary
+
+end module test_random_config

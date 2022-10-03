@@ -1,6 +1,6 @@
 #call make $target MODE=debug to turn on gdb flag in compiler
-PFUNIT_DIR = /home/iorwerth/pFUnit/build/installed
-include $(PFUNIT_DIR)/PFUNIT-4.1/include/PFUNIT.mk
+PFUNIT_DIR = /home/iori/lib/pFUnit/build/installed
+include $(PFUNIT_DIR)/PFUNIT-4.2/include/PFUNIT.mk
 FC1 = gfortran-9
 MODE = production
 
@@ -12,7 +12,7 @@ all: make_helper \
 	test_dispersions \
 	test_initialisation \
 	test_fastFourier \
-	test_kramers_kronig
+	test_random_config
 .PHONY: all
 
 make_helper:
@@ -58,6 +58,10 @@ $(eval $(call make_pfunit_test,test_fastFourier))
 test_kramers_kronig_TESTS := test_kramers_kronig.pf 
 test_kramers_kronig_OTHER_SRCS := kramers_kronig  greensroutines definedtypes constants
 $(eval $(call make_pfunit_test,test_kramers_kronig))
+
+test_config_TESTS := test_random_config.pf
+test_config_OTHER_SRCS := random_config constants
+$(eval $(call make_pfunit_test,test_config))
 
 .PHONY: clean
 clean:
