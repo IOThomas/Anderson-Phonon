@@ -38,4 +38,27 @@ contains
 
     end subroutine initialise_binary
 
+    @test
+    subroutine initialise_box()
+        type(random_config_settings) :: settings
+        class(random_config_base), allocatable :: generator
+        integer :: ierr = 1
+        logical :: is_type = .false.
+
+        settings%generator_name = 'BOX'
+
+        call initialise_random_config(settings, generator, ierr)
+
+        select type (generator)
+        type is (box_disorder)
+            is_type = .true.
+        class default
+            is_type = .false.
+        end select
+
+        @assertEqual(ierr, 0)
+        @assertTrue(is_type)
+
+    end subroutine initialise_box
+
 end module test_random_config
