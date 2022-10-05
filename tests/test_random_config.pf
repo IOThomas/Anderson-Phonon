@@ -61,4 +61,40 @@ contains
 
     end subroutine initialise_box
 
+    @test
+    subroutine set_and_get_binary()
+        type(random_config_settings) :: settings, test_val
+        type(binary_isotopic_disorder) :: generator
+
+        settings%mass_0 = 0.5_real12
+        settings%mass_impurity = 0.1_real12
+        settings%impurity_concentration = 0.7_real12
+        settings%generator_name = 'TEST'
+
+        call generator%set(settings)
+        test_val = generator%get()
+
+        @assertEqual(test_val%generator_name, 'BINARY_ISOTOPIC')
+        @assertEqual(test_val%mass_0, settings%mass_0)
+        @assertEqual(test_val%mass_impurity, settings%mass_impurity)
+        @assertEqual(test_val%impurity_concentration, settings%impurity_concentration)
+
+    end subroutine set_and_get_binary
+
+    @test
+    subroutine set_and_get_box()
+        type(random_config_settings) :: settings, test_val
+        type(box_disorder) :: generator
+
+        settings%disorder_strength = 0.56_real12
+        settings%generator_name = 'TEST'
+
+        call generator%set(settings)
+        test_val = generator%get()
+
+        @assertEqual(test_val%generator_name, 'BOX')
+        @assertEqual(test_val%disorder_strength, settings%disorder_strength)
+
+    end subroutine set_and_get_box
+
 end module test_random_config
