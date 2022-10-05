@@ -120,6 +120,7 @@ contains
         settings%generator_name = this%name
         settings%mass_0 = this%mass_0
         settings%impurity_concentration = this%impurity_concentration
+        settings%mass_impurity = this%mass_impurity
 
     end function binary_isotopic_get
 
