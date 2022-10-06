@@ -97,4 +97,90 @@ contains
 
     end subroutine set_and_get_box
 
+    @test
+    subroutine binary_generate()
+        type(random_config_settings) :: settings
+        type(binary_isotopic_disorder) :: generator
+        complex(real12) :: matrix(10, 10), peturbation
+        logical :: conditions_met(10, 10)
+        integer :: i, j
+
+        conditions_met = .false.
+
+        settings%mass_0 = 0.2_real12
+        settings%mass_impurity = 0.5_real12
+        settings%impurity_concentration = 0.35_real12
+
+        peturbation%re = one - settings%mass_impurity/settings%mass_0
+        peturbation%im = zero
+
+        call generator%set(settings)
+        matrix = generator%generate(size(matrix,1), size(matrix,2))
+
+        where ((i /= j).and.(matrix == cmplx_zero))
+            conditions_met = .true.
+        elsewhere ((i == j).and.((matrix == cmplx_zero).or. (matrix == peturbation)))
+            conditions_met = .true.
+        end where
+
+        @assertTrue(all(conditions_met))
+
+    end subroutine binary_generate
+
+    @test
+    subroutine binary_zero_conc()
+        type(random_config_settings) :: settings
+        type(binary_isotopic_disorder) :: generator
+        complex(real12) :: matrix(10, 10), peturbation
+        integer :: i, j
+
+        settings%mass_0 = 0.2_real12
+        settings%mass_impurity = 0.5_real12
+        settings%impurity_concentration = zero
+
+        call generator%set(settings)
+        matrix = generator%generate(size(matrix,1), size(matrix,2))
+
+        @assertTrue(all(matrix == cmplx_zero))
+
+    end subroutine binary_zero_conc
+
+    @test
+    subroutine binary_full_conc()
+        type(random_config_settings) :: settings
+        type(binary_isotopic_disorder) :: generator
+        complex(real12) :: matrix(10, 10), peturbation
+        logical :: conditions_met(10, 10)
+        integer :: i, j
+
+        conditions_met = .false.
+
+        settings%mass_0 = 0.2_real12
+        settings%mass_impurity = 0.5_real12
+        settings%impurity_concentration = one
+
+        peturbation%re = one - settings%mass_impurity/settings%mass_0
+        peturbation%im = zero
+
+        call generator%set(settings)
+        matrix = generator%generate(size(matrix,1), size(matrix,2))
+
+        ! doing this with a where construct failed for no obvious reason!
+        do concurrent (i=1:size(matrix,1), j=1:size(matrix,2))
+            if ((i/=j).and.(matrix(i,j) == cmplx_zero)) then 
+                conditions_met = .true.
+            elseif ((i==j).and.(matrix(i,j)==peturbation)) then
+                conditions_met = .true.
+            end if 
+        end do
+
+        @assertTrue(all(conditions_met))
+
+    end subroutine binary_full_conc
+
+
+    @test
+    subroutine box_generate()
+    end subroutine box_generate
+
 end module test_random_config
