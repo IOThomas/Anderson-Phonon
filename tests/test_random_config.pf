@@ -181,6 +181,51 @@ contains
 
     @test
     subroutine box_generate()
+        type(random_config_settings) :: settings
+        type(box_disorder) :: generator
+
+        complex(real12) :: matrix(10, 10)
+        real(real12) :: peturbation
+        logical :: conditions_met(10, 10)
+        integer :: i, j
+
+        conditions_met = .false.
+        settings%disorder_strength = 0.5_real12
+        peturbation = settings%disorder_strength
+
+        call generator%set(settings)
+        matrix = generator%generate(size(matrix,1), size(matrix,2))
+
+        do concurrent (i = 1:size(matrix,1), j = 1:size(matrix,2))
+            if ((i /= j).and.(matrix(i,j) == cmplx_zero)) then
+                conditions_met(i,j) = .true.
+            elseif ((i == j).and.(abs(matrix(i,j))> zero).and.(abs(matrix(i,j)) <= peturbation).and.(matrix(i,j)%im == zero)) then
+                conditions_met(i,j) = .true.
+            end if
+        end do
+
+        @assertTrue(all(conditions_met))
+
     end subroutine box_generate
+
+    @test
+    subroutine box_zero_str()
+        type(random_config_settings) :: settings
+        type(box_disorder) :: generator
+
+        complex(real12) :: matrix(10, 10)
+        real(real12) :: peturbation
+        logical :: conditions_met(10, 10)
+        integer :: i, j
+
+        settings%disorder_strength = zero
+
+        call generator%set(settings)
+        matrix = generator%generate(size(matrix,1), size(matrix,2))
+
+        @assertTrue(all(matrix == cmplx_zero))
+    
+    end subroutine box_zero_str
+        
 
 end module test_random_config
