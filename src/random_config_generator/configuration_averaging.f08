@@ -50,7 +50,7 @@ contains
         type(greensfunc) :: standard_calculate(size(greensfunctions,1),size(greensfunctions,2))
 
         integer :: isize, jsize, n_config, n_layer
-        integer :: i, j, k 
+        integer :: i, j 
         complex(real12), allocatable :: total_layer(:,:,:), current_layer(:,:,:,:)
 
         isize = size(greensfunctions,1)
