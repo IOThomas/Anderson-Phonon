@@ -22,7 +22,7 @@ module constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! tolerances 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  real(real12), parameter, public :: scale_tol = 1.0e4_real12
+  real(real12), parameter, public :: scale_tol = 1.0e5_real12
   !# allows easy scaling of tolerance (set at approx FFT test accuracy)
   real(real12), parameter, public :: tolerance = scale_tol*epsilon(one)
   !# typical numerical tolerance 

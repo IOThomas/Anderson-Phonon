@@ -14,12 +14,12 @@
 ! dd Mmm yyyy - Initial Version
 ! TODO_dd_mmm_yyyy - TODO_describe_appropriate_changes - TODO_name
 !------------------------------------------------------------------------------
-module configuration_averaging
+module config_avg
     use constants, only: real12, cmplx_zero
-    use greensroutines, only: greensfunc, copy_gf_slice
+    use greensroutines, only: greensfunc, copy_gf_slice, allocate_GF
 
     private
-    public config_average, standard_average
+    public initialise_average, config_average, standard_average
     
     ! interface for base class
     type, abstract :: config_average
@@ -44,6 +44,20 @@ module configuration_averaging
 
 contains
 
+    subroutine initialise_average(selection, calculator, ierr)
+        character(50), intent(in) :: selection
+        class(config_average), allocatable, intent(inout) :: calculator
+        integer, intent(out) :: ierr
+
+        ierr = 0
+        if (selection == 'STANDARD') then 
+            allocate(standard_average :: calculator)
+        else 
+            ierr = 1
+        end if
+
+    end subroutine initialise_average
+
     pure function standard_calculate(this, greensfunctions)
         class(standard_average), intent(in) :: this
         type(greensfunc), intent(in) :: greensfunctions(:,:,:)
@@ -58,12 +72,13 @@ contains
         n_config = size(greensfunctions,3)
         n_layer = greensfunctions(1,1,1)%get_size()
         allocate(total_layer(isize, jsize, n_layer), current_layer(isize,jsize,n_layer, n_config))
-
+        call allocate_GF(standard_calculate, n_layer)
         total_layer = cmplx_zero
 
         do concurrent(i=1:n_layer, j=1:n_config)
             call copy_gf_slice(current_layer(1:isize,1:jsize, i,j), greensfunctions(1:isize,1:jsize,j), i)
         end do
+    
 
         do concurrent (i = 1:n_layer)
             do j = 1, n_config
@@ -79,4 +94,4 @@ contains
     end function standard_calculate
 
 
-end module configuration_averaging
+end module config_avg

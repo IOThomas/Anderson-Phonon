@@ -12,7 +12,8 @@ all: make_helper \
 	test_dispersions \
 	test_initialisation \
 	test_fastFourier \
-	test_random_config
+	test_config_gen \
+	test_config_avg 
 .PHONY: all
 
 make_helper:
@@ -23,6 +24,8 @@ FFLAGS += -g
 endif	
 FFLAGS += $(PFUNIT_EXTRA_FFLAGS)
 FFLAGS += -I$(SRCDIR) -I./helper_modules -I/usr/include/ 
+
+#%.o: %.mod
 
 %.o: helper_modules/%.f08   
 	$(FC1) -c $(FFLAGS)  $<
@@ -59,9 +62,13 @@ test_kramers_kronig_TESTS := test_kramers_kronig.pf
 test_kramers_kronig_OTHER_SRCS := kramers_kronig  greensroutines definedtypes constants
 $(eval $(call make_pfunit_test,test_kramers_kronig))
 
-test_config_TESTS := test_random_config.pf
-test_config_OTHER_SRCS := random_config constants
-$(eval $(call make_pfunit_test,test_config))
+test_config_gen_TESTS := test_random_config.pf 
+test_config_gen_OTHER_SRCS := random_config  constants
+$(eval $(call make_pfunit_test,test_config_gen))
+
+test_config_avg_TESTS := test_config_avg.pf 
+test_config_avg_OTHER_SRCS := config_avg greensroutines constants
+$(eval $(call make_pfunit_test,test_config_avg))
 
 .PHONY: clean
 clean:
@@ -71,7 +78,7 @@ clean:
 
 .PHONY: cleantests
 cleantests:
-	$(RM) test_dispersions test_greensroutines test_helpers test_initialisation test_fastFourier
+	$(RM) test_dispersions test_greensroutines test_helpers test_initialisation test_fastFourier test_config_gen
 
 ###########################################################################
 .PHONY: runtests

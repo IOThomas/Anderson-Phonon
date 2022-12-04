@@ -2,6 +2,7 @@ obj =   constants.f08 \
 	definedtypes.f08 \
 	greensroutines.f08 \
 	random_config_generator/random_config.f08 \
+	random_config_generator/config_avg.f08 \
 	gf_fourier.f08 \
 	gf_transforms.f08 \
 	one_dimensional_FT.f08 \

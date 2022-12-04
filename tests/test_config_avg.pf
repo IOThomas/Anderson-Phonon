@@ -1,0 +1,49 @@
+module test_config_avg
+    use constants
+    use greensroutines
+    use config_avg
+    use funit
+
+    implicit none
+
+contains
+
+    @before
+    subroutine set_up()
+    end subroutine set_up
+
+    @after
+    subroutine tear_down()
+    end subroutine tear_down
+
+    @test
+    subroutine one_component_avg()
+        integer, parameter :: nconfig = 100
+        integer, parameter :: nfreq = 10
+        type(greensfunc) :: input(1,1,nconfig)
+        type(greensfunc) :: output(1,1)
+        type(standard_average) :: average_function
+        complex(real12), parameter :: test_value = cmplx(1.2_real12,zero, real12)
+        complex(real12) :: greensfn(1,1,nconfig)
+        logical :: slice_ok(nfreq)
+        integer :: i
+
+        slice_ok = .false.
+        call allocate_GF(input, nfreq)
+        call allocate_GF(output, nfreq)
+        
+        greensfn = test_value 
+        call initialise_GF(input, greensfn)
+       
+
+        output = average_function%calculate(input)
+
+        do concurrent (i=1:nfreq)
+            if (abs(output(1,1)%GF(i) - test_value) <=tolerance) slice_ok(i) = .true.
+        end do 
+
+        @assertTrue(all(slice_ok))
+
+    end subroutine one_component_avg
+
+end module test_config_avg
