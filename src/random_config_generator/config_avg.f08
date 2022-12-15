@@ -65,14 +65,25 @@ contains
 
         integer :: isize, jsize, n_config, n_layer
         integer :: i, j 
+        logical :: array_size_match, test_allocated
         complex(real12), allocatable :: total_layer(:,:,:), current_layer(:,:,:,:)
+
+        array_size_match = greensfunctions(1,1,1)%get_size() == result(1,1)%get_size()
+        if (.not. array_size_match) &
+            & call fatal_error_from_call(1,'config_avg.f90','standard_calculate')
+        array_size_match = (size(greensfunctions,1) == size(result,1)) .and.(size(greensfunctions,2) == size(result,2))
+        if (.not. array_size_match) &
+            & call fatal_error_from_call(2,'config_avg.f90','standard_calculate')
+        test_allocated = all(is_GF_allocated(greensfunctions)) .and. all(is_GF_allocated(result))
+        if (.not. test_allocated) &
+            & call fatal_error_from_call(3, 'config_avg.f90', 'standard_calculate')
 
         isize = size(greensfunctions,1)
         jsize = size(greensfunctions,2)
         n_config = size(greensfunctions,3)
         n_layer = greensfunctions(1,1,1)%get_size()
         allocate(total_layer(isize, jsize, n_layer), current_layer(isize,jsize,n_layer, n_config))
-        call allocate_GF(standard_calculate, n_layer)
+        call allocate_GF(result, n_layer)
         total_layer = cmplx_zero
 
         do concurrent(i=1:n_layer, j=1:n_config)
@@ -87,11 +98,11 @@ contains
 
             total_layer(1:isize,1:jsize,i) = total_layer(1:isize,1:jsize,i)/real(n_config,real12)
 
-            call copy_gf_slice(standard_calculate, total_layer(1:isize,1:jsize,i), i)
+            call copy_gf_slice(result, total_layer(1:isize,1:jsize,i), i)
         end do
 
 
-    end function standard_calculate
+    end subroutine standard_calculate
 
 
 end module config_avg
