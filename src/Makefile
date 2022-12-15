@@ -26,6 +26,11 @@ xtest:
 
 test:
 
+	$(compiler) $(opt) $(trap) $(prec) -c -g  $(inc) $(obj) $(lib) 
+	mv *.o ../tests
+	mv *.mod ../tests
+
+test-warn:
 	$(compiler) $(opt) $(warn) $(trap) $(prec) -c -g  $(inc) $(obj) $(lib) 
 	mv *.o ../tests
 	mv *.mod ../tests
