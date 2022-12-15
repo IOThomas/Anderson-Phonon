@@ -83,7 +83,6 @@ contains
         n_config = size(greensfunctions,3)
         n_layer = greensfunctions(1,1,1)%get_size()
         allocate(total_layer(isize, jsize, n_layer), current_layer(isize,jsize,n_layer, n_config))
-        call allocate_GF(result, n_layer)
         total_layer = cmplx_zero
 
         do concurrent(i=1:n_layer, j=1:n_config)

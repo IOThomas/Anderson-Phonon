@@ -36,7 +36,7 @@ contains
         call initialise_GF(input, greensfn)
        
 
-        output = average_function%calculate(input)
+        call average_function%calculate(input, output)
 
         do concurrent (i=1:nfreq)
             if (abs(output(1,1)%GF(i) - test_value) <=tolerance) slice_ok(i) = .true.
