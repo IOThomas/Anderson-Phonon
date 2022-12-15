@@ -28,12 +28,12 @@ module config_avg
     end type config_average
 
     abstract interface
-        pure function calculate(this, greensfunctions)
+        subroutine calculate(this, greensfunctions, result)
             import config_average, greensfunc
             class(config_average), intent(in) :: this
             type(greensfunc), intent(in) :: greensfunctions(:,:,:)
-            type(greensfunc) :: calculate(size(greensfunctions,1),size(greensfunctions,2))
-        end function calculate
+            type(greensfunc), intent(inout) :: result(:,:)
+        end subroutine calculate
     end interface
 
     ! interface for extented class
@@ -58,10 +58,10 @@ contains
 
     end subroutine initialise_average
 
-    pure function standard_calculate(this, greensfunctions)
+    subroutine standard_calculate(this, greensfunctions, result)
         class(standard_average), intent(in) :: this
         type(greensfunc), intent(in) :: greensfunctions(:,:,:)
-        type(greensfunc) :: standard_calculate(size(greensfunctions,1),size(greensfunctions,2))
+        type(greensfunc), intent(inout):: result(:,:)
 
         integer :: isize, jsize, n_config, n_layer
         integer :: i, j 
