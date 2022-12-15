@@ -9,7 +9,7 @@ module greensroutines
     private
     public allocate_GF, calculateGF, greensfunc, copymap, copyGF, invertGF, &
         reduceGF, assignment(=), copy_gf_slice, initialise_GF, allocate_3DGF, &
-        operator(.eq.), operator(.ne.)
+        operator(.eq.), operator(.ne.), deallocate_GF, is_GF_allocated
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     type, public :: greensfunc
