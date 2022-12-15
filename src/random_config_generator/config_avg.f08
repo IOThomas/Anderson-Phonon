@@ -15,8 +15,8 @@
 ! TODO_dd_mmm_yyyy - TODO_describe_appropriate_changes - TODO_name
 !------------------------------------------------------------------------------
 module config_avg
-    use constants, only: real12, cmplx_zero
-    use greensroutines, only: greensfunc, copy_gf_slice, allocate_GF
+    use constants, only: real12, cmplx_zero, fatal_error_from_call
+    use greensroutines, only: greensfunc, copy_gf_slice, allocate_GF, is_GF_allocated
 
     private
     public initialise_average, config_average, standard_average
