@@ -56,6 +56,19 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     end subroutine allocate_GF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    elemental subroutine deallocate_GF(GF_array)
+        type(greensfunc), intent(inout) :: GF_array
+    
+        if (allocated(GF_array%GF)) deallocate(GF_array%GF)
+        GF_array%nGF_points = 0
+    end subroutine deallocate_GF
+
+    elemental function is_GF_allocated(GF_array)
+        type(greensfunc), intent(in) :: GF_array
+        logical is_GF_allocated
+
+        is_GF_allocated = allocated(GF_array%GF)
+    end function is_GF_allocated
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     pure function get_size(this)
