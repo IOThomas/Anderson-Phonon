@@ -46,4 +46,35 @@ contains
 
     end subroutine one_component_avg
 
+    @test
+    subroutine one_comp_difflay_avg()
+        integer, parameter :: nconfig = 100
+        integer, parameter :: nfreq = 10
+        type(greensfunc) :: input(1,1,nconfig)
+        type(greensfunc) :: output(1,1)
+        type(standard_average) :: average_function
+        complex(real12), parameter :: test_value = cmplx(1.2_real12,zero, real12)
+        logical :: slice_ok(nfreq)
+        integer :: i, j
+
+        slice_ok = .false.
+        call allocate_GF(input, nfreq)
+        call deallocate_GF(output)
+        call allocate_GF(output, nfreq)
+        
+        do concurrent (i=1:nconfig,j=1:nfreq)
+            input(1,1,i)%GF(j)= test_value*real(j,real12)
+        end do
+        
+        call average_function%calculate(input, output)
+
+
+        do concurrent (i=1:nfreq)
+            if (abs(output(1,1)%GF(i) - test_value*real(i,real12)) <=tolerance) slice_ok(i) = .true.
+        end do 
+
+        @assertTrue(all(slice_ok))
+
+    end subroutine one_comp_difflay_avg
+
 end module test_config_avg
