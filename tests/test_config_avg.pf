@@ -133,7 +133,7 @@ contains
     subroutine initialise_fail()
         class(config_average), allocatable :: average
         integer :: ierr = 0
-        logical :: is_type = .false.
+        logical :: is_type = .true.
         character(50) :: name
 
         name = 'XCSFAS'
