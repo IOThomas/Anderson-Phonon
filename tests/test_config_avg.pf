@@ -76,4 +76,35 @@ contains
 
     end subroutine one_comp_difflay_avg
 
+    @test
+    subroutine sev_comp_difflay_avg()
+        integer, parameter :: nconfig = 100
+        integer, parameter :: nfreq = 10
+        integer, parameter :: nx = 10, ny = 7
+        type(greensfunc) :: input(nx,ny,nconfig)
+        type(greensfunc) :: output(nx,ny)
+        type(standard_average) :: average_function
+        complex(real12), parameter :: test_value = cmplx(1.2_real12,zero, real12)
+        logical :: slice_ok(nfreq)
+        integer :: i, j, ix, iy
+
+        slice_ok = .false.
+        call allocate_GF(input, nfreq)
+        call allocate_GF(output, nfreq)
+        
+        do concurrent (ix=1:nx, iy=1:ny,i=1:nconfig,j=1:nfreq)
+            input(ix,iy,i)%GF(j)= test_value*real(j*ix*iy,real12)
+        end do
+        
+        call average_function%calculate(input, output)
+
+
+        do concurrent (ix=1:nx, iy=1:ny,i=1:nfreq)
+            if (abs(output(ix,iy)%GF(i) - test_value*real(i*ix*iy,real12)) <=tolerance) slice_ok(i) = .true.
+        end do 
+
+        @assertTrue(all(slice_ok))
+
+    end subroutine sev_comp_difflay_avg
+
 end module test_config_avg
