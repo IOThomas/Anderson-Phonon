@@ -59,7 +59,6 @@ contains
 
         slice_ok = .false.
         call allocate_GF(input, nfreq)
-        call deallocate_GF(output)
         call allocate_GF(output, nfreq)
         
         do concurrent (i=1:nconfig,j=1:nfreq)
