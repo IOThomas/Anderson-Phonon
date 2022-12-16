@@ -107,4 +107,26 @@ contains
 
     end subroutine sev_comp_difflay_avg
 
+    @test
+    subroutine initialise_standard()
+        class(config_average), allocatable :: average
+        integer :: ierr = 1
+        logical :: is_type = .false.
+        character(50) :: name
+
+        name = 'STANDARD'
+        call initialise_average(name, average, ierr)
+
+        select type (average)
+        type is (standard_average)
+            is_type = .true.
+        class default
+            is_type = .false.
+        end select
+
+        @assertEqual(ierr, 0)
+        @assertTrue(is_type)
+
+    end subroutine initialise_standard
+
 end module test_config_avg
