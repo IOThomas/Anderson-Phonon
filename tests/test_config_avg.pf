@@ -129,4 +129,26 @@ contains
 
     end subroutine initialise_standard
 
+    @test
+    subroutine initialise_fail()
+        class(config_average), allocatable :: average
+        integer :: ierr = 0
+        logical :: is_type = .false.
+        character(50) :: name
+
+        name = 'XCSFAS'
+        call initialise_average(name, average, ierr)
+
+        select type (average)
+        type is (standard_average)
+            is_type = .true.
+        class default
+            is_type = .false.
+        end select
+
+        @assertEqual(ierr, 1)
+        @assertFalse(is_type)
+
+    end subroutine initialise_fail
+
 end module test_config_avg
