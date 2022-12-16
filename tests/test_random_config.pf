@@ -62,6 +62,31 @@ contains
     end subroutine initialise_box
 
     @test
+    subroutine initialise_fail()
+        type(random_config_settings) :: settings
+        class(random_config_base), allocatable :: generator
+        integer :: ierr = 0
+        logical :: is_type = .true.
+
+        settings%generator_name = 'asdfJJJ'
+
+        call initialise_random_config(settings, generator, ierr)
+
+        select type (generator)
+        type is (box_disorder)
+            is_type = .true.
+        type is (binary_isotopic_disorder)
+            is_type = .true.
+        class default
+            is_type = .false.
+        end select
+
+        @assertEqual(ierr, 1)
+        @assertFalse(is_type)
+
+    end subroutine initialise_fail
+
+    @test
     subroutine set_and_get_binary()
         type(random_config_settings) :: settings, test_val
         type(binary_isotopic_disorder) :: generator
