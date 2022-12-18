@@ -547,7 +547,7 @@ contains
 
    @test
    subroutine test_deallocate()
-      integer, parameter:: n = 3
+      integer, parameter :: n = 3
       type(greensfunc) :: GF(n,n,n)
       logical :: is_not_allocated(n,n,n)
       integer:: i, j, k
