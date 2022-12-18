@@ -562,6 +562,12 @@ contains
       end do
       @assertTrue(all(is_not_allocated))
    end subroutine test_deallocate
+
+   @test
+   subroutine test_is_allocated()
+      integer, parameter :: n = 3
+      
+   end subroutine test_is_allocated   
    
 
 end module
