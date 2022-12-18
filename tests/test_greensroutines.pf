@@ -544,6 +544,24 @@ contains
       @assertFalse((GF1.eq.GF2))
       @assertTrue(GF1.ne.GF2)
    end subroutine test_GF1_ne_GF2_3D
+
+   @test
+   subroutine test_deallocate()
+      integer, parameter:: n = 3
+      type(greensfunc) :: GF(n,n,n)
+      logical :: is_not_allocated(n,n,n)
+      integer:: i, j, k
+
+      is_not_allocated = .false.
+
+      call allocate_GF(GF,10)
+      call deallocate_GF(GF)
+
+      do concurrent (i=1:n, j=1:n,k=1:n)
+         if (.not. allocated(GF(i,j,k)%GF)) is_not_allocated = .true.
+      end do
+      @assertTrue(all(is_not_allocated))
+   end subroutine test_deallocate
    
 
 end module
