@@ -561,6 +561,7 @@ contains
          if (.not. allocated(GF(i,j,k)%GF)) is_not_allocated = .true.
       end do
       @assertTrue(all(is_not_allocated))
+      @assertTrue(all(GF%get_size() == 0))
    end subroutine test_deallocate
 
    @test
