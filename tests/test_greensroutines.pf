@@ -566,7 +566,22 @@ contains
    @test
    subroutine test_is_allocated()
       integer, parameter :: n = 3
+      type(greensfunc) :: GF(n,n,n)
+      logical :: is_allocated(n,n,n)
+      integer :: i, j, k
       
+      is_allocated = .false.
+
+      call allocate_GF(GF, 10)
+      is_allocated = is_GF_allocated(GF)
+      @assertTrue(all(is_allocated))
+      @assertTrue(all(GF%get_size() == 10))
+
+      call deallocate_GF(GF)
+      is_allocated = is_GF_allocated(GF)
+      @assertFalse(any(is_allocated))
+      @assertTrue(all(GF%get_size() == 0))
+
    end subroutine test_is_allocated   
    
 
