@@ -20,6 +20,7 @@ module average_GF
     use greensroutines, only: greensfunc, allocate_GF, copy_gf_slice, initialise_GF
     use config_avg, only: config_average
     use random_config, only: random_config_base, random_config_settings
+    use matrix_methods, only: invert_GF_matrix
     implicit none
     
 contains
@@ -87,45 +88,6 @@ contains
         do concurrent (i = 1:isize, j = 1:jsize, k = 1:iomega)
             output_GF(i,j)%GF(k)= rescale(i)*output_GF(i,j)%GF(k)*rescale(j)
         end do
-
-    contains
-
-        pure subroutine invert_diagonal_GF(input, output)
-            type(greensfunc), intent(in) :: input(:,:)
-            type(greensfunc), intent(out) :: output(:,:)
-
-            integer :: ix, xsize
-            complex(real12), allocatable :: slice(:,:,:)
-
-            xsize = size(input, 1)
-
-            allocate(slice(xsize,xsize,input(1,1)%get_size()))
-
-            do concurrent (ix=1:input(1,1)%get_size())
-                call copy_gf_slice(slice(1:xsize,1:xsize,ix), input, ix)
-                slice(1:xsize,1:xsize,ix) = invert_diagonal_mat(slice(1:xsize,1:xsize,ix))
-                call copy_gf_slice(output, slice(1:xsize,1:xsize,ix), ix)
-            end do
-
-        end subroutine invert_diagonal_GF
-
-        pure function invert_diagonal_mat(matrix)
-            complex(real12), intent(in) :: matrix(:,:)
-            complex(real12) :: invert_diagonal_mat(size(matrix,1),size(matrix,2))
-
-            integer :: ix
-
-            invert_diagonal_mat = cmplx_zero
-            do concurrent (ix=1:size(matrix,1))
-                if (matrix(ix,ix) /= cmplx_zero) then
-                    invert_diagonal_mat(ix,ix) = 1.0/matrix(ix,ix)
-                else
-                    invert_diagonal_mat(ix,ix)%re = huge(real12)
-                    invert_diagonal_mat(ix,ix)%im = zero
-                end if
-            end do
-
-        end function invert_diagonal_mat
 
     end subroutine cluster_GF
     
