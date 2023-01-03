@@ -74,13 +74,17 @@ contains
         call allocate_GF(inverse_GF, iomega)
         call allocate_GF(inverse_cluster, iomega)
 
-        call invert_diagonal_GF(input_GF, inverse_GF)
+        call invert_GF_matrix(input_GF, inverse_GF)
         call initialise_GF(inverse_cluster, cmplx_zero)
-        do concurrent (i = 1:isize, j = 1:iomega)
-            inverse_cluster(i,i)%GF(j) = inverse_GF(i,i)%GF(j) - frequency(j)*frequency(j)*potential(i)
+        do concurrent (i = 1:isize, j = 1:jsize, k = 1:iomega)
+            if (i == j ) then
+                inverse_cluster(i,j)%GF(k) = inverse_GF(i,j)%GF(k) - frequency(k)*frequency(k)*potential(i)
+            else
+                inverse_cluster(i,j)%GF(k) = inverse_GF(i,j)%GF(k)
+            end if 
         end do
 
-        call invert_diagonal_GF(inverse_cluster, output_GF)
+        call invert_GF(inverse_cluster, output_GF)
 
         rescale%re = sqrt(one - potential%re)
         rescale%im = zero
