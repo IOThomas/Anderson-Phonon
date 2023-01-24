@@ -5,21 +5,21 @@ module matrix_methods
     private
     public invert_GF_matrix, invert_diagonal_mat, invert_general_matrix
 
-    !external CGETRI
-    !external CGETRF
+    !external ZGETRI
+    !external ZGETRF
     interface ! declare external LAPACK routines 
-        subroutine CGETRF(n_row, n_col, matrix_A, lead_dim_A, pivot_indices, ierror)
+        subroutine ZGETRF(n_row, n_col, matrix_A, lead_dim_A, pivot_indices, ierror)
             import real12
             integer :: ierror, lead_dim_A, n_row, n_col
             integer :: pivot_indices(*)
             complex(real12) :: matrix_A(lead_dim_A, *)
-        end subroutine CGETRF
-        subroutine CGETRI(n_row, matrix_A, lead_dim_A, pivot_indices, work_matrix,  work_dim, ierror)
+        end subroutine ZGETRF
+        subroutine ZGETRI(n_row, matrix_A, lead_dim_A, pivot_indices, work_matrix,  work_dim, ierror)
             import real12
             integer :: ierror, lead_dim_A, work_dim, n_row
             integer :: pivot_indices(*)
             complex(real12) :: matrix_A(lead_dim_A,*), work_matrix(*)
-        end subroutine
+        end subroutine ZGETRI
     end interface
     
 contains
@@ -82,8 +82,12 @@ contains
 
         subroutine handle_errors()
             integer :: slice_no, error_val
+            logical, allocatable :: error_mask(:)
 
-            slice_no = findloc(ierror,.true., 1, ierror /= 0)
+            allocate(error_mask(size(ierror,1)))
+            error_mask = .false.
+            where (ierror /= 0) error_mask = .true.
+            slice_no = findloc(error_mask, .true.,1)
             error_val = ierror(slice_no)
 
             if (error_val < 0) then
@@ -92,11 +96,13 @@ contains
                 call fatal_error_from_call(4,'invert_GF_matrix', 'matrix_methods.f08') 
             else if ((error_val > 0) .and. (.not. is_diagonal(slice_no))) then
                 write(*,*) "Error in inverting matrix for Green's function momentum slice ", slice_no
-                write(*,*) "U(", error_val, ",", error_val, ") is exactly zero following decomposition by LAPACK routines.  Singular matrix: cannot be inverted."
+                write(*,*) "U(", error_val, ",", error_val, ") is exactly zero following decomposition by LAPACK routines."
+                write(*,*) "Singular matrix: cannot be inverted."
                 call fatal_error_from_call(5,'invert_GF_matrix', 'matrix_methods.f08') 
             else if ((error_val > 0) .and. (is_diagonal(slice_no))) then
                 write(*,*) "Error in inverting matrix for Green's function momentum slice ", slice_no
-                write(*,*) "Component (", error_val, ",", error_val, ") of the matrix is exactly zero.  Singular matrix: cannot be inverted."
+                write(*,*) "Component (", error_val, ",", error_val, ") of the matrix is exactly zero."
+                write(*,*) "Singular matrix: cannot be inverted."
                 call fatal_error_from_call(6,'invert_GF_matrix', 'matrix_methods.f08') 
             end if 
         end subroutine handle_errors
@@ -144,11 +150,11 @@ contains
         allocate(work(lwork))
         ierr = 0
 
-        call CGETRF(n_rows, n_rows, inverse, lda, pivots, ierr)
+        call ZGETRF(n_rows, n_rows, inverse, lda, pivots, ierr)
 
         if (ierr /= 0) return
 
-        call CGETRI(n_rows, inverse, lda, pivots, work, lwork, ierr)
+        call ZGETRI(n_rows, inverse, lda, pivots, work, lwork, ierr)
 
         if (ierr /= 0) return
 

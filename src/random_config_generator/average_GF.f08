@@ -53,7 +53,7 @@ contains
 
     end subroutine get_average_GF
 
-    pure subroutine cluster_GF(input_GF, output_GF, potential, frequency, ierr)
+    subroutine cluster_GF(input_GF, output_GF, potential, frequency, ierr)
         type(greensfunc), intent(in) :: input_GF(:,:)
         type(greensfunc), intent(inout) :: output_GF(:,:)
         complex(real12), intent(in) :: potential(:), frequency(:)

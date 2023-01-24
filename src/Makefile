@@ -3,6 +3,8 @@ obj =   constants.f08 \
 	greensroutines.f08 \
 	random_config_generator/random_config.f08 \
 	random_config_generator/config_avg.f08 \
+	random_config_generator/matrix_methods.f08 \
+	random_config_generator/average_GF.f08 \
 	gf_fourier.f08 \
 	gf_transforms.f08 \
 	one_dimensional_FT.f08 \
@@ -11,14 +13,15 @@ obj =   constants.f08 \
 	initialisation.f08
 
 
-compiler = gfortran-9
+compiler = gfortran
 
 opt = -fcheck=all
 warn = -Wall
 trap = -ffpe-trap=invalid,overflow,zero
 prec = -ffpe-trap=precision
 inc = -I/usr/include/
-lib = -lfftw3q -lquadmath -lm 
+libinc = -L/home/iori/.local/lib
+lib = -lfftw3q -lquadmath -lm -liblapackquad
 
 xtest:
 
@@ -26,7 +29,7 @@ xtest:
 
 test:
 
-	$(compiler) $(opt) $(trap) $(prec) -c -g  $(inc) $(obj) $(lib) 
+	$(compiler) $(opt) $(trap) $(prec) -c -g  $(inc) $(obj) $(libinc) $(lib) 
 	mv *.o ../tests
 	mv *.mod ../tests
 
