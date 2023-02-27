@@ -1,0 +1,59 @@
+module test_matrix_inversion
+    use funit
+    use constants
+    use greensroutines
+    use matrix_methods
+
+    implicit none
+
+contains
+
+    @before
+    subroutine set_up()
+    end subroutine set_up
+
+    @after
+    subroutine tear_down()
+    end subroutine tear_down
+
+    @test
+    subroutine diagonal_matrix()
+        complex(real12) :: input_matrix(20,20)
+        complex(real12) :: output_matrix(20,20)
+        complex(real12) :: test_output(20,20)
+        integer :: ierr = 1
+        integer :: i
+
+        input_matrix = cmplx_zero
+        output_matrix = cmplx_zero
+        test_output = cmplx_zero
+
+        do concurrent (i = 1:20)
+            input_matrix(i,i)%re = real(i, real12)
+            test_output(i,i)%re = 1.0/real(i, real12)
+        end do
+
+        call invert_diagonal_mat(input_matrix, output_matrix, ierr)
+        @assertEqual(ierr, 0)
+        @assertEqual(output_matrix, test_matrix, tolerance)
+
+    end subroutine diagonal_matrix
+
+    @test
+    subroutine diagonal_sing()
+    end subroutine diagonal_sing    
+
+    @test
+    subroutine nondiagonal_matrix()
+    end subroutine
+
+    @test
+    subroutine diag_GF_matrix()
+    end subroutine
+
+    @test
+    subroutine nondiag_GF_matrix()
+    end subroutine
+
+
+end module test_matrix_inversion
