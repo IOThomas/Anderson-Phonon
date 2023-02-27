@@ -45,8 +45,10 @@ contains
             is_diagonal(ix) = diagonal_test(slice(1:xsize,1:xsize, ix))
             if (is_diagonal(ix)) then
                 call invert_diagonal_mat(slice(1:xsize,1:xsize,ix), slice(1:xsize,1:xsize,ix), ierror(ix))
-            else
+            else if (.not. is_diagonal(ix)) then
                 call invert_general_matrix(slice(1:xsize,1:xsize,ix), slice(1:xsize,1:xsize,ix), ierror(ix))
+            else 
+                call fatal_error_from_call(5, 'invert_GF_matrix', 'matrix_methods.f08')
                 
             end if
             call copy_gf_slice(output, slice(1:xsize,1:xsize,ix), ix)
