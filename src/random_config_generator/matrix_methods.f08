@@ -3,7 +3,7 @@ module matrix_methods
     use greensroutines
     implicit none
     private
-    public invert_GF_matrix, invert_diagonal_mat, invert_general_matrix
+    public invert_GF_matrix, invert_diagonal_mat,invert_general_matrix
 
     !external ZGETRI
     !external ZGETRF

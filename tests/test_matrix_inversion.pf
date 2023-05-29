@@ -30,30 +30,73 @@ contains
 
         do concurrent (i = 1:20)
             input_matrix(i,i)%re = real(i, real12)
-            test_output(i,i)%re = 1.0/real(i, real12)
+            test_output(i,i)%re = one/real(i, real12)
         end do
 
         call invert_diagonal_mat(input_matrix, output_matrix, ierr)
         @assertEqual(ierr, 0)
-        @assertEqual(output_matrix, test_matrix, tolerance)
+        @assertEqual(output_matrix, test_output, tolerance)
 
     end subroutine diagonal_matrix
 
     @test
     subroutine diagonal_sing()
+        complex(real12) :: input_matrix(20,20)
+        complex(real12) :: output_matrix(20,20)
+        integer :: ierr = 0
+        integer :: i
+
+        input_matrix = cmplx_zero
+        output_matrix = cmplx_zero
+
+        do concurrent (i = 1:20)
+            input_matrix(i,i)%re = real(i, real12)
+        end do
+        input_matrix(2,2) = cmplx_zero
+
+        call invert_diagonal_mat(input_matrix, output_matrix, ierr)
+
+        @assertFalse(ierr == 0)
+
     end subroutine diagonal_sing    
 
     @test
     subroutine nondiagonal_matrix()
-    end subroutine
+        complex(real12) :: input_matrix(5,5)
+        complex(real12) :: inverted_matrix(5,5)
+        complex(real12) :: product_matrix(5,5)
+        complex(real12) :: identity_matrix(5,5)
+        integer :: ierr = 1
+        integer :: i, j
 
-    @test
-    subroutine diag_GF_matrix()
-    end subroutine
+        input_matrix = cmplx_zero
+        inverted_matrix = cmplx_zero
+        product_matrix = cmplx_zero
+        identity_matrix = cmplx_zero
 
-    @test
-    subroutine nondiag_GF_matrix()
-    end subroutine
+        do concurrent (i = 1:5)
+            identity_matrix(i,i) = one
+        enddo 
+        do concurrent (i = 1:5, j=1:5)
+            input_matrix = real(i*j, real12)
+        enddo 
+
+        call invert_general_matrix(input_matrix, inverted_matrix, ierr)
+        @assertEqual(ierr, 0)
+
+        product_matrix = matmul(input_matrix, inverted_matrix)
+
+        @assertEqual(product_matrix, identity_matrix, tolerance)        
+
+    end subroutine nondiagonal_matrix
+
+    ! @test
+    ! subroutine diag_GF_matrix()
+    ! end subroutine
+
+    ! @test
+    ! subroutine nondiag_GF_matrix()
+    ! end subroutine
 
 
 end module test_matrix_inversion

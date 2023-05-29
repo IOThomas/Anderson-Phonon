@@ -1,7 +1,7 @@
 #call make $target MODE=debug to turn on gdb flag in compiler
 PFUNIT_DIR = /home/iori/lib/pFUnit/build/installed
 include $(PFUNIT_DIR)/PFUNIT-4.2/include/PFUNIT.mk
-FC1 = gfortran-9
+FC1 = gfortran
 MODE = production
 
 SRCDIR = ../src
@@ -13,7 +13,8 @@ all: make_helper \
 	test_initialisation \
 	test_fastFourier \
 	test_config_gen \
-	test_config_avg 
+	test_config_avg \
+	test_matrix_ops
 .PHONY: all
 
 make_helper:
@@ -24,6 +25,7 @@ FFLAGS += -g
 endif	
 FFLAGS += $(PFUNIT_EXTRA_FFLAGS)
 FFLAGS += -I$(SRCDIR) -I./helper_modules -I/usr/include/ 
+
 
 #%.o: %.mod
 
@@ -69,6 +71,11 @@ $(eval $(call make_pfunit_test,test_config_gen))
 test_config_avg_TESTS := test_config_avg.pf 
 test_config_avg_OTHER_SRCS := config_avg greensroutines constants
 $(eval $(call make_pfunit_test,test_config_avg))
+
+test_matrix_ops_TESTS := test_matrix_inversion.pf
+test_matrix_ops_OTHER_SRCS := matrix_methods greensroutines constants
+test_matrix_ops_OTHER_LIBRARIES :=  /home/iori/.local/lib/liblapackquad.a /home/iori/.local/lib/librefblasquad.a
+$(eval $(call make_pfunit_test,test_matrix_ops))
 
 .PHONY: clean
 clean:
