@@ -27,3 +27,4 @@ tests/test_kramers_kronig
 tests/test_config
 tests/test_config_gen
 tests/test_config_avg
+tests/test_matrix_ops

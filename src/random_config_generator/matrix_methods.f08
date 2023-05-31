@@ -26,22 +26,23 @@ contains
 
     subroutine invert_GF_matrix(input, output)
         type(greensfunc), intent(in) :: input(:,:)
-        type(greensfunc), intent(out) :: output(:,:)
+        type(greensfunc), intent(inout) :: output(:,:)
 
         integer :: ix, xsize
-        integer, allocatable :: ierror(:)
+        integer, allocatable :: ierror(:), ix_matrix(:,:)
         complex(real12), allocatable :: slice(:,:,:)
         logical, allocatable :: is_diagonal(:)
 
         call check_inputs()
-
         xsize = size(input, 1)
 
         allocate(slice(xsize,xsize,input(1,1)%get_size()), is_diagonal(input(1,1)%get_size()), ierror(input(1,1)%get_size()))
+        allocate(ix_matrix(xsize,xsize))
 
         do ix = 1, input(1,1)%get_size()
-            call copy_gf_slice(slice(1:xsize,1:xsize,ix), input, ix)
-
+            ix_matrix = ix
+            call copy_gf_slice(slice(1:xsize,1:xsize,ix), input, ix_matrix)
+ 
             is_diagonal(ix) = diagonal_test(slice(1:xsize,1:xsize, ix))
             if (is_diagonal(ix)) then
                 call invert_diagonal_mat(slice(1:xsize,1:xsize,ix), slice(1:xsize,1:xsize,ix), ierror(ix))
@@ -51,7 +52,7 @@ contains
                 call fatal_error_from_call(5, 'invert_GF_matrix', 'matrix_methods.f08')
                 
             end if
-            call copy_gf_slice(output, slice(1:xsize,1:xsize,ix), ix)
+            call copy_gf_slice(output, slice(1:xsize,1:xsize,ix), ix_matrix)
         end do
 
         if (any(ierror /= 0 )) call handle_errors()
@@ -111,21 +112,24 @@ contains
 
     end subroutine invert_GF_matrix
 
-    pure subroutine invert_diagonal_mat(matrix, inverse, ierr)
+    subroutine invert_diagonal_mat(matrix, inverse, ierr)
         complex(real12), intent(in) :: matrix(:,:)
         complex(real12), intent(out) :: inverse(:,:)
+        complex(real12), allocatable :: work(:,:)
         integer, intent(out) :: ierr
 
         integer :: ix, iflag(size(matrix, 1))
 
+        allocate(work(size(matrix,1),size(matrix,2)))
+        work = matrix
         ierr = 0
         inverse = cmplx_zero
         iflag = 0
         do concurrent (ix=1:size(matrix,1))
-            if (matrix(ix,ix) /= cmplx_zero) then
-                inverse(ix,ix) = 1.0/matrix(ix,ix)
+            if (work(ix,ix) /= cmplx_zero) then
+                inverse(ix,ix) = 1.0/work(ix,ix)
             else
-                inverse(ix,ix) = matrix(ix, ix)
+                inverse(ix,ix) = work(ix, ix)
                 iflag(ix) = 1
             end if
         end do

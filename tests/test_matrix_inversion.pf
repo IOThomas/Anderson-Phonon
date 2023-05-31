@@ -76,10 +76,10 @@ contains
 
         do concurrent (i = 1:5)
             identity_matrix(i,i) = one
+            input_matrix(i,i) = two
         enddo 
-        do concurrent (i = 1:5, j=1:5)
-            input_matrix = real(i*j, real12)
-        enddo 
+            input_matrix(2,1) = one
+            input_matrix(5,4) = one
 
         call invert_general_matrix(input_matrix, inverted_matrix, ierr)
         @assertEqual(ierr, 0)
@@ -90,12 +90,48 @@ contains
 
     end subroutine nondiagonal_matrix
 
-    ! @test
-    ! subroutine diag_GF_matrix()
-    ! end subroutine
+    @test
+    subroutine diag_GF_matrix()
+        type(greensfunc) :: input_matrix(20,20)
+        type(greensfunc) :: output_matrix(20,20)
+        type(greensfunc) :: test_output(20,20)
+        complex(real12) :: output_slice(20,20,2)
+        complex(real12) :: test_slice(20,20,2)
+        complex(real12) :: temp_slice(20,20)
+        complex(real12), parameter :: initialise(20,20) = cmplx_zero
+        integer :: i_matrix(20,20)
+        integer :: i, j
+
+        call allocate_GF(input_matrix, 2)
+        call allocate_GF(output_matrix, 2)
+        call allocate_GF(test_output, 2)
+        
+        call initialise_GF(input_matrix, initialise)
+        call initialise_GF(output_matrix, initialise)
+        call initialise_GF(test_output, initialise)
+
+        do concurrent (i = 1:20, j = 1:2)
+            input_matrix(i,i)%GF(j)%re = real(i, real12)
+            test_output(i,i)%GF(j)%re = one/real(i, real12)
+        end do
+
+        call invert_GF_matrix(input_matrix, output_matrix)
+
+        do i = 1, 2
+            i_matrix = i
+            call copy_gf_slice(output_slice(1:20,1:20, i), output_matrix, i_matrix)
+            call copy_gf_slice(test_slice(1:20,1:20, i), test_output, i_matrix)
+        end do
+        
+        @assertEqual(output_slice, test_slice, tolerance)
+    end subroutine
 
     ! @test
     ! subroutine nondiag_GF_matrix()
+    ! end subroutine
+
+    ! @test
+    ! subroutine mixed_GF_matrix()
     ! end subroutine
 
 
