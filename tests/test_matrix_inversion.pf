@@ -126,9 +126,49 @@ contains
         @assertEqual(output_slice, test_slice, tolerance)
     end subroutine
 
-    ! @test
-    ! subroutine nondiag_GF_matrix()
-    ! end subroutine
+    @test
+    subroutine nondiag_GF_matrix()
+        complex(real12) :: input_matrix(5,5)
+        complex(real12) :: inverted_matrix(5,5,2)
+        complex(real12) :: product_matrix(5,5,2)
+        complex(real12) :: identity_matrix(5,5)
+        complex(real12), parameter :: initialise(5,5) = cmplx_zero
+        type(greensfunc) :: input_gf(5,5)
+        type(greensfunc) :: inverted_gf(5,5)
+        integer :: ierr = 1
+        integer :: i, j
+
+        input_matrix = cmplx_zero
+        inverted_matrix = cmplx_zero
+        product_matrix = cmplx_zero
+        identity_matrix = cmplx_zero
+        call allocate_GF(input_gf, 2)
+        call allocate_GF(inverted_gf, 2)
+        call initialise_GF(input_gf, initialise)
+        call initialise_GF(inverted_gf, initialise)
+
+        do concurrent (i = 1:5)
+            identity_matrix(i,i) = one
+            input_matrix(i,i) = two
+        enddo 
+            input_matrix(2,1) = one
+            input_matrix(5,4) = one
+        
+        do i = 1,2
+            call copy_gf_slice(input_gf, input_matrix, i)
+        enddo
+
+        call invert_GF_matrix(input_gf, inverted_gf)
+        
+        do i=1, 2
+            call copy_gf_slice(inverted_matrix(1:5,1:5, i), inverted_gf, i)
+            product_matrix(1:5,1:5,i) = matmul(input_matrix, inverted_matrix(1:5,1:5, i))
+        enddo
+
+        @assertEqual(product_matrix(1:5,1:5,1), identity_matrix, tolerance) 
+        @assertEqual(product_matrix(1:5,1:5,2), identity_matrix, tolerance) 
+
+    end subroutine
 
     ! @test
     ! subroutine mixed_GF_matrix()

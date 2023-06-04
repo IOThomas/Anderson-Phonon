@@ -76,10 +76,10 @@ contains
             not_zero = .false.
 
             do concurrent(i=1:size(matrix,1), j=1:size(matrix,2))
-                if ((i /= j) .and. (matrix(i,j) == cmplx_zero)) not_zero = .true.
+                if ((i /= j) .and. (matrix(i,j) /= cmplx_zero)) not_zero = .true.
             end do
 
-            diagonal_test = any(not_zero)
+            diagonal_test = .not.(any(not_zero))
 
         end function diagonal_test
 
